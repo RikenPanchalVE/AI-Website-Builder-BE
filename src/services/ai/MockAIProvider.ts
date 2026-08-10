@@ -11,6 +11,8 @@ interface Answers {
   targetCountries?: string[];
   currency?: string;
   pages?: string[];
+  categories?: string[];
+  selectedPages?: string[];
   productCount?: number;
   hasCategories?: boolean;
   hasVariants?: boolean;
@@ -111,7 +113,12 @@ class MockAIProvider extends AIProvider {
     const industry = (answers.industry as string) || "Other";
     const currency = (answers.currency as string) || "USD";
     const symbol = CURRENCY_SYMBOLS[currency] || "$";
-    const selectedPages = (answers.pages as string[]) || ["home"];
+    const selectedPagesRaw = (answers.pages as string[]) || ["Home"];
+    // Convert display names to slugs: "About Us" -> "about_us", "Home" -> "home"
+    const slugify = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/_+$/, "").replace(/^_+/, "");
+    const selectedPages = selectedPagesRaw.map((p) => slugify(p));
+    // Always ensure "home" is included
+    if (!selectedPages.includes("home")) selectedPages.unshift("home");
     const homepageSections = (answers.homepageSections as string[]) || [];
     const features = (answers.features as string[]) || [];
     const paymentMethods = (answers.paymentMethods as string[]) || [];
@@ -121,7 +128,8 @@ class MockAIProvider extends AIProvider {
     const socialMedia = (answers.socialMedia as Record<string, string>) || {};
 
     const config = BUSINESS_TYPES[industry] || BUSINESS_TYPES["Other"];
-    const products = config.defaultProducts.map((p) => ({
+    const selectedCategories = (answers.categories as string[]) || [];
+    const allProducts = config.defaultProducts.map((p) => ({
       name: p.name,
       price: p.price,
       originalPrice: p.originalPrice,
@@ -131,6 +139,10 @@ class MockAIProvider extends AIProvider {
       reviewCount: p.reviewCount,
       badge: p.badge,
     }));
+    // Filter products to only include selected categories
+    const products = selectedCategories.length > 0
+      ? allProducts.filter((p) => selectedCategories.includes(p.category))
+      : allProducts;
 
     const logoAsset = assets.find((a) => a.type === "logo");
     const imageAssets = assets.filter((a) => a.type === "image");
@@ -159,7 +171,7 @@ class MockAIProvider extends AIProvider {
     });
 
     const resolvedHomepageSections = homepageSections.length > 0
-      ? homepageSections
+      ? homepageSections.map((s) => this._normalizeHomepageSection(s))
       : this._getDefaultHomepageSections(industry);
 
     const resolvedPaymentMethods = paymentMethods.length > 0
@@ -205,6 +217,12 @@ class MockAIProvider extends AIProvider {
       footer: {
         copyright: `© ${new Date().getFullYear()} ${businessName}. All rights reserved.`,
         links: footerLinks,
+        socialMedia,
+      },
+      seo: {
+        metaTitle: answers.metaTitle || `${businessName} - ${businessDescription}`,
+        metaDescription: answers.metaDescription || businessDescription,
+        keywords: answers.seoKeywords || [],
       },
     };
   }
@@ -213,14 +231,149 @@ class MockAIProvider extends AIProvider {
     websiteSpec: Record<string, unknown>,
     revisionRequest: string
   ): Promise<Record<string, unknown>> {
-    return {
+    const updatedSpec = {
       ...websiteSpec,
       version: ((websiteSpec.version as number) || 1) + 1,
+      description: `${websiteSpec.description || "A polished website"}. Revision request: ${revisionRequest}`,
+      pages: (websiteSpec.pages as Array<Record<string, unknown>> | undefined)?.map((page) => {
+        if (page.slug === "home") {
+          return {
+            ...page,
+            sections: [
+              {
+                id: uuidv4(),
+                component: "AboutStory",
+                order: 1,
+                props: {
+                  title: "Updated to match your request",
+                  content: `We adjusted the experience based on: ${revisionRequest}`,
+                  image: null,
+                  stats: [
+                    { value: "1", label: "Revision Applied" },
+                    { value: "100%", label: "Aligned" },
+                  ],
+                },
+              },
+              ...(page.sections as Array<Record<string, unknown>> | undefined || []),
+            ],
+          };
+        }
+        return page;
+      }) || [],
     };
+
+    return updatedSpec;
   }
 
   async generateContent(prompt: string): Promise<string> {
     return "Mock-generated content. Replace with real AI provider.";
+  }
+
+  // Map friendly display names (from the questionnaire) to internal section keys.
+  private _normalizeHomepageSection(name: string): string {
+    const map: Record<string, string> = {
+      "hero": "hero_banner",
+      "hero_banner": "hero_banner",
+      "new releases": "new_releases",
+      "new arrivals": "new_arrivals",
+      "bestsellers": "bestsellers",
+      "best sellers": "best_sellers",
+      "book of the month": "book_of_month",
+      "staff picks": "staff_picks",
+      "categories": "featured_categories",
+      "featured categories": "featured_categories",
+      "featured products": "featured_products",
+      "featured collections": "featured_collections",
+      "shop by category": "featured_categories",
+      "shop by concern": "shop_by_concern",
+      "shop by sport": "shop_by_sport",
+      "shop by pet": "shop_by_pet",
+      "author spotlights": "testimonials",
+      "testimonials": "testimonials",
+      "reviews": "testimonials",
+      "customer reviews": "testimonials",
+      "tech reviews": "tech_reviews",
+      "today's deals": "deals_of_the_day",
+      "deals of the day": "deals_of_the_day",
+      "deals": "deals",
+      "daily deals": "daily_deals",
+      "flash sale": "flash_sale",
+      "special offers": "special_offers",
+      "menu highlights": "menu_highlights",
+      "daily specials": "daily_specials",
+      "chef's table": "chef_table",
+      "reservations": "reservation_cta",
+      "book appointment": "book_appointment",
+      "book now": "book_now",
+      "services": "services",
+      "our doctors": "our_doctors",
+      "health resources": "health_resources",
+      "popular courses": "popular_courses",
+      "learning paths": "learning_paths",
+      "student success": "student_success",
+      "student success stories": "student_success",
+      "instructors": "instructors",
+      "featured properties": "featured_properties",
+      "property search": "property_search",
+      "neighborhoods": "neighborhoods",
+      "agents": "agents",
+      "popular destinations": "popular_destinations",
+      "featured packages": "featured_packages",
+      "travel guides": "travel_guides",
+      "pet care tips": "pet_care_tips",
+      "pet grooming": "pet_grooming_booking",
+      "featured vehicles": "featured_vehicles",
+      "inventory search": "inventory_search",
+      "service center": "service_center",
+      "before & after": "before_after",
+      "before and after": "before_after",
+      "home services list": "home_services_list",
+      "newsletter": "newsletter_signup",
+      "newsletter signup": "newsletter_signup",
+      "instagram feed": "instagram_feed",
+      "contact": "contact_form",
+      "contact us": "contact_form",
+      "faq": "faq",
+      "store locator": "store_locator",
+      "top brands": "brand_showcase",
+      "brand showcase": "brand_showcase",
+      "brands": "brand_showcase",
+      "why choose us": "why_choose_us",
+      "delivery info": "delivery_info",
+      "room ideas": "room_ideas",
+      "design inspiration": "design_inspo",
+      "beauty tips": "beauty_tips",
+      "training tips": "training_tips",
+      "gift guide": "gift_guide",
+      "trending now": "featured_products",
+      "featured": "featured_products",
+      "fresh arrivals": "fresh_arrivals",
+      "recipe ideas": "blog_preview",
+      "blog preview": "blog_preview",
+      "contact preview": "contact_preview",
+      "faq preview": "faq_preview",
+      "new launches": "new_arrivals",
+      "tech blog": "blog_preview",
+      "popular products": "featured_products",
+      "sale": "flash_sale",
+      "customer gallery": "instagram_feed",
+      "athlete stories": "testimonials",
+      "custom design": "featured_products",
+      "certifications": "featured_categories",
+      "about us": "about_story",
+      "gallery": "instagram_feed",
+      "patient portal": "featured_products",
+      "resources": "featured_products",
+      "pricing": "featured_products",
+      "search": "property_search",
+      "market insights": "testimonials",
+      "rewards program": "newsletter_signup",
+      "build & price": "featured_products",
+      "build and price": "featured_products",
+      "financing": "flash_sale",
+      "service areas": "store_locator",
+    };
+    return map[(name || "").trim().toLowerCase()] || name;
   }
 
   private _getDefaultHomepageSections(industry: string): string[] {
@@ -237,9 +390,9 @@ class MockAIProvider extends AIProvider {
       Education: ["hero_banner", "popular_courses", "learning_paths", "student_success", "instructors"],
       "Real Estate": ["hero_banner", "featured_properties", "property_search", "neighborhoods", "agents"],
       Travel: ["hero_banner", "popular_destinations", "deals", "featured_packages", "travel_guides"],
-      "Pet Store": ["hero_banner", "shop_by_pet", "best_sellers", "new_arrivals", "pet_care_tips"],
+      "Pet Store": ["hero_banner", "shop_by_pet", "best_sellers", "new_arrivals", "pet_care_tips", "pet_grooming_booking"],
       Automotive: ["hero_banner", "featured_vehicles", "special_offers", "inventory_search", "service_center"],
-      "Home Services": ["hero_banner", "services", "book_now", "before_after", "testimonials"],
+      "Home Services": ["hero_banner", "home_services_list", "book_now", "before_after", "testimonials"],
     };
     return sectionMap[industry] || ["hero_banner", "featured_categories", "featured_products", "testimonials"];
   }
@@ -272,7 +425,7 @@ class MockAIProvider extends AIProvider {
     const secondaryColor = answers.secondaryColor || "#1E40AF";
     const buttonStyle = answers.buttonStyle || "rounded";
     const borderRadius = answers.borderRadius || "medium";
-    const animations = answers.animationLevel !== "none";
+    const animations = answers.animationLevel === "none" ? false : (answers.animationLevel || "moderate");
 
     const fontMap: Record<string, string> = {
       elegant: "Playfair Display", professional: "Roboto", clean: "Inter",
@@ -296,11 +449,92 @@ class MockAIProvider extends AIProvider {
       "action-oriented": "rounded", elegant: "rounded", bold: "square",
     };
 
+    const hexToRgb = (hex: string) => {
+      const n = hex.replace("#", "");
+      const full = n.length === 3 ? n.split("").map(c => c + c).join("") : n;
+      const v = Number.parseInt(full, 16);
+      return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
+    };
+
+    const luminance = (hex: string) => {
+      const { r, g, b } = hexToRgb(hex);
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    };
+
+    const adjustColor = (hex: string, factor: number): string => {
+      const { r, g, b } = hexToRgb(hex);
+      const nr = Math.min(255, Math.max(0, Math.round(r * factor)));
+      const ng = Math.min(255, Math.max(0, Math.round(g * factor)));
+      const nb = Math.min(255, Math.max(0, Math.round(b * factor)));
+      return `#${((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1)}`;
+    };
+
+    const mixWithWhite = (hex: string, amount: number): string => {
+      const { r, g, b } = hexToRgb(hex);
+      const nr = Math.round(r + (255 - r) * amount);
+      const ng = Math.round(g + (255 - g) * amount);
+      const nb = Math.round(b + (255 - b) * amount);
+      return `#${((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1)}`;
+    };
+
+    const mixWithBlack = (hex: string, amount: number): string => {
+      const { r, g, b } = hexToRgb(hex);
+      const nr = Math.round(r * (1 - amount));
+      const ng = Math.round(g * (1 - amount));
+      const nb = Math.round(b * (1 - amount));
+      return `#${((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1)}`;
+    };
+
+    const isDark = style === "dark";
+
+    // Generate a complete, colorful palette derived from the selected colors.
+    // The main background is clearly tinted with the brand color (NOT near-white)
+    // so the chosen theme is unmistakably visible across the whole site.
+    const backgroundColor = isDark
+      ? mixWithBlack(primaryColor, 0.82)
+      : mixWithWhite(primaryColor, 0.78);
+    const foregroundColor = isDark
+      ? "#f1f5f9"
+      : luminance(backgroundColor) > 0.7 ? "#16181d" : "#f8fafc";
+    const mutedColor = isDark
+      ? mixWithBlack(primaryColor, 0.68)
+      : mixWithWhite(primaryColor, 0.68);
+    const mutedForegroundColor = isDark ? "#a0aec0" : "#4b5563";
+    const borderColor = isDark
+      ? mixWithBlack(primaryColor, 0.55)
+      : mixWithWhite(primaryColor, 0.58);
+    const cardColor = isDark
+      ? mixWithBlack(primaryColor, 0.72)
+      : mixWithWhite(primaryColor, 0.88);
+
+    // Advanced-theme tokens used by the renderer for gradients, tints and accents.
+    const accentColor = secondaryColor;
+    const primarySoft = mixWithWhite(primaryColor, 0.82);
+    const secondarySoft = mixWithWhite(secondaryColor, 0.82);
+    const surfaceStrong = mixWithWhite(primaryColor, 0.72);
+    const gradientFrom = isDark ? primaryColor : mixWithBlack(primaryColor, 0.12);
+    const gradientTo = secondaryColor;
+    const ringGlow = mixWithWhite(primaryColor, 0.55);
+
     return {
       style,
       primaryColor,
       secondaryColor,
-      fontFamily: fontMap[style.toLowerCase()] || "Inter",
+      backgroundColor,
+      foregroundColor,
+      mutedColor,
+      mutedForegroundColor,
+      borderColor,
+      cardColor,
+      // additional advanced tokens
+      accentColor,
+      primarySoft,
+      secondarySoft,
+      surfaceStrong,
+      gradientFrom,
+      gradientTo,
+      ringGlow,
+      fontFamily: answers.fontStyle || fontMap[style.toLowerCase()] || "Inter",
       borderRadius: borderRadiusMap[borderRadius] || borderRadius || "8px",
       buttonStyle: buttonStyleMap[buttonStyle.toLowerCase()] || buttonStyle || "rounded",
       animations,
@@ -492,39 +726,35 @@ class MockAIProvider extends AIProvider {
         },
       }),
       menu_highlights: () => ({
-        id: uuidv4(), component: "FeaturedProducts", order: 2,
+        id: uuidv4(), component: "MenuHighlights", order: 2,
         props: {
           title: "Menu Highlights", subtitle: "Chef's signature dishes, crafted with love",
-          products: ctx.products.slice(0, 4).map((p) => ({
-            id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`,
+          items: ctx.products.slice(0, 6).map((p) => ({
+            name: p.name, price: p.price.toFixed(2),
             description: p.description, image: ctx.imagePaths[0] || null,
-            rating: p.rating, reviewCount: p.reviewCount, slug: p.name.toLowerCase().replace(/\s+/g, "-"),
-            category: p.category, badge: p.category,
+            badge: p.category,
           })),
         },
       }),
       daily_specials: () => ({
-        id: uuidv4(), component: "FlashSale", order: 3,
+        id: uuidv4(), component: "DailySpecials", order: 3,
         props: {
           title: "Daily Specials", subtitle: "Today's special dishes - limited availability",
-          endDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-          products: ctx.products.filter((p) => p.originalPrice).slice(0, 3).map((p) => ({
-            id: uuidv4(), name: p.name, price: `${ctx.symbol}${(p.price * 0.8).toFixed(2)}`,
-            originalPrice: `${ctx.symbol}${p.price.toFixed(2)}`, discount: "20%",
-            image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"),
+          items: ctx.products.filter((p) => p.originalPrice).slice(0, 3).map((p) => ({
+            name: p.name, price: (p.price * 0.8).toFixed(2),
+            originalPrice: p.price.toFixed(2),
+            description: p.description, image: ctx.imagePaths[0] || null,
           })),
         },
       }),
       chef_table: () => ({
-        id: uuidv4(), component: "AboutStory", order: 4,
+        id: uuidv4(), component: "ChefTable", order: 4,
         props: {
           title: "The Chef's Table",
-          content: `Behind every great dish at ${ctx.businessName} is a story of passion, tradition, and innovation. Our executive chef brings decades of culinary experience, blending classic techniques with modern flavors.`,
+          description: `Behind every great dish at ${ctx.businessName} is a story of passion, tradition, and innovation. Our executive chef brings decades of culinary experience, blending classic techniques with modern flavors.`,
           image: ctx.imagePaths[1] || ctx.imagePaths[0] || null,
-          stats: [
-            { value: "15+", label: "Years Experience" }, { value: "50+", label: "Signature Dishes" },
-            { value: "4.9", label: "Average Rating" }, { value: "10K+", label: "Happy Guests" },
-          ],
+          ctaText: "Reserve Your Table",
+          ctaLink: "/reservations",
         },
       }),
       deals_of_the_day: () => ({
@@ -717,70 +947,68 @@ class MockAIProvider extends AIProvider {
         },
       }),
       services: () => ({
-        id: uuidv4(), component: "FeaturedProducts", order: 2,
+        id: uuidv4(), component: "Services", order: 2,
         props: {
           title: "Our Services", subtitle: "Professional services tailored to your needs",
-          products: ctx.products.slice(0, 4).map((p) => ({
-            id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`,
-            description: p.description, image: ctx.imagePaths[0] || null,
-            rating: p.rating, reviewCount: p.reviewCount, slug: p.name.toLowerCase().replace(/\s+/g, "-"),
-            category: p.category,
+          services: ctx.products.slice(0, 6).map((p) => ({
+            name: p.name, title: p.name, price: p.price.toFixed(2),
+            description: p.description, icon: "✦",
           })),
         },
       }),
       book_appointment: () => ({
-        id: uuidv4(), component: "ContactPreview", order: 3,
+        id: uuidv4(), component: "AppointmentBooking", order: 3,
         props: {
           title: "Book an Appointment", subtitle: "Schedule your visit with our team",
-          email: "appointments@" + ctx.businessName.toLowerCase().replace(/\s+/g, "") + ".com",
-          phone: "+1 (555) 123-4567", address: "123 Medical Center Drive, Suite 100",
+          submitText: "Book Appointment",
         },
       }),
       our_doctors: () => ({
-        id: uuidv4(), component: "TeamSection", order: 4,
+        id: uuidv4(), component: "DoctorProfiles", order: 4,
         props: {
           title: "Our Medical Team", subtitle: "Experienced professionals dedicated to your health",
-          members: [
-            { name: "Dr. Sarah Johnson", role: "Family Medicine", bio: "Board certified with 15 years of primary care experience.", image: null },
-            { name: "Dr. Michael Chen", role: "Internal Medicine", bio: "Specialist in preventive care and chronic disease management.", image: null },
-            { name: "Dr. Emily Williams", role: "Pediatrics", bio: "Compassionate care for children of all ages.", image: null },
-            { name: "Dr. Robert Davis", role: "Cardiology", bio: "Leading heart health specialist with advanced training.", image: null },
+          doctors: [
+            { name: "Dr. Sarah Johnson", specialty: "Family Medicine", avatar: null },
+            { name: "Dr. Michael Chen", specialty: "Internal Medicine", avatar: null },
+            { name: "Dr. Emily Williams", specialty: "Pediatrics", avatar: null },
+            { name: "Dr. Robert Davis", specialty: "Cardiology", avatar: null },
           ],
         },
       }),
       health_resources: () => ({
-        id: uuidv4(), component: "BlogPreview", order: 5,
+        id: uuidv4(), component: "HealthResources", order: 5,
         props: {
           title: "Health Resources", subtitle: "Stay informed with our health articles",
-          posts: [
-            { title: "Understanding Your Blood Test Results", excerpt: "A simple guide to reading and understanding lab reports.", image: null, slug: "blood-test-guide" },
-            { title: "Managing Stress for Better Health", excerpt: "Practical strategies for reducing stress in daily life.", image: null, slug: "stress-management" },
-            { title: "Nutrition Myths Debunked", excerpt: "Separating fact from fiction in nutrition science.", image: null, slug: "nutrition-myths" },
+          resources: [
+            { title: "Understanding Your Blood Test Results", description: "A simple guide to reading and understanding lab reports.", image: null, category: "Wellness" },
+            { title: "Managing Stress for Better Health", description: "Practical strategies for reducing stress in daily life.", image: null, category: "Mental Health" },
+            { title: "Nutrition Myths Debunked", description: "Separating fact from fiction in nutrition science.", image: null, category: "Nutrition" },
           ],
         },
       }),
       popular_courses: () => ({
-        id: uuidv4(), component: "FeaturedProducts", order: 2,
+        id: uuidv4(), component: "CourseGrid", order: 2,
         props: {
           title: "Popular Courses", subtitle: "Most enrolled courses by our students",
-          products: ctx.products.filter((p) => p.badge === "Best Seller" || p.rating >= 4.7).slice(0, 4).map((p) => ({
-            id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`,
-            originalPrice: p.originalPrice ? `${ctx.symbol}${p.originalPrice.toFixed(2)}` : null,
+          courses: ctx.products.filter((p) => p.badge === "Best Seller" || p.rating >= 4.7).slice(0, 6).map((p) => ({
+            title: p.name, price: p.price.toFixed(2),
             description: p.description, image: ctx.imagePaths[0] || null,
-            rating: p.rating, reviewCount: p.reviewCount, slug: p.name.toLowerCase().replace(/\s+/g, "-"),
-            category: p.category, badge: p.badge,
+            category: p.category, duration: "8 weeks", level: "Intermediate",
           })),
         },
       }),
       learning_paths: () => ({
-        id: uuidv4(), component: "FeaturedCategories", order: 3,
+        id: uuidv4(), component: "LearningPaths", order: 3,
         props: {
           title: "Learning Paths", subtitle: "Structured programs to achieve your goals",
-          categories: ctx.config.categories.map((cat) => ({ ...cat, image: ctx.imagePaths[0] || null, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })),
+          paths: ctx.config.categories.map((cat) => ({
+            title: cat.name, description: cat.description || `Master ${cat.name} with our structured program`,
+            icon: "🎯", courses: Math.floor(Math.random() * 8) + 3,
+          })),
         },
       }),
       student_success: () => ({
-        id: uuidv4(), component: "Testimonials", order: 4,
+        id: uuidv4(), component: "StudentSuccess", order: 4,
         props: {
           title: "Student Success Stories", subtitle: "Hear from our graduates who transformed their careers",
           testimonials: [
@@ -791,26 +1019,29 @@ class MockAIProvider extends AIProvider {
         },
       }),
       instructors: () => ({
-        id: uuidv4(), component: "TeamSection", order: 5,
+        id: uuidv4(), component: "InstructorProfiles", order: 5,
         props: {
           title: "Expert Instructors", subtitle: "Learn from industry professionals",
-          members: [
-            { name: "Prof. Sarah Chen", role: "Web Development Lead", bio: "10+ years at top tech companies.", image: null },
-            { name: "Dr. James Wilson", role: "Data Science Lead", bio: "PhD in Machine Learning, published researcher.", image: null },
-            { name: "Lisa Park", role: "Design Lead", bio: "Award-winning designer with agency experience.", image: null },
-            { name: "Mark Thompson", role: "Business Lead", bio: "MBA from Harvard, startup founder.", image: null },
+          instructors: [
+            { name: "Prof. Sarah Chen", specialty: "Web Development", avatar: null },
+            { name: "Dr. James Wilson", specialty: "Data Science", avatar: null },
+            { name: "Lisa Park", specialty: "UX Design", avatar: null },
+            { name: "Mark Thompson", specialty: "Business Strategy", avatar: null },
           ],
         },
       }),
       featured_properties: () => ({
-        id: uuidv4(), component: "FeaturedProducts", order: 2,
+        id: uuidv4(), component: "PropertyGrid", order: 2,
         props: {
           title: "Featured Properties", subtitle: "Handpicked properties for you",
-          products: ctx.products.slice(0, 4).map((p) => ({
-            id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toLocaleString()}`,
+          properties: ctx.products.slice(0, 6).map((p) => ({
+            title: p.name, price: p.price.toLocaleString(),
             description: p.description, image: ctx.imagePaths[0] || null,
-            rating: p.rating, reviewCount: p.reviewCount, slug: p.name.toLowerCase().replace(/\s+/g, "-"),
-            category: p.category, badge: p.badge,
+            badge: p.badge, type: p.category,
+            beds: Math.floor(Math.random() * 4) + 1,
+            baths: Math.floor(Math.random() * 3) + 1,
+            sqft: Math.floor(Math.random() * 2000) + 800,
+            address: "123 Main St, City, State",
           })),
         },
       }),
@@ -827,68 +1058,78 @@ class MockAIProvider extends AIProvider {
         },
       }),
       neighborhoods: () => ({
-        id: uuidv4(), component: "FeaturedCategories", order: 4,
+        id: uuidv4(), component: "NeighborhoodGuide", order: 4,
         props: {
           title: "Explore Neighborhoods", subtitle: "Discover the perfect area for your lifestyle",
-          categories: [
-            { name: "Downtown", description: "Urban living with city amenities", productCount: 45, image: null, slug: "downtown" },
-            { name: "Suburbs", description: "Family-friendly communities", productCount: 62, image: null, slug: "suburbs" },
-            { name: "Waterfront", description: "Properties with stunning views", productCount: 28, image: null, slug: "waterfront" },
-            { name: "Historic District", description: "Charming character homes", productCount: 20, image: null, slug: "historic-district" },
+          neighborhoods: [
+            { name: "Downtown", description: "Urban living with city amenities", image: null, href: "#" },
+            { name: "Suburbs", description: "Family-friendly communities", image: null, href: "#" },
+            { name: "Waterfront", description: "Properties with stunning views", image: null, href: "#" },
+            { name: "Historic District", description: "Charming character homes", image: null, href: "#" },
           ],
         },
       }),
       agents: () => ({
-        id: uuidv4(), component: "TeamSection", order: 5,
+        id: uuidv4(), component: "AgentProfiles", order: 5,
         props: {
           title: "Our Agents", subtitle: "Expert guidance for your property journey",
-          members: [
-            { name: "Jennifer Adams", role: "Senior Agent", bio: "15+ years in luxury real estate.", image: null },
-            { name: "Robert Martinez", role: "Buyer's Agent", bio: "Specializes in first-time home buyers.", image: null },
-            { name: "Sarah Kim", role: "Commercial Specialist", bio: "Expert in commercial property investments.", image: null },
-            { name: "David Thompson", role: "Property Manager", bio: "Full-service property management.", image: null },
+          agents: [
+            { name: "Jennifer Adams", specialty: "Senior Agent", avatar: null },
+            { name: "Robert Martinez", specialty: "Buyer's Agent", avatar: null },
+            { name: "Sarah Kim", specialty: "Commercial Specialist", avatar: null },
+            { name: "David Thompson", specialty: "Property Manager", avatar: null },
           ],
         },
       }),
       popular_destinations: () => ({
-        id: uuidv4(), component: "FeaturedCategories", order: 2,
+        id: uuidv4(), component: "DestinationGrid", order: 2,
         props: {
           title: "Popular Destinations", subtitle: "Trending travel spots our travelers love",
-          categories: ctx.config.categories.map((cat) => ({ ...cat, image: ctx.imagePaths[0] || null, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })),
+          destinations: ctx.config.categories.map((cat) => ({
+            name: cat.name, description: cat.description || `Explore ${cat.name}`,
+            image: ctx.imagePaths[0] || null, price: Math.floor(Math.random() * 2000) + 500,
+          })),
         },
       }),
       deals: () => ({
-        id: uuidv4(), component: "FlashSale", order: 3,
+        id: uuidv4(), component: "TravelDeals", order: 3,
         props: {
           title: "Travel Deals", subtitle: "Limited-time offers on top destinations",
-          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          products: ctx.products.filter((p) => p.originalPrice).slice(0, 3).map((p) => ({
-            id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toLocaleString()}`,
-            originalPrice: `${ctx.symbol}${p.originalPrice!.toLocaleString()}`, discount: "25%",
-            image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"),
+          deals: ctx.products.filter((p) => p.originalPrice).slice(0, 4).map((p) => ({
+            title: p.name, price: p.price.toLocaleString(),
+            originalPrice: p.originalPrice?.toLocaleString(), discount: "25",
+            description: p.description, image: ctx.imagePaths[0] || null,
           })),
         },
       }),
       featured_packages: () => ({
-        id: uuidv4(), component: "FeaturedProducts", order: 4,
+        id: uuidv4(), component: "PackageGrid", order: 4,
         props: {
           title: "Featured Packages", subtitle: "All-inclusive vacation experiences",
-          products: ctx.products.filter((p) => p.category === "Packages").slice(0, 4).map((p) => ({
-            id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toLocaleString()}`,
-            description: p.description, image: ctx.imagePaths[0] || null,
-            rating: p.rating, reviewCount: p.reviewCount, slug: p.name.toLowerCase().replace(/\s+/g, "-"),
-            category: p.category, badge: p.badge,
+          packages: ctx.products.filter((p) => p.category === "Packages").slice(0, 6).map((p, idx) => ({
+            title: p.name, price: p.price.toLocaleString(), period: "person",
+            description: p.description, image: ctx.imagePaths[idx % Math.max(1, ctx.imagePaths.length)] || null,
+            duration: `${Math.floor(Math.random() * 7) + 3} days`, badge: p.badge,
+            featured: idx === 0,
+            cta: "Book This Package",
+            features: [
+              "Round-trip flights & transfers",
+              `${Math.floor(Math.random() * 4) + 3}-star hotel accommodation`,
+              "Daily breakfast included",
+              "Guided local experiences",
+              "24/7 travel support",
+            ].slice(0, 4),
           })),
         },
       }),
       travel_guides: () => ({
-        id: uuidv4(), component: "BlogPreview", order: 5,
+        id: uuidv4(), component: "TravelGuides", order: 5,
         props: {
           title: "Travel Guides", subtitle: "Expert tips for your next adventure",
-          posts: [
-            { title: "Packing Essentials for Any Trip", excerpt: "The ultimate packing checklist for stress-free travel.", image: null, slug: "packing-essentials" },
-            { title: "Budget Travel Tips", excerpt: "How to see the world without breaking the bank.", image: null, slug: "budget-travel-tips" },
-            { title: "Solo Travel Safety Guide", excerpt: "Stay safe while exploring the world alone.", image: null, slug: "solo-travel-safety" },
+          guides: [
+            { title: "Packing Essentials for Any Trip", description: "The ultimate packing checklist for stress-free travel.", image: null, destination: "Tips" },
+            { title: "Budget Travel Tips", description: "How to see the world without breaking the bank.", image: null, destination: "Budget" },
+            { title: "Solo Travel Safety Guide", description: "Stay safe while exploring the world alone.", image: null, destination: "Safety" },
           ],
         },
       }),
@@ -900,18 +1141,31 @@ class MockAIProvider extends AIProvider {
         },
       }),
       pet_care_tips: () => ({
-        id: uuidv4(), component: "BlogPreview", order: 3,
+        id: uuidv4(), component: "PetCareTips", order: 3,
         props: {
           title: "Pet Care Tips", subtitle: "Expert advice for happy, healthy pets",
           posts: [
-            { title: "Nutrition Guide for Dogs", excerpt: "What to feed your dog at every life stage.", image: null, slug: "dog-nutrition-guide" },
-            { title: "Cat Enrichment Ideas", excerpt: "Keep your indoor cat active and entertained.", image: null, slug: "cat-enrichment" },
-            { title: "Aquarium Setup Basics", excerpt: "Everything you need to start a fish tank.", image: null, slug: "aquarium-setup" },
+            { title: "Nutrition Guide for Dogs", excerpt: "What to feed your dog at every life stage. A balanced diet is essential for your dog's health and longevity. Learn about the key nutrients, feeding schedules, and common dietary mistakes to avoid.", image: null, slug: "dog-nutrition-guide", category: "Dogs" },
+            { title: "Cat Enrichment Ideas", excerpt: "Keep your indoor cat active and entertained. Indoor cats need mental and physical stimulation to stay healthy. Discover creative ways to enrich your cat's environment with toys, climbing structures, and interactive play.", image: null, slug: "cat-enrichment", category: "Cats" },
+            { title: "Aquarium Setup Basics", excerpt: "Everything you need to start a fish tank. From choosing the right tank size to understanding water cycling, this guide covers all the essentials for setting up a thriving aquarium.", image: null, slug: "aquarium-setup", category: "Fish" },
+            { title: "Bird Training Tips", excerpt: "Teach your bird new tricks and commands. Positive reinforcement training strengthens the bond between you and your feathered friend while keeping them mentally stimulated.", image: null, slug: "bird-training", category: "Birds" },
+          ],
+        },
+      }),
+      pet_grooming_booking: () => ({
+        id: uuidv4(), component: "PetGroomingBooking", order: 4,
+        props: {
+          title: "Pet Grooming & Boarding", subtitle: "Book professional grooming or boarding services",
+          services: [
+            { name: "Full Grooming", price: "$65", description: "Bath, haircut, nail trim, ear cleaning", icon: "✂️" },
+            { name: "Bath & Brush", price: "$35", description: "Bath, blow dry, and brush out", icon: "🛁" },
+            { name: "Nail Trim", price: "$15", description: "Nail clipping and filing", icon: "🐾" },
+            { name: "Boarding (per night)", price: "$45", description: "Overnight stay with meals and playtime", icon: "🏠" },
           ],
         },
       }),
       featured_vehicles: () => ({
-        id: uuidv4(), component: "FeaturedProducts", order: 2,
+        id: uuidv4(), component: "VehicleGrid", order: 2,
         props: {
           title: "Featured Vehicles", subtitle: "Top picks from our inventory",
           products: ctx.products.filter((p) => ["Cars", "SUVs", "EVs", "Trucks"].includes(p.category)).slice(0, 4).map((p) => ({
@@ -947,28 +1201,55 @@ class MockAIProvider extends AIProvider {
         },
       }),
       service_center: () => ({
-        id: uuidv4(), component: "FeaturedProducts", order: 5,
+        id: uuidv4(), component: "AutomotiveServicePackages", order: 5,
         props: {
           title: "Service Center", subtitle: "Professional maintenance and repair",
-          products: [
-            { id: uuidv4(), name: "Oil Change", price: "$49.99", description: "Full synthetic oil change with filter", image: null, rating: 4.8, reviewCount: 567, slug: "oil-change", category: "Maintenance" },
-            { id: uuidv4(), name: "Brake Service", price: "$199.99", description: "Brake pad replacement and rotor resurfacing", image: null, rating: 4.7, reviewCount: 345, slug: "brake-service", category: "Repair" },
-            { id: uuidv4(), name: "Tire Rotation", price: "$29.99", description: "Tire rotation and pressure check", image: null, rating: 4.6, reviewCount: 234, slug: "tire-rotation", category: "Maintenance" },
-            { id: uuidv4(), name: "Full Detail", price: "$149.99", description: "Complete interior and exterior detailing", image: null, rating: 4.9, reviewCount: 123, slug: "full-detail", category: "Detailing" },
+          services: [
+            { name: "Oil Change", title: "Oil Change", price: "49.99", description: "Full synthetic oil change with filter", icon: "🔧" },
+            { name: "Brake Service", title: "Brake Service", price: "199.99", description: "Brake pad replacement and rotor resurfacing", icon: "🛑" },
+            { name: "Tire Rotation", title: "Tire Rotation", price: "29.99", description: "Tire rotation and pressure check", icon: "🔄" },
+            { name: "Full Detail", title: "Full Detail", price: "149.99", description: "Complete interior and exterior detailing", icon: "✨" },
           ],
         },
       }),
       book_now: () => ({
-        id: uuidv4(), component: "ContactPreview", order: 2,
+        id: uuidv4(), component: "AppointmentBooking", order: 3,
         props: {
           title: "Book a Service", subtitle: "Schedule your appointment online",
-          email: "bookings@" + ctx.businessName.toLowerCase().replace(/\s+/g, "") + ".com",
-          phone: "+1 (555) 123-4567", address: "123 Service Street, Suite 100",
+          submitText: "Book Now",
+          services: [
+            { name: "Cleaning", label: "House Cleaning" },
+            { name: "Plumbing", label: "Plumbing Repair" },
+            { name: "Electrical", label: "Electrical Work" },
+            { name: "Painting", label: "Interior Painting" },
+            { name: "Landscaping", label: "Lawn & Garden" },
+            { name: "HVAC", label: "Heating & Cooling" },
+          ],
         },
       }),
       before_after: () => ({
-        id: uuidv4(), component: "InstagramFeed", order: 3,
-        props: { title: "Before & After", subtitle: "See the difference we make", images: Array(6).fill(null) },
+        id: uuidv4(), component: "BeforeAfterGallery", order: 3,
+        props: {
+          title: "Before & After", subtitle: "See the difference we make",
+          items: [
+            { before: null, after: null, title: "Kitchen Renovation", category: "Painting" },
+            { before: null, after: null, title: "Lawn Transformation", category: "Landscaping" },
+            { before: null, after: null, title: "Bathroom Remodel", category: "Plumbing" },
+            { before: null, after: null, title: "Living Room Makeover", category: "Painting" },
+            { before: null, after: null, title: "Garden Design", category: "Landscaping" },
+            { before: null, after: null, title: "Deck Restoration", category: "Cleaning" },
+          ],
+        },
+      }),
+      home_services_list: () => ({
+        id: uuidv4(), component: "HomeServicePackages", order: 2,
+        props: {
+          title: "Our Services", subtitle: "Professional services tailored to your needs",
+          services: ctx.products.slice(0, 6).map((p) => ({
+            name: p.name, title: p.name, price: `$${p.price.toFixed(2)}`,
+            description: p.description, icon: "🔧",
+          })),
+        },
       }),
       flash_sale: () => ({
         id: uuidv4(), component: "FlashSale", order: 5,
@@ -993,6 +1274,73 @@ class MockAIProvider extends AIProvider {
         id: uuidv4(), component: "InstagramFeed", order: 13,
         props: { title: "Follow Us on Instagram", subtitle: ctx.socialMedia.instagram || "@yourbrand", images: Array(6).fill(null) },
       }),
+      reservation_cta: () => ({
+        id: uuidv4(), component: "CTABanner", order: 14,
+        props: {
+          title: "Reserve Your Table", subtitle: "Book ahead and skip the wait. Perfect for special occasions and intimate dinners.",
+          ctaText: "Make a Reservation", ctaLink: "/reservations",
+          backgroundImage: ctx.imagePaths[2] || null,
+        },
+      }),
+      contact_form: () => ({
+        id: uuidv4(), component: "ContactPreview", order: 15,
+        props: {
+          title: "Get in Touch", subtitle: "We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+          submitText: "Send Message",
+        },
+      }),
+      faq: () => ({
+        id: uuidv4(), component: "FAQPreview", order: 16,
+        props: {
+          title: "Frequently Asked Questions",
+          faqs: [
+            { question: "What are your opening hours?", answer: "We're open Monday-Sunday from 10 AM to 10 PM. Holiday hours may vary." },
+            { question: "Do you offer delivery?", answer: "Yes! We offer delivery through our partners. Check our delivery page for more details." },
+            { question: "How can I track my order?", answer: "Once your order ships, you'll receive a tracking number via email." },
+          ],
+          link: "/faq", linkText: "View All FAQs",
+        },
+      }),
+      store_locator: () => ({
+        id: uuidv4(), component: "StoreLocator", order: 17,
+        props: {
+          title: "Visit Us", address: ctx.businessDescription || "123 Main Street",
+          phone: "(555) 123-4567", email: `info@${ctx.businessName.toLowerCase().replace(/\s+/g, "")}.com`,
+          hours: "Mon-Sun: 10 AM - 10 PM",
+        },
+      }),
+      brands: () => ({
+        id: uuidv4(), component: "BrandShowcase", order: 18,
+        props: {
+          title: "Brands We Work With", subtitle: "Trusted by leading brands worldwide",
+          brands: (ctx.config.defaultProducts || []).slice(0, 6).map((p) => ({ name: p.category, logo: null })),
+        },
+      }),
+      blog_preview: () => ({
+        id: uuidv4(), component: "BlogPreview", order: 6,
+        props: {
+          title: "From the Blog", subtitle: "Latest news, tips, and updates",
+          posts: [
+            { title: "Top 10 Trends This Season", excerpt: "Discover the trends shaping the market right now.", image: null, slug: "top-10-trends" },
+            { title: "How to Choose the Best Products", excerpt: "Our expert guide to making the right choice.", image: null, slug: "choosing-best-products" },
+            { title: "Behind the Scenes", excerpt: "A look at what makes our business special.", image: null, slug: "behind-the-scenes" },
+          ],
+        },
+      }),
+      about_story: () => ({
+        id: uuidv4(), component: "AboutStory", order: 7,
+        props: {
+          title: `${ctx.businessName} at a Glance`,
+          content: ctx.businessDescription,
+          image: ctx.imagePaths[1] || ctx.imagePaths[0] || null,
+          stats: [
+            { value: "10K+", label: "Happy Customers" },
+            { value: "50+", label: "Products" },
+            { value: "5+", label: "Years of Excellence" },
+            { value: "98%", label: "Satisfaction" },
+          ],
+        },
+      }),
     };
 
     const sections: ISection[] = [];
@@ -1003,6 +1351,19 @@ class MockAIProvider extends AIProvider {
         const section = builder();
         section.order = order++;
         sections.push(section);
+      }
+    }
+    // Guarantee the homepage is never empty: if no configured sections could be
+    // built (e.g. label mismatch), fall back to the industry defaults.
+    if (sections.length === 0) {
+      const fallbackKeys = this._getDefaultHomepageSections(ctx.industry);
+      for (const sectionKey of fallbackKeys) {
+        const builder = sectionBuilders[sectionKey];
+        if (builder) {
+          const section = builder();
+          section.order = order++;
+          sections.push(section);
+        }
       }
     }
     return sections;
@@ -1045,7 +1406,8 @@ class MockAIProvider extends AIProvider {
   }): ISection[] {
     return [
       { id: uuidv4(), component: "ShopHero", order: 1, props: { title: ctx.industry === "Restaurant" ? "Our Menu" : "Shop", subtitle: "Browse our curated selection", backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "ProductFilters", order: 2, props: {
+      {
+        id: uuidv4(), component: "ProductFilters", order: 2, props: {
           filters: [
             { name: "Category", type: "checkbox", options: [...new Set(ctx.products.map((p) => p.category))].map((c) => ({ label: c, value: c.toLowerCase().replace(/\s+/g, "-"), count: ctx.products.filter((p) => p.category === c).length })) },
             { name: "Price Range", type: "range", min: 0, max: Math.max(...ctx.products.map((p) => p.price)) * 1.5, currency: ctx.symbol },
@@ -1053,7 +1415,8 @@ class MockAIProvider extends AIProvider {
           ], layout: "sidebar",
         },
       },
-      { id: uuidv4(), component: "ProductGrid", order: 3, props: {
+      {
+        id: uuidv4(), component: "ProductGrid", order: 3, props: {
           products: ctx.products.map((p) => ({
             id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`,
             originalPrice: p.originalPrice ? `${ctx.symbol}${p.originalPrice.toFixed(2)}` : null,
@@ -1076,7 +1439,8 @@ class MockAIProvider extends AIProvider {
     const product = ctx.products[0];
     const relatedProducts = ctx.products.slice(1, 5);
     const sections: ISection[] = [
-      { id: uuidv4(), component: "Breadcrumbs", order: 1, props: {
+      {
+        id: uuidv4(), component: "Breadcrumbs", order: 1, props: {
           items: [
             { label: "Home", href: "/" }, { label: ctx.industry === "Restaurant" ? "Menu" : "Shop", href: "/shop" },
             { label: product.category, href: "/shop?category=" + product.category.toLowerCase().replace(/\s+/g, "-") },
@@ -1084,7 +1448,8 @@ class MockAIProvider extends AIProvider {
           ],
         },
       },
-      { id: uuidv4(), component: "ProductDetails", order: 2, props: {
+      {
+        id: uuidv4(), component: "ProductDetails", order: 2, props: {
           product: {
             id: uuidv4(), name: product.name, price: `${ctx.symbol}${product.price.toFixed(2)}`,
             originalPrice: product.originalPrice ? `${ctx.symbol}${product.originalPrice.toFixed(2)}` : null,
@@ -1104,13 +1469,15 @@ class MockAIProvider extends AIProvider {
     if (ctx.hasReviews) {
       sections.push({
         id: uuidv4(), component: "ProductReviews", order: 3, props: {
-          summary: { average: product.rating, total: product.reviewCount, distribution: [
-            { stars: 5, count: Math.floor(product.reviewCount * 0.6), percentage: 60 },
-            { stars: 4, count: Math.floor(product.reviewCount * 0.25), percentage: 25 },
-            { stars: 3, count: Math.floor(product.reviewCount * 0.1), percentage: 10 },
-            { stars: 2, count: Math.floor(product.reviewCount * 0.03), percentage: 3 },
-            { stars: 1, count: Math.floor(product.reviewCount * 0.02), percentage: 2 },
-          ]},
+          summary: {
+            average: product.rating, total: product.reviewCount, distribution: [
+              { stars: 5, count: Math.floor(product.reviewCount * 0.6), percentage: 60 },
+              { stars: 4, count: Math.floor(product.reviewCount * 0.25), percentage: 25 },
+              { stars: 3, count: Math.floor(product.reviewCount * 0.1), percentage: 10 },
+              { stars: 2, count: Math.floor(product.reviewCount * 0.03), percentage: 3 },
+              { stars: 1, count: Math.floor(product.reviewCount * 0.02), percentage: 2 },
+            ]
+          },
           reviews: [
             { id: uuidv4(), author: "Sarah M.", date: "2026-01-10", rating: 5, title: "Excellent!", content: "Amazing quality and great value. Highly recommend!", verified: true, helpful: 24, images: [] },
             { id: uuidv4(), author: "James R.", date: "2026-01-05", rating: 5, title: "Great value", content: "Exceeded my expectations. Fast delivery and excellent packaging.", verified: true, helpful: 18, images: [] },
@@ -1119,7 +1486,8 @@ class MockAIProvider extends AIProvider {
         },
       });
     }
-    sections.push({ id: uuidv4(), component: "RelatedProducts", order: 4, props: {
+    sections.push({
+      id: uuidv4(), component: "RelatedProducts", order: 4, props: {
         title: "You May Also Like",
         products: relatedProducts.map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, image: ctx.imagePaths[0] || null, rating: p.rating, slug: p.name.toLowerCase().replace(/\s+/g, "-") })),
       },
@@ -1130,7 +1498,8 @@ class MockAIProvider extends AIProvider {
   private _buildCategoriesSections(ctx: { businessName: string; config: BusinessTypeConfig; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Categories", subtitle: "Explore our curated collections", backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "CategoryGrid", order: 2, props: {
+      {
+        id: uuidv4(), component: "CategoryGrid", order: 2, props: {
           categories: ctx.config.categories.map((cat) => ({ id: uuidv4(), name: cat.name, description: cat.description, image: ctx.imagePaths[0] || null, productCount: cat.productCount, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })),
           layout: "grid", columns: 3,
         },
@@ -1224,20 +1593,23 @@ class MockAIProvider extends AIProvider {
     const content = aboutContent[ctx.industry] || aboutContent["default"];
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: `${content.title} ${ctx.businessName}`, subtitle: ctx.businessDescription, backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "AboutStory", order: 2, props: {
+      {
+        id: uuidv4(), component: "AboutStory", order: 2, props: {
           title: content.title, content: content.story,
           image: ctx.imagePaths[1] || ctx.imagePaths[0] || null,
           stats: [{ value: "10K+", label: "Happy Customers" }, { value: "50+", label: ctx.industry === "Restaurant" ? "Menu Items" : "Products" }, { value: "5+", label: "Years Experience" }, { value: "98%", label: "Satisfaction Rate" }],
         },
       },
       { id: uuidv4(), component: "AboutValues", order: 3, props: { title: "Our Values", values: content.values } },
-      { id: uuidv4(), component: "TeamSection", order: 4, props: {
+      {
+        id: uuidv4(), component: "TeamSection", order: 4, props: {
           title: ctx.industry === "Healthcare" ? "Our Medical Team" : "Meet Our Team",
           subtitle: `The people behind ${ctx.businessName}`,
           members: content.team.map((t) => ({ ...t, image: null })),
         },
       },
-      { id: uuidv4(), component: "CTABanner", order: 5, props: {
+      {
+        id: uuidv4(), component: "CTABanner", order: 5, props: {
           headline: ctx.industry === "Restaurant" ? "Ready to Dine with Us?" : `Ready to Experience ${ctx.businessName}?`,
           subheadline: ctx.industry === "Restaurant" ? "Reserve your table today" : "Discover our collection and see what makes us different.",
           ctaText: ctx.industry === "Restaurant" ? "Reserve a Table" : "Shop Now",
@@ -1326,7 +1698,8 @@ class MockAIProvider extends AIProvider {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Contact Us", subtitle: "We'd love to hear from you. Get in touch with our team." } },
       { id: uuidv4(), component: "ContactInfo", order: 2, props: { methods: contactMethodsMap[ctx.industry] || contactMethodsMap["default"] } },
-      { id: uuidv4(), component: "ContactForm", order: 3, props: {
+      {
+        id: uuidv4(), component: "ContactForm", order: 3, props: {
           title: ctx.industry === "Healthcare" ? "Request an Appointment" : ctx.industry === "Restaurant" ? "Make a Reservation" : "Send Us a Message",
           fields: formFieldsMap[ctx.industry] || formFieldsMap["default"],
           submitText: ctx.industry === "Healthcare" ? "Request Appointment" : ctx.industry === "Restaurant" ? "Request Reservation" : "Send Message",
@@ -1340,7 +1713,8 @@ class MockAIProvider extends AIProvider {
     const posts = BLOG_POSTS[ctx.industry] || BLOG_POSTS["default"];
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Blog", subtitle: `Stories, tips, and updates from ${ctx.businessName}`, backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "BlogGrid", order: 2, props: {
+      {
+        id: uuidv4(), component: "BlogGrid", order: 2, props: {
           posts: posts.map((post) => ({ id: uuidv4(), title: post.title, excerpt: post.excerpt, date: post.date, readTime: post.readTime, category: post.category, image: ctx.imagePaths[0] || null, slug: post.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), author: { name: "Editorial Team", avatar: null } })),
           pagination: { currentPage: 1, totalPages: 3, totalPosts: 24 },
         },
@@ -1351,63 +1725,83 @@ class MockAIProvider extends AIProvider {
   private _buildFaqSections(ctx: { businessName: string; industry: string }): ISection[] {
     const faqCategoriesMap: Record<string, Array<{ name: string; faqs: Array<{ question: string; answer: string }> }>> = {
       Restaurant: [
-        { name: "Reservations & Dining", faqs: [
+        {
+          name: "Reservations & Dining", faqs: [
             { question: "Do you accept walk-ins?", answer: "Yes, but we recommend reservations for parties of 4+ and on weekends." },
             { question: "Do you accommodate dietary restrictions?", answer: "Yes! Our menu includes vegetarian, vegan, and gluten-free options." },
             { question: "Do you have a dress code?", answer: "Smart casual. No flip-flops or tank tops." },
-          ] },
-        { name: "Menu & Pricing", faqs: [
+          ]
+        },
+        {
+          name: "Menu & Pricing", faqs: [
             { question: "Do you offer takeout?", answer: "Yes! Order online or by phone during all business hours." },
             { question: "Do you have a kids' menu?", answer: "Yes! We have a kids' menu and highchairs available." },
             { question: "Do you offer private dining?", answer: "Yes, our private dining room seats up to 20 guests." },
-          ] },
+          ]
+        },
       ],
       Healthcare: [
-        { name: "Appointments", faqs: [
+        {
+          name: "Appointments", faqs: [
             { question: "How do I book an appointment?", answer: "Book online, call our office, or use our mobile app." },
             { question: "Do you offer telehealth?", answer: "Yes, many appointments can be conducted via secure video." },
             { question: "What should I bring?", answer: "Insurance card, photo ID, list of current medications." },
-          ] },
-        { name: "Insurance & Billing", faqs: [
+          ]
+        },
+        {
+          name: "Insurance & Billing", faqs: [
             { question: "What insurance do you accept?", answer: "We accept most major plans including Blue Cross, Aetna, UnitedHealthcare." },
             { question: "Do you offer payment plans?", answer: "Yes, flexible options for uninsured patients." },
             { question: "How do I get my records?", answer: "Request through our patient portal or contact our records department." },
-          ] },
+          ]
+        },
       ],
       Education: [
-        { name: "Enrollment", faqs: [
+        {
+          name: "Enrollment", faqs: [
             { question: "How do I enroll?", answer: "Click 'Enroll Now' on any course page, create an account, and complete payment." },
             { question: "Can I try before I buy?", answer: "Yes! Many courses offer free preview lessons and a 7-day money-back guarantee." },
             { question: "Are there prerequisites?", answer: "Prerequisites vary by course. Each course page lists required skills." },
-          ] },
-        { name: "Learning Experience", faqs: [
+          ]
+        },
+        {
+          name: "Learning Experience", faqs: [
             { question: "How long do I have access?", answer: "Lifetime access! Revisit materials anytime including future updates." },
             { question: "Do you offer certificates?", answer: "Yes, all completed programs include an industry-recognized certificate." },
             { question: "Is there instructor support?", answer: "Yes, ask questions in forums and attend live office hours." },
-          ] },
+          ]
+        },
       ],
       default: [
-        { name: "Orders & Shipping", faqs: [
+        {
+          name: "Orders & Shipping", faqs: [
             { question: "How long does shipping take?", answer: "Standard: 3-7 business days. Express: 1-2 business days." },
             { question: "Do you ship internationally?", answer: "Yes, to over 50 countries. Rates calculated at checkout." },
             { question: "How can I track my order?", answer: "You'll receive a tracking number via email once shipped." },
-          ] },
-        { name: "Returns & Exchanges", faqs: [
+          ]
+        },
+        {
+          name: "Returns & Exchanges", faqs: [
             { question: "What is your return policy?", answer: "30-day return policy on all items in original condition." },
             { question: "How do I start a return?", answer: "Log into your account, go to Order History, click 'Return Item'." },
             { question: "When will I receive my refund?", answer: "Refunds processed within 3-5 business days of receiving the return." },
-          ] },
-        { name: "Products & Care", faqs: [
+          ]
+        },
+        {
+          name: "Products & Care", faqs: [
             { question: "How do I find my size?", answer: "Each product page includes a detailed size guide." },
             { question: "Are your products sustainable?", answer: "Many products use organic, recycled, or responsibly sourced materials." },
             { question: "How should I care for my products?", answer: "Care instructions are included on each product label and page." },
-          ] },
-        { name: "Account & Payment", faqs: [
+          ]
+        },
+        {
+          name: "Account & Payment", faqs: [
             { question: "What payment methods do you accept?", answer: "All major credit/debit cards, PayPal, Apple Pay, Google Pay." },
             { question: "Do I need an account to order?", answer: "No, you can checkout as a guest." },
             { question: "Is my payment information secure?", answer: "Yes, we use SSL encryption and are PCI DSS compliant." },
-          ] },
-        ],
+          ]
+        },
+      ],
     };
     const faqCategories = faqCategoriesMap[ctx.industry] || faqCategoriesMap["default"];
     return [
@@ -1419,7 +1813,8 @@ class MockAIProvider extends AIProvider {
   private _buildTrackOrderSections(_ctx: { businessName: string }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Track Your Order", subtitle: "Enter your order details to check the status" } },
-      { id: uuidv4(), component: "OrderTracking", order: 2, props: {
+      {
+        id: uuidv4(), component: "OrderTracking", order: 2, props: {
           formFields: [
             { name: "orderNumber", label: "Order Number", type: "text", placeholder: "e.g., ORD-12345", required: true },
             { name: "email", label: "Email Address", type: "email", placeholder: "your@email.com", required: true },
@@ -1444,7 +1839,8 @@ class MockAIProvider extends AIProvider {
   private _buildWishlistSections(ctx: { symbol: string; products: Array<{ name: string; price: number; description: string; category: string }>; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "My Wishlist", subtitle: "Your saved items" } },
-      { id: uuidv4(), component: "WishlistGrid", order: 2, props: {
+      {
+        id: uuidv4(), component: "WishlistGrid", order: 2, props: {
           products: ctx.products.slice(0, 4).map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), inStock: true, addedDate: "2026-01-10" })),
           emptyState: { title: "Your wishlist is empty", message: "Browse our collection and save items you love.", ctaText: "Start Shopping", ctaLink: "/shop" },
         },
@@ -1455,12 +1851,14 @@ class MockAIProvider extends AIProvider {
   private _buildCartSections(ctx: { businessName: string; symbol: string; products: Array<{ name: string; price: number; description: string; category: string }>; imagePaths: string[]; shippingOptions: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Shopping Cart", subtitle: "Review your items before checkout" } },
-      { id: uuidv4(), component: "CartItems", order: 2, props: {
+      {
+        id: uuidv4(), component: "CartItems", order: 2, props: {
           items: ctx.products.slice(0, 3).map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, quantity: Math.floor(Math.random() * 3) + 1, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), color: "Midnight Blue", size: "M", maxQuantity: 10 })),
           emptyState: { title: "Your cart is empty", message: "Looks like you haven't added anything yet.", ctaText: "Continue Shopping", ctaLink: "/shop" },
         },
       },
-      { id: uuidv4(), component: "CartSummary", order: 3, props: {
+      {
+        id: uuidv4(), component: "CartSummary", order: 3, props: {
           subtotal: `${ctx.symbol}299.97`, shipping: ctx.shippingOptions.includes("free") ? "Free" : `${ctx.symbol}9.99`,
           tax: `${ctx.symbol}24.00`, total: `${ctx.symbol}333.96`,
           couponCode: { placeholder: "Enter coupon code", buttonText: "Apply" },
@@ -1475,7 +1873,8 @@ class MockAIProvider extends AIProvider {
     const paymentLabels: Record<string, string> = { credit_debit: "Credit / Debit Card", upi: "UPI", paypal: "PayPal", stripe: "Stripe", razorpay: "Razorpay", cod: "Cash on Delivery", bank_transfer: "Bank Transfer" };
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Checkout", subtitle: "Complete your order" } },
-      { id: uuidv4(), component: "CheckoutForm", order: 2, props: {
+      {
+        id: uuidv4(), component: "CheckoutForm", order: 2, props: {
           steps: [{ id: "shipping", label: "Shipping", icon: "truck" }, { id: "payment", label: "Payment", icon: "credit-card" }, { id: "review", label: "Review", icon: "check-circle" }],
           shippingForm: {
             fields: [
@@ -1514,10 +1913,11 @@ class MockAIProvider extends AIProvider {
   private _buildMenuSections(ctx: { businessName: string; symbol: string; products: Array<{ name: string; price: number; description: string; category: string }>; config: BusinessTypeConfig; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Our Menu", subtitle: "Explore our delicious offerings", backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "CategoryGrid", order: 2, props: { categories: ctx.config.categories.map((cat) => ({ id: uuidv4(), name: cat.name, description: cat.description, image: ctx.imagePaths[0] || null, productCount: cat.productCount, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })), layout: "grid", columns: 3 } },
-      { id: uuidv4(), component: "ProductGrid", order: 3, props: {
-          products: ctx.products.map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, inStock: true })),
-          pagination: { currentPage: 1, totalPages: 2, totalProducts: ctx.products.length, perPage: ctx.products.length },
+      { id: uuidv4(), component: "CategoryGrid", order: 2, props: { categories: ctx.config.categories.map((cat) => ({ id: uuidv4(), name: cat.name, description: cat.description, image: ctx.imagePaths[0] || null, count: cat.productCount, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })) } },
+      {
+        id: uuidv4(), component: "MenuHighlights", order: 3, props: {
+          title: "Featured Dishes", subtitle: "Chef's recommendations",
+          items: ctx.products.slice(0, 8).map((p) => ({ name: p.name, price: p.price.toFixed(2), description: p.description, image: ctx.imagePaths[0] || null, badge: p.category })),
         },
       },
     ];
@@ -1526,17 +1926,9 @@ class MockAIProvider extends AIProvider {
   private _buildReservationsSections(ctx: { businessName: string }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Reservations", subtitle: "Book your table at " + ctx.businessName } },
-      { id: uuidv4(), component: "ContactForm", order: 2, props: {
+      {
+        id: uuidv4(), component: "ReservationForm", order: 2, props: {
           title: "Reserve a Table",
-          fields: [
-            { name: "name", label: "Full Name", type: "text", required: true },
-            { name: "email", label: "Email Address", type: "email", required: true },
-            { name: "phone", label: "Phone Number", type: "tel", required: true },
-            { name: "party_size", label: "Party Size", type: "select", required: true, options: ["1-2 Guests", "3-4 Guests", "5-6 Guests", "7-8 Guests", "8+ (Private Dining)"] },
-            { name: "date", label: "Preferred Date", type: "date", required: true },
-            { name: "time", label: "Preferred Time", type: "select", required: true, options: ["11:00 AM", "12:00 PM", "1:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"] },
-            { name: "special_requests", label: "Special Requests", type: "textarea", required: false },
-          ],
           submitText: "Request Reservation",
         },
       },
@@ -1546,10 +1938,18 @@ class MockAIProvider extends AIProvider {
   private _buildServicesSections(ctx: { businessName: string; industry: string; config: BusinessTypeConfig; symbol: string; products: Array<{ name: string; price: number; description: string; category: string; rating: number; reviewCount: number }>; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Our Services", subtitle: `Professional services from ${ctx.businessName}`, backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "CategoryGrid", order: 2, props: { categories: ctx.config.categories.map((cat) => ({ id: uuidv4(), name: cat.name, description: cat.description, image: ctx.imagePaths[0] || null, productCount: cat.productCount, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })), layout: "grid", columns: 3 } },
-      { id: uuidv4(), component: "ProductGrid", order: 3, props: {
-          products: ctx.products.map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, rating: p.rating, reviewCount: p.reviewCount, inStock: true })),
-          pagination: { currentPage: 1, totalPages: 2, totalProducts: ctx.products.length, perPage: ctx.products.length },
+      {
+        id: uuidv4(), component: "Services", order: 2, props: {
+          title: "What We Offer", subtitle: "Quality services you can trust",
+          services: ctx.products.slice(0, 6).map((p) => ({ name: p.name, title: p.name, price: p.price.toFixed(2), description: p.description, icon: "✦" })),
+        },
+      },
+      {
+        id: uuidv4(), component: "CTABanner", order: 3, props: {
+          headline: "Ready to Get Started?",
+          subheadline: "Contact us today for a free consultation",
+          ctaText: "Contact Us",
+          ctaLink: "/contact",
         },
       },
     ];
@@ -1558,19 +1958,9 @@ class MockAIProvider extends AIProvider {
   private _buildBookAppointmentSections(ctx: { businessName: string }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Book an Appointment", subtitle: "Schedule your visit with our team" } },
-      { id: uuidv4(), component: "ContactForm", order: 2, props: {
+      {
+        id: uuidv4(), component: "AppointmentBooking", order: 2, props: {
           title: "Request an Appointment",
-          fields: [
-            { name: "name", label: "Full Name", type: "text", required: true },
-            { name: "email", label: "Email Address", type: "email", required: true },
-            { name: "phone", label: "Phone Number", type: "tel", required: true },
-            { name: "dob", label: "Date of Birth", type: "date", required: true },
-            { name: "service", label: "Service Needed", type: "select", required: true, options: ["General Checkup", "Specialist Consultation", "Lab Work", "Vaccination", "Telehealth Visit"] },
-            { name: "date", label: "Preferred Date", type: "date", required: true },
-            { name: "time", label: "Preferred Time", type: "select", required: true, options: ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"] },
-            { name: "insurance", label: "Insurance Provider", type: "text", required: false },
-            { name: "message", label: "Symptoms/Concerns", type: "textarea", required: false },
-          ],
           submitText: "Request Appointment",
         },
       },
@@ -1580,19 +1970,23 @@ class MockAIProvider extends AIProvider {
   private _buildPropertiesSections(ctx: { businessName: string; symbol: string; products: Array<{ name: string; price: number; description: string; category: string; rating: number; reviewCount: number; badge?: string }>; config: BusinessTypeConfig; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Properties", subtitle: "Browse our available properties", backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "PropertySearch", order: 2, props: {
+      {
+        id: uuidv4(), component: "PropertySearch", order: 2, props: {
           title: "Search Properties",
-          filters: [
-            { name: "Property Type", type: "select", options: ["House", "Condo", "Apartment", "Townhouse", "Land", "Commercial"] },
-            { name: "Price Range", type: "range", min: 0, max: 5000000, currency: "$" },
-            { name: "Bedrooms", type: "select", options: ["1+", "2+", "3+", "4+", "5+"] },
-          ],
-          layout: "sidebar",
         },
       },
-      { id: uuidv4(), component: "ProductGrid", order: 3, props: {
-          products: ctx.products.map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toLocaleString()}`, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, rating: p.rating, reviewCount: p.reviewCount, badge: p.badge, inStock: true })),
-          pagination: { currentPage: 1, totalPages: 3, totalProducts: ctx.products.length * 3, perPage: ctx.products.length },
+      {
+        id: uuidv4(), component: "PropertyGrid", order: 3, props: {
+          title: "Available Properties", subtitle: "Find your dream home",
+          properties: ctx.products.slice(0, 6).map((p) => ({
+            title: p.name, price: p.price.toLocaleString(),
+            description: p.description, image: ctx.imagePaths[0] || null,
+            badge: p.badge, type: p.category,
+            beds: Math.floor(Math.random() * 4) + 1,
+            baths: Math.floor(Math.random() * 3) + 1,
+            sqft: Math.floor(Math.random() * 2000) + 800,
+            address: "123 Main St, City, State",
+          })),
         },
       },
     ];
@@ -1605,10 +1999,9 @@ class MockAIProvider extends AIProvider {
   private _buildCoursesSections(ctx: { businessName: string; symbol: string; products: Array<{ name: string; price: number; originalPrice?: number; description: string; category: string; rating: number; reviewCount: number; badge?: string }>; config: BusinessTypeConfig; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Courses", subtitle: "Explore our programs and courses", backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "CategoryGrid", order: 2, props: { categories: ctx.config.categories.map((cat) => ({ id: uuidv4(), name: cat.name, description: cat.description, image: ctx.imagePaths[0] || null, productCount: cat.productCount, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })), layout: "grid", columns: 3 } },
-      { id: uuidv4(), component: "ProductGrid", order: 3, props: {
-          products: ctx.products.map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, originalPrice: p.originalPrice ? `${ctx.symbol}${p.originalPrice.toFixed(2)}` : null, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, rating: p.rating, reviewCount: p.reviewCount, badge: p.badge, inStock: true })),
-          pagination: { currentPage: 1, totalPages: 2, totalProducts: ctx.products.length, perPage: ctx.products.length },
+      {
+        id: uuidv4(), component: "CourseGrid", order: 2, props: {
+          courses: ctx.products.map((p) => ({ id: uuidv4(), title: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, rating: p.rating, duration: "8 weeks", level: "Intermediate" })),
         },
       },
     ];
@@ -1617,7 +2010,8 @@ class MockAIProvider extends AIProvider {
   private _buildAdmissionsSections(ctx: { businessName: string }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Admissions", subtitle: "Start your learning journey with " + ctx.businessName } },
-      { id: uuidv4(), component: "ContactForm", order: 2, props: {
+      {
+        id: uuidv4(), component: "ContactForm", order: 2, props: {
           title: "Apply Now",
           fields: [
             { name: "name", label: "Full Name", type: "text", required: true },
@@ -1634,19 +2028,23 @@ class MockAIProvider extends AIProvider {
     ];
   }
 
-  private _buildDestinationsSections(ctx: { businessName: string; config: BusinessTypeConfig; imagePaths: string[] }): ISection[] {
+  private _buildDestinationsSections(ctx: { businessName: string; symbol: string; products: Array<{ name: string; price: number; description: string; category: string; rating: number; reviewCount: number; badge?: string }>; config: BusinessTypeConfig; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Destinations", subtitle: "Explore our top travel destinations", backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "CategoryGrid", order: 2, props: { categories: ctx.config.categories.map((cat) => ({ id: uuidv4(), name: cat.name, description: cat.description, image: ctx.imagePaths[0] || null, productCount: cat.productCount, slug: cat.name.toLowerCase().replace(/\s+/g, "-") })), layout: "grid", columns: 3 } },
+      {
+        id: uuidv4(), component: "DestinationGrid", order: 2, props: {
+          destinations: ctx.products.map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toFixed(2)}`, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, rating: p.rating })),
+        },
+      },
     ];
   }
 
   private _buildItinerariesSections(ctx: { businessName: string; symbol: string; products: Array<{ name: string; price: number; description: string; category: string; rating: number; reviewCount: number; badge?: string }>; imagePaths: string[] }): ISection[] {
     return [
       { id: uuidv4(), component: "PageHero", order: 1, props: { title: "Itineraries", subtitle: "Curated travel itineraries for every adventurer", backgroundImage: ctx.imagePaths[0] || null } },
-      { id: uuidv4(), component: "ProductGrid", order: 2, props: {
-          products: ctx.products.slice(0, 6).map((p) => ({ id: uuidv4(), name: p.name, price: `${ctx.symbol}${p.price.toLocaleString()}`, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, rating: p.rating, reviewCount: p.reviewCount, badge: p.badge, inStock: true })),
-          pagination: { currentPage: 1, totalPages: 2, totalProducts: ctx.products.length, perPage: ctx.products.length },
+      {
+        id: uuidv4(), component: "PackageGrid", order: 2, props: {
+          packages: ctx.products.slice(0, 6).map((p) => ({ id: uuidv4(), title: p.name, price: `${ctx.symbol}${p.price.toLocaleString()}`, description: p.description, image: ctx.imagePaths[0] || null, slug: p.name.toLowerCase().replace(/\s+/g, "-"), category: p.category, rating: p.rating, duration: "7 days", badge: p.badge })),
         },
       },
     ];
@@ -1656,24 +2054,29 @@ class MockAIProvider extends AIProvider {
     const navMap: Record<string, { label: string; href: string }> = {
       home: { label: "Home", href: "/" }, shop: { label: "Shop", href: "/shop" },
       categories: { label: "Categories", href: "/categories" }, about: { label: "About", href: "/about" },
+      about_us: { label: "About Us", href: "/about" },
       blog: { label: "Blog", href: "/blog" }, contact: { label: "Contact", href: "/contact" },
+      contact_us: { label: "Contact Us", href: "/contact" },
       menu: { label: "Menu", href: "/menu" }, reservations: { label: "Reservations", href: "/reservations" },
       services: { label: "Services", href: "/services" }, book_appointment: { label: "Book Appointment", href: "/book-appointment" },
       properties: { label: "Properties", href: "/properties" }, listings: { label: "Listings", href: "/listings" },
       courses: { label: "Courses", href: "/courses" }, admissions: { label: "Admissions", href: "/admissions" },
       destinations: { label: "Destinations", href: "/destinations" }, itineraries: { label: "Itineraries", href: "/itineraries" },
+      faq: { label: "FAQ", href: "/faq" }, track_order: { label: "Track Order", href: "/track-order" },
+      privacy_policy: { label: "Privacy Policy", href: "/privacy-policy" },
+      terms_conditions: { label: "Terms & Conditions", href: "/terms-conditions" },
+      refund_policy: { label: "Refund Policy", href: "/refund-policy" },
     };
     const navItems: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }> = [];
-    const mainPages = ["home", "shop", "menu", "categories", "about", "blog", "contact", "services", "courses", "properties", "destinations"];
-    for (const slug of mainPages) {
-      if (selectedPages.includes(slug)) {
-        const item = navMap[slug];
-        if (item) {
-          if ((slug === "shop" || slug === "menu") && hasCategories) {
-            navItems.push({ ...item, children: config.categories.slice(0, 5).map((cat) => ({ label: cat.name, href: `/${slug === "menu" ? "menu" : "shop"}?category=${cat.name.toLowerCase().replace(/\s+/g, "-")}` })) });
-          } else {
-            navItems.push(item);
-          }
+    // Build nav from ALL selected pages, keeping the order user chose
+    for (const slug of selectedPages) {
+      if (slug === "home") continue; // Home is implicit
+      const item = navMap[slug];
+      if (item) {
+        if ((slug === "shop" || slug === "menu") && hasCategories) {
+          navItems.push({ ...item, children: config.categories.slice(0, 5).map((cat) => ({ label: cat.name, href: `/${slug === "menu" ? "menu" : "shop"}?category=${cat.name.toLowerCase().replace(/\s+/g, "-")}` })) });
+        } else {
+          navItems.push(item);
         }
       }
     }
@@ -1683,16 +2086,27 @@ class MockAIProvider extends AIProvider {
   private _buildFooterLinks(selectedPages: string[]): Array<{ label: string; href: string }> {
     const links: Array<{ label: string; href: string }> = [];
     const linkMap: Record<string, { label: string; href: string }> = {
-      about: { label: "About Us", href: "/about" }, contact: { label: "Contact", href: "/contact" },
+      about: { label: "About Us", href: "/about" }, about_us: { label: "About Us", href: "/about" },
+      contact: { label: "Contact", href: "/contact" }, contact_us: { label: "Contact Us", href: "/contact" },
       blog: { label: "Blog", href: "/blog" }, faq: { label: "FAQ", href: "/faq" },
+      shop: { label: "Shop", href: "/shop" }, categories: { label: "Categories", href: "/categories" },
+      menu: { label: "Menu", href: "/menu" }, reservations: { label: "Reservations", href: "/reservations" },
+      services: { label: "Services", href: "/services" }, courses: { label: "Courses", href: "/courses" },
+      properties: { label: "Properties", href: "/properties" }, destinations: { label: "Destinations", href: "/destinations" },
       privacy_policy: { label: "Privacy Policy", href: "/privacy-policy" },
       terms_conditions: { label: "Terms & Conditions", href: "/terms-conditions" },
       refund_policy: { label: "Refund Policy", href: "/refund-policy" },
       track_order: { label: "Track Order", href: "/track-order" },
     };
-    const footerOrder = ["about", "contact", "blog", "faq", "privacy_policy", "terms_conditions", "refund_policy", "track_order"];
-    for (const slug of footerOrder) {
-      if (selectedPages.includes(slug) && linkMap[slug]) { links.push(linkMap[slug]); }
+    // Add all selected pages as footer links
+    for (const slug of selectedPages) {
+      if (slug === "home") continue;
+      if (linkMap[slug]) {
+        // Avoid duplicates
+        if (!links.find((l) => l.href === linkMap[slug].href)) {
+          links.push(linkMap[slug]);
+        }
+      }
     }
     return links;
   }

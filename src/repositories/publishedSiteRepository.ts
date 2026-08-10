@@ -10,10 +10,16 @@ interface ThemeData {
   style?: string;
   primaryColor?: string;
   secondaryColor?: string;
+  backgroundColor?: string;
+  foregroundColor?: string;
+  mutedColor?: string;
+  mutedForegroundColor?: string;
+  borderColor?: string;
+  cardColor?: string;
   fontFamily?: string;
   borderRadius?: string;
   buttonStyle?: string;
-  animations?: boolean;
+  animations?: boolean | string;
 }
 
 interface SiteSpec {
@@ -36,881 +42,648 @@ interface SiteSpec {
   footer?: {
     copyright?: string;
     links?: Array<{ label: string; href: string }>;
+    socialMedia?: Record<string, string>;
+  };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords?: string[];
   };
 }
 
-const e = (str: unknown): string =>
+const esc = (str: unknown): string =>
   String(str ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-const placeholder = (text: string, w = 400, h = 400): string =>
-  `https://placehold.co/${w}x${h}?text=${encodeURIComponent(text)}`;
+const ph = (text: string, w = 400, h = 400): string =>
+  `https://placehold.co/${w}x${h}?text=${encodeURIComponent(text)}&bg=f3f4f6&color=9ca3af`;
 
-const stars = (rating: number): string => {
+const starsHtml = (rating: number): string => {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
   let html = "";
   for (let i = 0; i < 5; i++) {
-    if (i < full) html += "&#9733;";
-    else if (i === full && half) html += "&#9733;";
-    else html += "&#9734;";
+    if (i < full)
+      html += '<svg class="si sf" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
+    else if (i === full && half)
+      html += '<svg class="si sh" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
+    else
+      html += '<svg class="si se" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
   }
-  return `<span class="text-yellow-400 text-lg">${html}</span>`;
+  return `<span class="stars">${html}</span>`;
 };
 
-const borderRadius = (val?: string): string => {
+const brClass = (val?: string): string => {
   switch (val) {
-    case "none": return "rounded-none";
-    case "small": return "rounded";
-    case "large": return "rounded-2xl";
-    default: return "rounded-lg";
+    case "none": return "";
+    case "small": return "r-sm";
+    case "large": return "r-lg";
+    case "0": return "";
+    case "2px": return "r-sm";
+    case "4px": return "r-sm";
+    case "6px": return "r-sm";
+    case "8px": return "r-md";
+    case "10px": return "r-md";
+    case "12px": return "r-md";
+    case "16px": return "r-lg";
+    case "20px": return "r-lg";
+    case "24px": return "r-lg";
+    default: return "r-md";
   }
 };
 
-const btnStyle = (val?: string): string => {
+const btnClass = (val?: string): string => {
   switch (val) {
-    case "pill": return "rounded-full";
-    case "square": return "rounded-none";
-    default: return "rounded-lg";
+    case "pill": return "b-pill";
+    case "square": return "b-sq";
+    default: return "b-def";
   }
+};
+
+const renderMobileNav = (
+  items: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }>
+): string =>
+  items.map(item => {
+    if (item.children && item.children.length > 0)
+      return `<div class="mnav-k">${esc(item.label)}</div><div class="mnav-s">${item.children.map(c => `<a href="${esc(c.href)}">${esc(c.label)}</a>`).join("")}</div>`;
+    return `<a href="${esc(item.href)}" class="mnav-k">${esc(item.label)}</a>`;
+  }).join("");
+
+const renderNavigation = (
+  siteName: string,
+  navItems: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }>
+): string => {
+  const items = navItems.map(item => {
+    if (item.children && item.children.length > 0)
+      return `<div class="nav-dd"><a href="${esc(item.href)}" class="nav-k">${esc(item.label)} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:2px;vertical-align:middle"><path d="M3 5l3 3 3-3"/></svg></a><div class="nav-dd-m">${item.children.map(c => `<a href="${esc(c.href)}" class="nav-dd-i">${esc(c.label)}</a>`).join("")}</div></div>`;
+    return `<a href="${esc(item.href)}" class="nav-k">${esc(item.label)}</a>`;
+  }).join("");
+
+  return `
+  <input type="checkbox" id="mtog" class="mtog" />
+  <nav class="nav" id="main-nav">
+    <div class="nav-in">
+      <a href="/" class="nav-l">${esc(siteName)}</a>
+      <div class="nav-ks">${items}</div>
+      <div class="nav-a">
+        <button class="nav-ab" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+        <button class="nav-ab" aria-label="Account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+        <a href="/cart" class="nav-ab" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><span class="cc" style="display:none">0</span></a>
+        <a href="/wishlist" class="nav-ab hid md:flex" aria-label="Wishlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="cc wish-h" style="display:none;background:var(--err);top:2px">0</span></a>
+        <label for="mtog" class="ham" aria-label="Menu"><span></span><span></span><span></span></label>
+      </div>
+    </div>
+  </nav>
+  <div class="mnav" id="mnav">${renderMobileNav(navItems)}</div>`;
+};
+
+const renderFooter = (
+  footer: { copyright?: string; links?: Array<{ label: string; href: string }>; socialMedia?: Record<string, string> },
+  siteName: string
+): string => {
+  const links = footer.links || [];
+  const socialMedia = footer.socialMedia || {};
+  const ql = links.slice(0, 5);
+  const sl = links.slice(5, 10);
+  const socialLinks = Object.entries(socialMedia).filter(([, url]) => url && url !== "#");
+  return `<footer class="footer"><div class="ftg">
+    <div class="ftb"><div class="ftbn">${esc(siteName)}</div><p class="ftbd">Premium products and exceptional shopping experience. We bring you the best quality with outstanding customer service.</p>
+      <div class="fts">
+        ${socialMedia.facebook ? `<a href="${esc(socialMedia.facebook)}" aria-label="Facebook" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>` : `<a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>`}
+        ${socialMedia.instagram ? `<a href="${esc(socialMedia.instagram)}" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg></a>` : `<a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg></a>`}
+        ${socialMedia.twitter ? `<a href="${esc(socialMedia.twitter)}" aria-label="Twitter" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>` : `<a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>`}
+        ${socialMedia.youtube ? `<a href="${esc(socialMedia.youtube)}" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>` : `<a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>`}
+        ${socialMedia.linkedin ? `<a href="${esc(socialMedia.linkedin)}" aria-label="LinkedIn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>` : ""}
+      </div>
+    </div>
+    <div><div class="fth">Quick Links</div><ul class="ftl">${ql.length > 0 ? ql.map(l => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join("") : `<li><a href="/">Home</a></li><li><a href="/shop">Shop</a></li><li><a href="/about_us">About</a></li><li><a href="/contact_us">Contact</a></li>`}</ul></div>
+    <div><div class="fth">Customer Service</div><ul class="ftl">${sl.length > 0 ? sl.map(l => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join("") : `<li><a href="/contact_us">Contact Us</a></li><li><a href="/faq">FAQ</a></li><li><a href="/shipping">Shipping &amp; Returns</a></li><li><a href="/privacy_policy">Privacy Policy</a></li>`}</ul></div>
+    <div><div class="fth">Contact Info</div><ul class="ftl">
+      <li style="margin-bottom:14px"><a href="/contact_us" style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Get in Touch</a></li>
+      <li style="margin-bottom:14px"><a href="mailto:info@example.com" style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>info@example.com</a></li>
+      <li style="display:flex;align-items:center;gap:8px;color:#9ca3af"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>(555) 123-4567</li>
+    </ul></div>
+  </div>
+  <div class="ftbt">
+    <div class="ftc">${esc(footer.copyright || `\u00a9 ${new Date().getFullYear()} ${esc(siteName)}. All rights reserved.`)}</div>
+    <div class="ftp"><span class="ftpb">Visa</span><span class="ftpb">Mastercard</span><span class="ftpb">Amex</span><span class="ftpb">PayPal</span><span class="ftpb">Apple Pay</span></div>
+  </div></footer>`;
 };
 
 const renderComponent = (component: string, props: Record<string, any>, theme?: ThemeData): string => {
   const p = props || {};
-  const br = borderRadius(theme?.borderRadius);
-  const btn = btnStyle(theme?.buttonStyle);
+  const r = brClass(theme?.borderRadius);
+  const b = btnClass(theme?.buttonStyle);
+  const pri = theme?.primaryColor || "#1e3a5f";
+  const sec = theme?.secondaryColor || "#2563eb";
 
   switch (component) {
 
-    // ─── HOMEPAGE SECTIONS ────────────────────────────────
-
     case "HeroEcommerce":
-      return `<section class="relative w-full min-h-[500px] flex items-center justify-center text-center text-white" style="background:${p.backgroundImage ? `url('${e(p.backgroundImage)}') center/cover` : p.backgroundColor || `linear-gradient(135deg, ${theme?.primaryColor || "#1e3a5f"}, ${theme?.secondaryColor || "#2563eb"})`}">
-        <div class="absolute inset-0 bg-black/40"></div>
-        <div class="relative z-10 max-w-3xl mx-auto px-6 py-24">
-          <h1 class="text-4xl md:text-6xl font-bold mb-6">${e(p.headline)}</h1>
-          <p class="text-lg md:text-xl mb-8 opacity-90">${e(p.subheadline)}</p>
-          ${p.ctaText ? `<a href="${e(p.ctaLink || "#")}" class="inline-block bg-white text-gray-900 font-semibold px-8 py-3 ${btn} hover:bg-gray-100 transition">${e(p.ctaText)}</a>` : ""}
+      return `<section class="hero" style="background:${p.backgroundImage ? `url('${esc(p.backgroundImage)}') center/cover no-repeat` : `linear-gradient(135deg,${pri},${sec})`}">
+        <div class="hero-ov"></div>
+        <div class="hero-c">
+          ${p.badge ? `<div class="hero-b">${esc(p.badge)}</div>` : ""}
+          <h1 class="hero-t">${esc(p.headline)}</h1>
+          <p class="hero-s">${esc(p.subheadline)}</p>
+          <div class="hero-a">
+            ${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bp blg ${b}">${esc(p.ctaText)}</a>` : ""}
+            ${p.ctaText2 ? `<a href="${esc(p.ctaLink2 || "#")}" class="btn bs2 blg ${b}" style="border-color:#fff;color:#fff">${esc(p.ctaText2)}</a>` : ""}
+          </div>
         </div>
       </section>`;
 
     case "FeaturedCategories":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Shop by Category")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          ${(p.categories || []).map((c: any) => `
-            <a href="${e(c.href || "#")}" class="group block ${br} overflow-hidden shadow-sm hover:shadow-lg transition">
-              <img src="${e(c.image || placeholder(c.name || "Category", 400, 300))}" alt="${e(c.name)}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300" />
-              <div class="p-4 text-center font-semibold">${e(c.name)}</div>
-            </a>`).join("")}
+      return `<section class="py16"><div class="ct">
+        <div class="sh"><div><div class="sh-sub">Browse</div><h2 class="sh-t">${esc(p.title || "Shop by Category")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+        <div class="gr gc2 md:gc4 g6">
+          ${(p.categories || []).map((c: any) => `<a href="${esc(c.href || "#")}" class="pc" data-category-filter="${esc(c.slug || c.name || '')}" style="text-decoration:none"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(c.image || ph(c.name || "Category", 400, 300))}" alt="${esc(c.name)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">Shop Now</span></div></div><div class="pcbd tc"><div class="pcbn" style="white-space:normal">${esc(c.name)}</div>${c.count ? `<div class="pcbc">${esc(c.count)} items</div>` : ""}</div></a>`).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "BestSellers":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Best Sellers")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          ${(p.products || []).map((pr: any) => `
-            <div class="group ${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-              <img src="${e(pr.image || placeholder(pr.name || "Product"))}" alt="${e(pr.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-              <div class="p-4">
-                <h3 class="font-semibold text-sm mb-1 truncate">${e(pr.name)}</h3>
-                ${pr.rating ? `<div class="mb-1">${stars(pr.rating)}</div>` : ""}
-                <div class="flex items-center gap-2">
-                  <span class="font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(pr.price || "0")}</span>
-                  ${pr.originalPrice ? `<span class="text-gray-400 line-through text-sm">$${e(pr.originalPrice)}</span>` : ""}
-                </div>
-                <button class="mt-3 w-full bg-gray-900 text-white text-sm py-2 ${btn} hover:bg-gray-700 transition">Add to Cart</button>
-              </div>
-            </div>`).join("")}
+    case "FeaturedProducts":
+      return `<section class="py16 bga"><div class="ct">
+        <div class="sh"><div><div class="sh-sub">Top Picks</div><h2 class="sh-t">${esc(p.title || (component === "BestSellers" ? "Best Sellers" : "Featured Products"))}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+        <div class="gr gc2 md:gc4 g6">
+          ${(p.products || []).map((pr: any) => {
+        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.isNew ? '<span class="badge bdg-n">New</span>' : ""}${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd">${pr.category ? `<div class="pcbc">${esc(pr.category)}</div>` : ""}<div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+      }).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "NewArrivals":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "New Arrivals")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          ${(p.products || []).map((pr: any) => `
-            <div class="group ${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-              <img src="${e(pr.image || placeholder(pr.name || "Product"))}" alt="${e(pr.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-              <div class="p-4">
-                <h3 class="font-semibold text-sm mb-1 truncate">${e(pr.name)}</h3>
-                ${pr.rating ? `<div class="mb-1">${stars(pr.rating)}</div>` : ""}
-                <div class="flex items-center gap-2">
-                  <span class="font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(pr.price || "0")}</span>
-                  ${pr.originalPrice ? `<span class="text-gray-400 line-through text-sm">$${e(pr.originalPrice)}</span>` : ""}
-                </div>
-                <button class="mt-3 w-full bg-gray-900 text-white text-sm py-2 ${btn} hover:bg-gray-700 transition">Add to Cart</button>
-              </div>
-            </div>`).join("")}
+      return `<section class="py16"><div class="ct">
+        <div class="sh"><div><div class="sh-sub">Just In</div><h2 class="sh-t">${esc(p.title || "New Arrivals")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+        <div class="gr gc2 md:gc4 g6">
+          ${(p.products || []).map((pr: any) => {
+        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb"><span class="badge bdg-n">New</span></div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+      }).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "FlashSale":
-      return `<section class="py-16 px-6 bg-red-50">
-        <div class="max-w-7xl mx-auto">
-          <div class="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
-            <h2 class="text-3xl font-bold">${e(p.title || "Flash Sale")}</h2>
-            <div class="flex gap-2 text-center">
-              <div class="bg-gray-900 text-white w-16 h-16 flex items-center justify-center rounded-lg"><div><div class="text-xl font-bold" id="fs-hours">${e(p.countdown?.hours || "00")}</div><div class="text-xs uppercase">Hours</div></div></div>
-              <div class="bg-gray-900 text-white w-16 h-16 flex items-center justify-center rounded-lg"><div><div class="text-xl font-bold" id="fs-mins">${e(p.countdown?.minutes || "00")}</div><div class="text-xs uppercase">Mins</div></div></div>
-              <div class="bg-gray-900 text-white w-16 h-16 flex items-center justify-center rounded-lg"><div><div class="text-xl font-bold" id="fs-secs">${e(p.countdown?.seconds || "00")}</div><div class="text-xs uppercase">Secs</div></div></div>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            ${(p.products || []).map((pr: any) => `
-              <div class="group ${br} border border-gray-200 overflow-hidden bg-white hover:shadow-lg transition">
-                <div class="relative">
-                  <img src="${e(pr.image || placeholder(pr.name || "Sale"))}" alt="${e(pr.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-                  ${pr.discount ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 ${btn}">-${e(pr.discount)}%</span>` : ""}
-                </div>
-                <div class="p-4">
-                  <h3 class="font-semibold text-sm mb-1 truncate">${e(pr.name)}</h3>
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-red-600">$${e(pr.price || "0")}</span>
-                    ${pr.originalPrice ? `<span class="text-gray-400 line-through text-sm">$${e(pr.originalPrice)}</span>` : ""}
-                  </div>
-                  <button class="mt-3 w-full bg-red-600 text-white text-sm py-2 ${btn} hover:bg-red-700 transition">Add to Cart</button>
-                </div>
-              </div>`).join("")}
+      return `<section class="py16" style="background:linear-gradient(135deg,#fef2f2,#fff1f2)"><div class="ct">
+        <div class="d dc md:d jcsb mb10 g6">
+          <div><div class="sh-sub" style="color:var(--err)">Limited Time</div><h2 class="sh-t" style="text-align:left;margin-bottom:0">${esc(p.title || "Flash Sale")}</h2></div>
+          <div class="d g3">
+            <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.hours || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Hours</div></div>
+            <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.minutes || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Mins</div></div>
+            <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.seconds || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Secs</div></div>
           </div>
         </div>
-      </section>`;
-
-    case "FeaturedProducts":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Featured Products")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          ${(p.products || []).map((pr: any) => `
-            <div class="group ${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-              <img src="${e(pr.image || placeholder(pr.name || "Product"))}" alt="${e(pr.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-              <div class="p-4">
-                <h3 class="font-semibold text-sm mb-1 truncate">${e(pr.name)}</h3>
-                ${pr.rating ? `<div class="mb-1">${stars(pr.rating)}</div>` : ""}
-                <span class="font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(pr.price || "0")}</span>
-                <button class="mt-3 w-full bg-gray-900 text-white text-sm py-2 ${btn} hover:bg-gray-700 transition">Add to Cart</button>
-              </div>
-            </div>`).join("")}
+        <div class="gr gc2 md:gc4 g6">
+          ${(p.products || []).map((pr: any) => {
+        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Sale"), category: pr.category || '' });
+        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Sale"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn br bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div><div class="pcbp"><span class="cur tr5">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn br bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+      }).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "WhyChooseUs":
-      return `<section class="py-16 px-6 bg-gray-50">
-        <div class="max-w-7xl mx-auto">
-          <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Why Choose Us")}</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-            ${(p.features || []).map((f: any) => `
-              <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center ${br} text-2xl" style="background:${theme?.primaryColor || "#2563eb"}20;color:${theme?.primaryColor || "#2563eb"}">
-                  ${e(f.icon || "★")}
-                </div>
-                <h3 class="font-semibold mb-2">${e(f.title)}</h3>
-                <p class="text-gray-500 text-sm">${e(f.description)}</p>
-              </div>`).join("")}
-          </div>
+      return `<section class="py16 bga"><div class="ct">
+        <div class="sh"><div><div class="sh-sub">Our Promise</div><h2 class="sh-t">${esc(p.title || "Why Choose Us")}</h2></div></div>
+        <div class="gr gc2 md:gc4 g8">
+          ${(p.features || []).map((f: any) => `<div class="tc p6"><div style="width:64px;height:64px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.5rem">${esc(f.icon || "\u2605")}</div><h3 class="fs mb2">${esc(f.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(f.description)}</p></div>`).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "Testimonials":
-      return `<section class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "What Our Customers Say")}</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            ${(p.testimonials || []).map((t: any) => `
-              <div class="${br} border border-gray-200 p-6 text-center">
-                <img src="${e(t.avatar || placeholder(t.name || "User", 80, 80))}" alt="${e(t.name)}" class="w-16 h-16 rounded-full mx-auto mb-4 object-cover" />
-                <p class="text-gray-600 italic mb-4">"${e(t.quote || t.content)}"</p>
-                ${t.rating ? `<div class="mb-3">${stars(t.rating)}</div>` : ""}
-                <div class="font-semibold">${e(t.name)}</div>
-                ${t.title ? `<div class="text-gray-400 text-sm">${e(t.title)}</div>` : ""}
-              </div>`).join("")}
-          </div>
+      return `<section class="py16"><div class="ct">
+        <div class="sh"><div><div class="sh-sub">Testimonials</div><h2 class="sh-t">${esc(p.title || "What Our Customers Say")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">
+          ${(p.testimonials || []).map((t: any) => `<div class="tc2"><img src="${esc(t.avatar || ph(t.name || "User", 80, 80))}" alt="${esc(t.name)}" class="tca" />${t.rating ? `<div class="mb3 d jcc">${starsHtml(t.rating)}</div>` : ""}<p class="tcq">&ldquo;${esc(t.quote || t.content)}&rdquo;</p><div class="tcn">${esc(t.name)}</div>${t.title ? `<div class="tcr">${esc(t.title)}</div>` : ""}</div>`).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "BrandShowcase":
-      return `<section class="py-16 px-6 bg-gray-50">
-        <div class="max-w-7xl mx-auto text-center">
-          <h2 class="text-3xl font-bold mb-10">${e(p.title || "Our Brands")}</h2>
-          <div class="flex flex-wrap justify-center items-center gap-12">
-            ${(p.brands || []).map((b: any) => `
-              <div class="opacity-60 hover:opacity-100 transition">
-                ${b.logo ? `<img src="${e(b.logo)}" alt="${e(b.name)}" class="h-12" />` : `<div class="text-xl font-bold text-gray-400">${e(b.name)}</div>`}
-              </div>`).join("")}
-          </div>
+      return `<section class="py16 bga"><div class="ct tc">
+        <div class="sh"><div><h2 class="sh-t">${esc(p.title || "Our Brands")}</h2></div></div>
+        <div class="d dw jcc aic g12">
+          ${(p.brands || []).map((brd: any) => `<div style="opacity:.5;transition:opacity .25s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.5'">${brd.logo ? `<img src="${esc(brd.logo)}" alt="${esc(brd.name)}" style="height:40px" />` : `<div class="txl fb tgr4">${esc(brd.name)}</div>`}</div>`).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "NewsletterSignup":
-      return `<section class="py-16 px-6" style="background:${theme?.primaryColor || "#1e3a5f"}">
-        <div class="max-w-2xl mx-auto text-center text-white">
-          <h2 class="text-3xl font-bold mb-4">${e(p.title || "Subscribe to Our Newsletter")}</h2>
-          <p class="mb-8 opacity-90">${e(p.subtitle || "Get the latest updates on new products and upcoming sales")}</p>
-          <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <input type="email" placeholder="${e(p.placeholder || "Enter your email")}" class="px-5 py-3 rounded-lg text-gray-900 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-white/50" />
-            <button class="bg-white font-semibold px-8 py-3 ${btn} hover:bg-gray-100 transition" style="color:${theme?.primaryColor || "#1e3a5f"}">${e(p.buttonText || "Subscribe")}</button>
-          </div>
-        </div>
-      </section>`;
+      return `<section class="nlb" style="background:linear-gradient(135deg,${pri},${sec})"><div class="csm">
+        <h2 class="tx3 fb mb3" style="color:#fff">${esc(p.title || "Subscribe to Our Newsletter")}</h2>
+        <p class="tl mb8" style="opacity:.9">${esc(p.subtitle || "Get the latest updates on new products and upcoming sales")}</p>
+        <div class="nlf"><input type="email" placeholder="${esc(p.placeholder || "Enter your email address")}" class="inp" style="font-size:1rem" /><button class="btn bw blg ${b}">${esc(p.buttonText || "Subscribe")}</button></div>
+        <p class="tx mt4" style="opacity:.7">We respect your privacy. Unsubscribe at any time.</p>
+      </div></section>`;
 
     case "InstagramFeed":
-      return `<section class="py-16 px-6">
-        <div class="max-w-7xl mx-auto text-center">
-          <h2 class="text-3xl font-bold mb-4">${e(p.title || "Follow Us on Instagram")}</h2>
-          ${p.handle ? `<p class="text-gray-500 mb-10">@${e(p.handle)}</p>` : ""}
-          <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
-            ${(p.images || []).map((img: string) => `
-              <img src="${e(img || placeholder("Instagram", 300, 300))}" alt="Instagram post" class="w-full h-48 object-cover ${br} hover:opacity-80 transition cursor-pointer" />`).join("")}
-          </div>
+      return `<section class="py16"><div class="ct tc">
+        <div class="sh"><div><div class="sh-sub">Social</div><h2 class="sh-t">${esc(p.title || "Follow Us on Instagram")}</h2>${p.handle ? `<p class="sh-d">@${esc(p.handle)}</p>` : ""}</div></div>
+        <div class="gr gc2 md:gc6 g3">
+          ${(p.images || []).map((img: string) => `<div style="position:relative;overflow:hidden;border-radius:var(--rmd);aspect-ratio:1;cursor:pointer"><img src="${esc(img || ph("Instagram", 300, 300))}" alt="Instagram post" style="width:100%;height:100%;object-fit:cover;transition:transform .5s ease" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" /><div style="position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div>`).join("")}
         </div>
-      </section>`;
+      </div></section>`;
 
     case "FAQPreview":
-      return `<section class="py-16 px-6 max-w-3xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Frequently Asked Questions")}</h2>
-        <div class="space-y-4">
-          ${(p.faqs || []).map((f: any, i: number) => `
-            <details class="${br} border border-gray-200 ${i === 0 ? "open" : ""}">
-              <summary class="px-6 py-4 font-semibold cursor-pointer hover:bg-gray-50 transition list-none flex items-center justify-between">
-                <span>${e(f.question)}</span>
-                <span class="text-gray-400 text-xl">+</span>
-              </summary>
-              <div class="px-6 pb-4 text-gray-600 leading-relaxed">${e(f.answer)}</div>
-            </details>`).join("")}
-        </div>
-      </section>`;
+    case "FAQAccordion":
+      return `<section class="py16 bga"><div class="cxs">
+        <div class="sh"><div><div class="sh-sub">FAQ</div><h2 class="sh-t">${esc(p.title || "Frequently Asked Questions")}</h2></div></div>
+        ${(p.faqs || p.items || []).map((f: any, i: number) => `<details class="fi" ${i === 0 ? "open" : ""}><summary class="ftt"><span>${esc(f.question || f.title)}</span><span class="fti">+</span></summary><div class="fc">${esc(f.answer || f.content)}</div></details>`).join("")}
+      </div></section>`;
 
     case "ContactPreview":
-      return `<section class="py-16 px-6 bg-gray-50">
-        <div class="max-w-3xl mx-auto">
-          <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Contact Us")}</h2>
-          <form class="space-y-5">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <input type="text" placeholder="Your Name" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="email" placeholder="Your Email" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <input type="text" placeholder="Subject" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <textarea placeholder="Your Message" rows="5" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-            <button type="submit" class="bg-gray-900 text-white font-semibold px-8 py-3 ${btn} hover:bg-gray-700 transition">${e(p.submitText || "Send Message")}</button>
-          </form>
-        </div>
-      </section>`;
+    case "ContactForm":
+      return `<section class="py16 bga"><div class="cxs">
+        <div class="sh"><div><div class="sh-sub">Contact</div><h2 class="sh-t">${esc(p.title || "Send Us a Message")}</h2></div></div>
+        <form style="display:flex;flex-direction:column;gap:20px">
+          <div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Your Name</label></div><div class="fl-wrap"><input type="email" placeholder=" " class="inp" /><label>Your Email</label></div></div>
+          <div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Subject</label></div>
+          <div class="fl-wrap"><textarea placeholder=" " class="inp txa"></textarea><label>Your Message</label></div>
+          <div><button type="submit" class="btn bp blg ${b}">${esc(p.submitText || "Send Message")}</button></div>
+        </form>
+      </div></section>`;
 
     case "StoreLocator":
-      return `<section class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Visit Our Store")}</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="space-y-4">
-              ${p.address ? `<div class="flex items-start gap-3"><span class="text-2xl">📍</span><span class="text-gray-600">${e(p.address)}</span></div>` : ""}
-              ${p.phone ? `<div class="flex items-start gap-3"><span class="text-2xl">📞</span><span class="text-gray-600">${e(p.phone)}</span></div>` : ""}
-              ${p.email ? `<div class="flex items-start gap-3"><span class="text-2xl">✉️</span><span class="text-gray-600">${e(p.email)}</span></div>` : ""}
-              ${p.hours ? `<div class="flex items-start gap-3"><span class="text-2xl">🕐</span><span class="text-gray-600">${e(p.hours)}</span></div>` : ""}
-            </div>
-            <div class="bg-gray-200 ${br} h-64 flex items-center justify-center text-gray-400">
-              <div class="text-center"><div class="text-4xl mb-2">🗺️</div><div>Map</div></div>
-            </div>
+      return `<section class="py16"><div class="ct">
+        <div class="sh"><div><div class="sh-sub">Visit Us</div><h2 class="sh-t">${esc(p.title || "Our Store Location")}</h2></div></div>
+        <div class="gr gc1 md:gc2 g10">
+          <div style="display:flex;flex-direction:column;gap:20px">
+            ${p.address ? `<div class="d g4 ais"><div style="width:48px;height:48px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="fs mb1">Address</div><div style="color:var(--ctxl)">${esc(p.address)}</div></div></div>` : ""}
+            ${p.phone ? `<div class="d g4 ais"><div style="width:48px;height:48px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div><div class="fs mb1">Phone</div><div style="color:var(--ctxl)">${esc(p.phone)}</div></div></div>` : ""}
+            ${p.email ? `<div class="d g4 ais"><div style="width:48px;height:48px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg></div><div><div class="fs mb1">Email</div><div style="color:var(--ctxl)">${esc(p.email)}</div></div></div>` : ""}
+            ${p.hours ? `<div class="d g4 ais"><div style="width:48px;height:48px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div><div><div class="fs mb1">Hours</div><div style="color:var(--ctxl)">${esc(p.hours)}</div></div></div>` : ""}
           </div>
+          <div class="mp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><div class="fs">Interactive Map</div><div class="ts">${p.address ? esc(p.address) : "Location"}</div></div>
         </div>
-      </section>`;
+      </div></section>`;
+
+    // ─── SHOP PAGE ─────────────────────────────────────
 
     case "PageHero":
-      return `<section class="bg-gray-900 text-white py-20 px-6">
-        <div class="max-w-7xl mx-auto">
-          ${p.subtitle ? `<p class="text-sm font-semibold mb-3" style="color:${theme?.primaryColor || "#2563eb"}">${e(p.subtitle)}</p>` : ""}
-          <h1 class="text-4xl md:text-5xl font-bold">${e(p.title || "Page")}</h1>
-          ${p.backgroundImage ? `<div class="mt-6 ${br} overflow-hidden max-w-2xl"><img src="${e(p.backgroundImage)}" alt="" class="w-full h-48 object-cover" /></div>` : ""}
-        </div>
-      </section>`;
-
-    case "BlogPreview":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Latest Articles")}</h2>
-        ${p.subtitle ? `<p class="text-gray-500 text-center mb-10 max-w-2xl mx-auto">${e(p.subtitle)}</p>` : ""}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          ${(p.posts || []).map((post: any) => `
-            <article class="${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-              <img src="${e(post.image || placeholder(post.title || "Blog", 600, 300))}" alt="${e(post.title)}" class="w-full h-48 object-cover" />
-              <div class="p-6">
-                ${post.category ? `<div class="text-xs font-semibold mb-2" style="color:${theme?.primaryColor || "#2563eb"}">${e(post.category)}</div>` : ""}
-                <h3 class="font-semibold text-lg mb-2">${e(post.title)}</h3>
-                ${post.excerpt ? `<p class="text-gray-500 text-sm mb-4 leading-relaxed">${e(post.excerpt)}</p>` : ""}
-                <a href="${e(post.href || "#" + (post.slug || ""))}" class="text-sm font-semibold hover:underline" style="color:${theme?.primaryColor || "#2563eb"}">Read More →</a>
-              </div>
-            </article>`).join("")}
-        </div>
-      </section>`;
-
-    // ─── SHOP PAGE SECTIONS ──────────────────────────────
+      return `<section class="ph"><div class="phi">${p.subtitle ? `<div class="ts fs mb3" style="color:${pri}">${esc(p.subtitle)}</div>` : ""}<h1 class="tx4 md:tx5 fb" style="letter-spacing:-.02em">${esc(p.title || "Page")}</h1>${p.description ? `<p class="tl mt3" style="opacity:.8">${esc(p.description)}</p>` : ""}</div></section>`;
 
     case "ShopHero":
-      return `<section class="bg-gray-900 text-white py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <nav class="text-sm text-gray-400 mb-4"><a href="/" class="hover:text-white">Home</a> <span class="mx-2">/</span> <span class="text-white">${e(p.title || "Shop")}</span></nav>
-          <h1 class="text-4xl font-bold">${e(p.title || "Shop")}</h1>
-          ${p.description ? `<p class="text-gray-300 mt-3">${e(p.description)}</p>` : ""}
-        </div>
-      </section>`;
+      return `<section class="ph"><div class="phi"><nav class="brd" style="color:#9ca3af"><a href="/" style="color:#d1d5db">Home</a><span class="brd-s">/</span><span class="brd-c" style="color:#fff">${esc(p.title || "Shop")}</span></nav><h1 class="tx4 md:tx5 fb">${esc(p.title || "Shop")}</h1>${p.description ? `<p class="tl mt3" style="opacity:.8">${esc(p.description)}</p>` : ""}</div></section>`;
 
     case "ProductFilters":
-      return `<aside class="bg-white border border-gray-200 ${br} p-6 space-y-6">
-        <h3 class="font-bold text-lg mb-4">Filters</h3>
-        ${(p.categories || []).length > 0 ? `
-          <div>
-            <h4 class="font-semibold text-sm mb-3">Category</h4>
-            <div class="space-y-2">
-              ${p.categories.map((c: any) => `
-                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                  <input type="checkbox" class="rounded" /> ${e(c.name || c)}
-                </label>`).join("")}
-            </div>
-          </div>` : ""}
-        ${(p.priceRange || p.priceRanges) ? `
-          <div>
-            <h4 class="font-semibold text-sm mb-3">Price</h4>
-            <div class="space-y-2">
-              ${(p.priceRange || p.priceRanges || []).map((r: any) => `
-                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                  <input type="checkbox" class="rounded" /> ${e(typeof r === "string" ? r : r.label || `${r.min} - ${r.max}`)}
-                </label>`).join("")}
-            </div>
-          </div>` : ""}
-        ${(p.sortOptions || []).length > 0 ? `
-          <div>
-            <h4 class="font-semibold text-sm mb-3">Sort By</h4>
-            <select class="w-full border border-gray-300 ${br} px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-              ${p.sortOptions.map((o: any) => `<option value="${e(o.value || o)}">${e(o.label || o)}</option>`).join("")}
-            </select>
-          </div>` : ""}
+      return `<aside style="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><h3 class="fb txl mb6">Filters</h3>
+        ${(p.categories || []).length > 0 ? `<div class="mb6"><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Category</h4><div style="display:flex;flex-wrap:wrap;gap:8px"><button data-category-filter="all" class="btn bs2 bsm ${b}" style="background:var(--c1);color:#fff">All</button>${p.categories.map((c: any) => `<button data-category-filter="${esc(c.slug || c.name || c)}" class="btn bs2 bsm ${b}">${esc(c.name || c)}</button>`).join("")}</div></div>` : ""}
+        ${(p.priceRange || p.priceRanges) ? `<div class="mb6"><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Price</h4><div style="display:flex;flex-direction:column;gap:10px">${(p.priceRange || p.priceRanges || []).map((r: any) => `<label style="display:flex;align-items:center;gap:10px;font-size:.9375rem;color:var(--ctxl);cursor:pointer"><input type="checkbox" style="width:18px;height:18px;border-radius:4px;border:1.5px solid var(--bdr);accent-color:var(--c1)" /> ${esc(typeof r === "string" ? r : r.label || `${r.min} - ${r.max}`)}</label>`).join("")}</div></div>` : ""}
+        ${(p.sortOptions || []).length > 0 ? `<div><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Sort By</h4><select data-sort-select class="inp sel">${p.sortOptions.map((o: any) => `<option value="${esc(o.value || o)}">${esc(o.label || o)}</option>`).join("")}</select></div>` : ""}
       </aside>`;
 
     case "ProductGrid":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row gap-8">
-          <div class="md:w-1/4">${renderComponent("ProductFilters", p.filters || {}, theme)}</div>
-          <div class="md:w-3/4">
-            <div class="flex items-center justify-between mb-6">
-              <span class="text-gray-500 text-sm">${e(p.totalProducts || (p.products || []).length)} products</span>
-            </div>
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-              ${(p.products || []).map((pr: any) => `
-                <div class="group ${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-                  <img src="${e(pr.image || placeholder(pr.name || "Product"))}" alt="${e(pr.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-                  <div class="p-4">
-                    ${pr.category ? `<div class="text-xs text-gray-400 mb-1">${e(pr.category)}</div>` : ""}
-                    <h3 class="font-semibold text-sm mb-1 truncate">${e(pr.name)}</h3>
-                    ${pr.rating ? `<div class="mb-1">${stars(pr.rating)}</div>` : ""}
-                    <div class="flex items-center gap-2">
-                      <span class="font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(pr.price || "0")}</span>
-                      ${pr.originalPrice ? `<span class="text-gray-400 line-through text-sm">$${e(pr.originalPrice)}</span>` : ""}
-                    </div>
-                    <button class="mt-3 w-full bg-gray-900 text-white text-sm py-2 ${btn} hover:bg-gray-700 transition">Add to Cart</button>
-                  </div>
-                </div>`).join("")}
-            </div>
-            ${p.totalPages && p.totalPages > 1 ? `
-              <div class="flex justify-center gap-2 mt-10">
-                <button class="px-4 py-2 border border-gray-300 ${btn} hover:bg-gray-50 transition text-sm">Previous</button>
-                ${Array.from({ length: Math.min(p.totalPages || 1, 5) }, (_, i) => `
-                  <button class="w-10 h-10 flex items-center justify-center ${br} text-sm ${i === 0 ? "bg-gray-900 text-white" : "border border-gray-300 hover:bg-gray-50"} transition">${i + 1}</button>`).join("")}
-                <button class="px-4 py-2 border border-gray-300 ${btn} hover:bg-gray-50 transition text-sm">Next</button>
-              </div>` : ""}
+      return `<section class="py16"><div class="ct"><div style="display:flex;flex-direction:row;gap:32px"><div style="width:280px;flex-shrink:0" class="hid md:block">${renderComponent("ProductFilters", p.filters || {}, theme)}</div><div style="flex:1">
+        <div class="d aic jcsb mb6" style="flex-wrap:wrap;gap:12px">
+          <span data-result-count style="color:var(--ctxl);font-size:.9375rem">${esc(p.totalProducts || (p.products || []).length)} products</span>
+          <div class="d aic g3">
+            <input type="text" placeholder="Search products..." data-search-input class="inp" style="width:200px;padding:8px 12px;font-size:.875rem" />
+            <select data-sort-select class="inp sel" style="width:160px;padding:8px 12px;font-size:.875rem">
+              <option value="">Sort by</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="name">Name: A-Z</option>
+              <option value="rating">Top Rated</option>
+            </select>
           </div>
         </div>
-      </section>`;
+        <div class="gr gc2 lg:gc3 g6" data-product-grid>
+          ${(p.products || []).map((pr: any) => {
+        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.isNew ? '<span class="badge bdg-n">New</span>' : ""}${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd">${pr.category ? `<div class="pcbc">${esc(pr.category)}</div>` : ""}<div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+      }).join("")}
+        </div>
+        <div data-pagination-container></div>
+      </div></div></div></section>`;
 
-    // ─── PRODUCT DETAILS SECTIONS ─────────────────────────
+    // ─── PRODUCT DETAILS ───────────────────────────────
 
     case "Breadcrumbs":
-      return `<nav class="py-4 px-6 max-w-7xl mx-auto text-sm text-gray-500">
-        ${(p.items || []).map((item: any, i: number, arr: any[]) => `
-          ${i > 0 ? '<span class="mx-2">/</span>' : ""}
-          ${i < arr.length - 1 ? `<a href="${e(item.href || "#")}" class="hover:text-gray-900 transition">${e(item.label)}</a>` : `<span class="text-gray-900">${e(item.label)}</span>`}
-        `).join("")}
-      </nav>`;
+      return `<nav class="brd ct">${(p.items || []).map((item: any, i: number, arr: any[]) => `${i > 0 ? '<span class="brd-s">/</span>' : ""}${i < arr.length - 1 ? `<a href="${esc(item.href || "#")}">${esc(item.label)}</a>` : `<span class="brd-c">${esc(item.label)}</span>`}`).join("")}</nav>`;
 
-    case "ProductDetails":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div>
-            <img src="${e(p.image || placeholder(p.name || "Product", 600, 600))}" alt="${e(p.name)}" class="w-full ${br} object-cover" />
-            ${p.gallery && p.gallery.length > 0 ? `
-              <div class="flex gap-3 mt-4">
-                <img src="${e(p.image || placeholder("Product"))}" alt="" class="w-20 h-20 object-cover ${br} border-2 border-gray-900 cursor-pointer" />
-                ${p.gallery.map((img: string) => `<img src="${e(img)}" alt="" class="w-20 h-20 object-cover ${br} border border-gray-200 cursor-pointer hover:border-gray-900 transition" />`).join("")}
-              </div>` : ""}
-          </div>
-          <div>
-            ${p.brand ? `<div class="text-sm text-gray-500 mb-2">${e(p.brand)}</div>` : ""}
-            <h1 class="text-3xl font-bold mb-4">${e(p.name)}</h1>
-            ${p.rating ? `<div class="flex items-center gap-2 mb-4">${stars(p.rating)} <span class="text-gray-500 text-sm">(${e(p.reviewCount || 0)} reviews)</span></div>` : ""}
-            <div class="flex items-center gap-3 mb-6">
-              <span class="text-3xl font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(p.price || "0")}</span>
-              ${p.originalPrice ? `<span class="text-gray-400 line-through text-xl">$${e(p.originalPrice)}</span>` : ""}
-              ${p.discount ? `<span class="bg-red-100 text-red-600 text-sm font-semibold px-3 py-1 ${btn}">-${e(p.discount)}% OFF</span>` : ""}
-            </div>
-            ${p.shortDescription ? `<p class="text-gray-600 mb-6 leading-relaxed">${e(p.shortDescription)}</p>` : ""}
-            ${p.variants && p.variants.length > 0 ? `
-              <div class="mb-6">
-                <div class="font-semibold text-sm mb-3">${e(p.variantLabel || "Options")}</div>
-                <div class="flex flex-wrap gap-2">
-                  ${p.variants.map((v: any) => `
-                    <button class="px-4 py-2 border border-gray-300 ${br} text-sm hover:border-gray-900 transition">${e(v.name || v)}</button>`).join("")}
-                </div>
-              </div>` : ""}
-            ${p.sizes && p.sizes.length > 0 ? `
-              <div class="mb-6">
-                <div class="font-semibold text-sm mb-3">Size</div>
-                <div class="flex flex-wrap gap-2">
-                  ${p.sizes.map((s: any) => `
-                    <button class="w-12 h-12 flex items-center justify-center border border-gray-300 ${br} text-sm hover:border-gray-900 transition">${e(s.name || s)}</button>`).join("")}
-                </div>
-              </div>` : ""}
-            ${p.colors && p.colors.length > 0 ? `
-              <div class="mb-6">
-                <div class="font-semibold text-sm mb-3">Color</div>
-                <div class="flex flex-wrap gap-3">
-                  ${p.colors.map((c: any) => `
-                    <div class="w-8 h-8 ${br} border-2 border-gray-200 cursor-pointer hover:border-gray-900 transition" style="background:${e(c.hex || c.color || c)}" title="${e(c.name || c)}"></div>`).join("")}
-                </div>
-              </div>` : ""}
-            <div class="flex items-center gap-4 mb-6">
-              <div class="flex items-center border border-gray-300 ${br}">
-                <button class="px-4 py-2 text-lg hover:bg-gray-50 transition">-</button>
-                <span class="px-4 py-2 font-semibold">1</span>
-                <button class="px-4 py-2 text-lg hover:bg-gray-50 transition">+</button>
-              </div>
-              <button class="flex-1 bg-gray-900 text-white font-semibold py-3 ${btn} hover:bg-gray-700 transition">Add to Cart</button>
-            </div>
-            ${p.description ? `<div class="border-t border-gray-200 pt-6 mt-6"><h3 class="font-semibold mb-3">Description</h3><div class="text-gray-600 leading-relaxed text-sm">${e(p.description)}</div></div>` : ""}
-          </div>
+    case "ProductDetails": {
+      const pd = p.product ? { ...p.product, hasWishlist: p.hasWishlist, shareLinks: p.shareLinks } : p;
+      return `<section class="py16"><div class="ct"><div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start" data-product-card data-searchable data-search-name="${esc(pd.name || '')}" data-search-category="${esc(pd.category || '')}" data-price="${esc(pd.price || '0')}" data-rating="${esc(pd.rating || '0')}">
+        <div><div style="border-radius:var(--rlg);overflow:hidden;border:1px solid var(--bdr)"><img src="${esc(pd.image || ph(pd.name || "Product", 600, 600))}" alt="${esc(pd.name)}" style="width:100%;aspect-ratio:1;object-fit:cover" /></div>
+          ${pd.gallery && pd.gallery.length > 0 ? `<div class="d g3 mt4"><img src="${esc(pd.image || ph("Product"))}" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:var(--rsm);border:2px solid ${pri};cursor:pointer" />${pd.gallery.map((img: string) => `<img src="${esc(img)}" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:var(--rsm);border:1.5px solid var(--bdr);cursor:pointer;transition:border-color .25s" onmouseover="this.style.borderColor='${pri}'" onmouseout="this.style.borderColor='var(--bdr)'" />`).join("")}</div>` : ""}
         </div>
-      </section>`;
+        <div>${pd.brand ? `<div style="font-size:.8125rem;font-weight:500;color:var(--ctxlr);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">${esc(pd.brand)}</div>` : ""}<h1 style="font-size:2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:12px">${esc(pd.name)}</h1>
+          ${pd.rating ? `<div class="d aic g2 mb4">${starsHtml(pd.rating)} <span style="color:var(--ctxl);font-size:.9375rem">(${esc(pd.reviewCount || 0)} reviews)</span></div>` : ""}
+          <div class="d aic g3 mb6"><span style="font-size:1.75rem;font-weight:700;color:${pri}">$${esc(pd.price || "0")}</span>${pd.originalPrice ? `<span style="font-size:1.125rem;color:var(--ctxlr);text-decoration:line-through">$${esc(pd.originalPrice)}</span>` : ""}${pd.discount ? `<span class="badge bdg-s">-${esc(pd.discount)}% OFF</span>` : ""}</div>
+          ${pd.shortDescription ? `<p style="color:var(--ctxl);line-height:1.7;margin-bottom:24px">${esc(pd.shortDescription)}</p>` : ""}
+          ${pd.variants && pd.variants.length > 0 ? `<div class="mb6"><div class="fs ts mb3">${esc(pd.variantLabel || "Options")}</div><div class="d dw g2" data-color-group>${pd.variants.map((v: any) => `<button class="btn bs2 bsm ${b}" data-color-select="${esc(v.name || v)}">${esc(v.name || v)}</button>`).join("")}</div></div>` : ""}
+          ${pd.sizes && pd.sizes.length > 0 ? `<div class="mb6"><div class="fs ts mb3">Size</div><div class="d dw g2" data-size-group>${pd.sizes.map((s: any) => `<button class="btn bs2 bsm ${b}" data-size-select="${esc(s.name || s)}" style="min-width:48px;height:48px;padding:0">${esc(s.name || s)}</button>`).join("")}</div></div>` : ""}
+          ${pd.colors && pd.colors.length > 0 ? `<div class="mb6"><div class="fs ts mb3">Color</div><div class="d dw g3" data-color-group>${pd.colors.map((c: any) => `<div data-color-select="${esc(c.hex || c.color || c)}" style="width:32px;height:32px;border-radius:50%;border:2px solid var(--bdr);cursor:pointer;transition:all .2s;background:${esc(c.hex || c.color || c)}" title="${esc(c.name || c)}"></div>`).join("")}</div></div>` : ""}
+          <div class="d aic g4 mb6"><div class="qty"><button class="qb" data-qty-minus>\u2212</button><div class="qv" data-qty>1</div><button class="qb" data-qty-plus>+</button></div>
+          ${(() => {
+          const pid = `p_${esc(pd.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+          const prodData = JSON.stringify({ id: pid, name: pd.name, price: pd.price, image: pd.image || ph(pd.name || "Product"), category: pd.category || '' });
+          return `<button class="btn bp blg ${b}" style="flex:1" data-add-to-cart='${prodData}'>Add to Cart</button>`;
+        })()}
+          </div>
+          ${pd.description ? `<div style="border-top:1px solid var(--bdr);padding-top:24px;margin-top:24px"><h3 class="fs mb3">Description</h3><div style="color:var(--ctxl);line-height:1.7;font-size:.9375rem">${esc(pd.description)}</div></div>` : ""}
+        </div>
+      </div></div></section>`;
+    }
 
     case "ProductReviews":
-      return `<section class="py-16 px-6 max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold mb-8">Customer Reviews</h2>
-        <div class="space-y-6">
-          ${(p.reviews || []).map((r: any) => `
-            <div class="border border-gray-200 ${br} p-6">
-              <div class="flex items-center gap-4 mb-3">
-                <img src="${e(r.avatar || placeholder(r.author || "User", 48, 48))}" alt="" class="w-12 h-12 rounded-full object-cover" />
-                <div>
-                  <div class="font-semibold">${e(r.author || r.name)}</div>
-                  ${r.date ? `<div class="text-gray-400 text-xs">${e(r.date)}</div>` : ""}
-                </div>
-                <div class="ml-auto">${stars(r.rating)}</div>
-              </div>
-              ${r.title ? `<div class="font-semibold mb-1">${e(r.title)}</div>` : ""}
-              <p class="text-gray-600 text-sm leading-relaxed">${e(r.content || r.comment)}</p>
-            </div>`).join("")}
-        </div>
-      </section>`;
+      return `<section class="py16 bga"><div class="cxs"><div class="sh"><div><h2 class="sh-t" style="text-align:left">Customer Reviews</h2></div></div>
+        <div style="display:flex;flex-direction:column;gap:24px">${(p.reviews || []).map((r: any) => `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><div class="d aic g4 mb3"><img src="${esc(r.avatar || ph(r.author || "User", 48, 48))}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover" /><div><div class="fs">${esc(r.author || r.name)}</div>${r.date ? `<div style="font-size:.8125rem;color:var(--ctxlr)">${esc(r.date)}</div>` : ""}</div><div class="mla">${starsHtml(r.rating)}</div></div>${r.title ? `<div class="fs mb2">${esc(r.title)}</div>` : ""}<p style="color:var(--ctxl);font-size:.9375rem;line-height:1.7">${esc(r.content || r.comment)}</p></div>`).join("")}</div></div></section>`;
 
     case "RelatedProducts":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-2xl font-bold mb-8">${e(p.title || "Related Products")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          ${(p.products || []).map((pr: any) => `
-            <div class="group ${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-              <img src="${e(pr.image || placeholder(pr.name || "Product"))}" alt="${e(pr.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-              <div class="p-4">
-                <h3 class="font-semibold text-sm mb-1 truncate">${e(pr.name)}</h3>
-                ${pr.rating ? `<div class="mb-1">${stars(pr.rating)}</div>` : ""}
-                <span class="font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(pr.price || "0")}</span>
-              </div>
-            </div>`).join("")}
-        </div>
-      </section>`;
-
     case "RecentlyViewed":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-2xl font-bold mb-8">${e(p.title || "Recently Viewed")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          ${(p.products || []).map((pr: any) => `
-            <div class="group ${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-              <img src="${e(pr.image || placeholder(pr.name || "Product"))}" alt="${e(pr.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-              <div class="p-4">
-                <h3 class="font-semibold text-sm mb-1 truncate">${e(pr.name)}</h3>
-                <span class="font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(pr.price || "0")}</span>
-              </div>
-            </div>`).join("")}
-        </div>
-      </section>`;
+      return `<section class="py16"><div class="ct"><div class="sh"><div><h2 class="sh-t" style="text-align:left">${esc(p.title || (component === "RelatedProducts" ? "Related Products" : "Recently Viewed"))}</h2></div></div>
+        <div class="gr gc2 md:gc4 g6">${(p.products || []).map((pr: any) => {
+        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+        return `<div class="pc" data-product-card><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+      }).join("")}</div></div></section>`;
 
-    // ─── OTHER PAGE SECTIONS ──────────────────────────────
+    // ─── OTHER PAGES ───────────────────────────────────
 
     case "CategoryGrid":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Browse Categories")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          ${(p.categories || []).map((c: any) => `
-            <a href="${e(c.href || "#")}" class="group block ${br} overflow-hidden shadow-sm hover:shadow-lg transition">
-              <img src="${e(c.image || placeholder(c.name || "Category", 400, 300))}" alt="${e(c.name)}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300" />
-              <div class="p-4 text-center">
-                <div class="font-semibold">${e(c.name)}</div>
-                ${c.count ? `<div class="text-gray-400 text-sm mt-1">${e(c.count)} items</div>` : ""}
-              </div>
-            </a>`).join("")}
-        </div>
-      </section>`;
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Categories</div><h2 class="sh-t">${esc(p.title || "Browse Categories")}</h2></div></div>
+        <div class="gr gc2 md:gc3 lg:gc4 g6">${(p.categories || []).map((c: any) => `<a href="${esc(c.href || "#")}" class="pc" data-category-filter="${esc(c.slug || c.name || '')}" style="text-decoration:none"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(c.image || ph(c.name || "Category", 400, 300))}" alt="${esc(c.name)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">Explore</span></div></div><div class="pcbd tc"><div class="pcbn" style="white-space:normal">${esc(c.name)}</div>${c.count ? `<div class="pcbc">${esc(c.count)} items</div>` : ""}</div></a>`).join("")}</div></div></section>`;
 
     case "AboutStory":
-      return `<section class="py-16 px-6 max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            ${p.subtitle ? `<div class="text-sm font-semibold mb-3" style="color:${theme?.primaryColor || "#2563eb"}">${e(p.subtitle)}</div>` : ""}
-            <h2 class="text-3xl font-bold mb-6">${e(p.title || "Our Story")}</h2>
-            <p class="text-gray-600 leading-relaxed mb-4">${e(p.paragraph1 || p.description || "")}</p>
-            ${p.paragraph2 ? `<p class="text-gray-600 leading-relaxed">${e(p.paragraph2)}</p>` : ""}
-          </div>
-          <div>
-            <img src="${e(p.image || placeholder("Our Story", 600, 400))}" alt="Our Story" class="w-full ${br} object-cover shadow-lg" />
-          </div>
-        </div>
-      </section>`;
+      return `<section class="py16"><div class="ct"><div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+        <div>${p.subtitle ? `<div class="sh-sub" style="text-align:left;margin-bottom:8px">${esc(p.subtitle)}</div>` : ""}<h2 class="sh-t" style="text-align:left">${esc(p.title || "Our Story")}</h2><p style="color:var(--ctxl);line-height:1.75;margin-bottom:16px">${esc(p.paragraph1 || p.description || "")}</p>${p.paragraph2 ? `<p style="color:var(--ctxl);line-height:1.75">${esc(p.paragraph2)}</p>` : ""}${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bp ${b} mt6">${esc(p.ctaText)}</a>` : ""}</div>
+        <div><img src="${esc(p.image || ph("Our Story", 600, 400))}" alt="Our Story" style="width:100%;border-radius:var(--rlg);object-fit:cover;box-shadow:var(--shx)" /></div>
+      </div></div></section>`;
 
     case "AboutValues":
-      return `<section class="py-16 px-6 bg-gray-50">
-        <div class="max-w-7xl mx-auto">
-          <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Our Values")}</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            ${(p.values || []).map((v: any) => `
-              <div class="bg-white ${br} p-8 text-center shadow-sm">
-                <div class="text-3xl mb-4">${e(v.icon || "💎")}</div>
-                <h3 class="font-semibold text-lg mb-3">${e(v.title)}</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">${e(v.description)}</p>
-              </div>`).join("")}
-          </div>
-        </div>
-      </section>`;
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Values</div><h2 class="sh-t">${esc(p.title || "Our Values")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.values || []).map((v: any) => `<div style="background:var(--bgc);border-radius:var(--rlg);padding:32px;text-align:center;border:1px solid var(--bdr);transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:64px;height:64px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.5rem">${esc(v.icon || "\ud83d\udc8e")}</div><h3 class="fs txl mb3">${esc(v.title)}</h3><p style="color:var(--ctxl);font-size:.9375rem;line-height:1.7">${esc(v.description)}</p></div>`).join("")}</div></div></section>`;
 
     case "TeamSection":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Meet Our Team")}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-          ${(p.members || []).map((m: any) => `
-            <div class="text-center">
-              <img src="${e(m.avatar || placeholder(m.name || "Team", 300, 300))}" alt="${e(m.name)}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover" />
-              <div class="font-semibold">${e(m.name)}</div>
-              ${m.role ? `<div class="text-gray-500 text-sm">${e(m.role)}</div>` : ""}
-              ${m.social ? `
-                <div class="flex justify-center gap-3 mt-3">
-                  ${m.social.linkedin ? `<a href="${e(m.social.linkedin)}" class="text-gray-400 hover:text-gray-900 transition">in</a>` : ""}
-                  ${m.social.twitter ? `<a href="${e(m.social.twitter)}" class="text-gray-400 hover:text-gray-900 transition">X</a>` : ""}
-                </div>` : ""}
-            </div>`).join("")}
-        </div>
-      </section>`;
-
-    case "ContactInfo":
-      return `<section class="py-16 px-6 bg-gray-50">
-        <div class="max-w-7xl mx-auto">
-          <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Get in Touch")}</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            ${p.address ? `<div class="${br} bg-white p-8 shadow-sm"><div class="text-3xl mb-4">📍</div><h3 class="font-semibold mb-2">Address</h3><p class="text-gray-500 text-sm">${e(p.address)}</p></div>` : ""}
-            ${p.phone ? `<div class="${br} bg-white p-8 shadow-sm"><div class="text-3xl mb-4">📞</div><h3 class="font-semibold mb-2">Phone</h3><p class="text-gray-500 text-sm">${e(p.phone)}</p></div>` : ""}
-            ${p.email ? `<div class="${br} bg-white p-8 shadow-sm"><div class="text-3xl mb-4">✉️</div><h3 class="font-semibold mb-2">Email</h3><p class="text-gray-500 text-sm">${e(p.email)}</p></div>` : ""}
-          </div>
-        </div>
-      </section>`;
-
-    case "ContactForm":
-      return `<section class="py-16 px-6">
-        <div class="max-w-3xl mx-auto">
-          <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Send Us a Message")}</h2>
-          <form class="space-y-5">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <input type="text" placeholder="Your Name" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="email" placeholder="Your Email" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <input type="text" placeholder="Subject" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <textarea placeholder="Your Message" rows="5" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-            <button type="submit" class="bg-gray-900 text-white font-semibold px-8 py-3 ${btn} hover:bg-gray-700 transition">${e(p.submitText || "Send Message")}</button>
-          </form>
-        </div>
-      </section>`;
-
-    case "MapEmbed":
-      return `<section class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <div class="bg-gray-200 ${br} h-96 flex items-center justify-center text-gray-400">
-            <div class="text-center">
-              <div class="text-5xl mb-3">🗺️</div>
-              <div class="font-semibold">Map</div>
-              ${p.address ? `<div class="text-sm mt-1">${e(p.address)}</div>` : ""}
-            </div>
-          </div>
-        </div>
-      </section>`;
-
-    case "BlogGrid":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Latest Articles")}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          ${(p.posts || []).map((post: any) => `
-            <article class="${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-              <img src="${e(post.image || placeholder(post.title || "Blog", 600, 300))}" alt="${e(post.title)}" class="w-full h-48 object-cover" />
-              <div class="p-6">
-                ${post.category ? `<div class="text-xs font-semibold mb-2" style="color:${theme?.primaryColor || "#2563eb"}">${e(post.category)}</div>` : ""}
-                <h3 class="font-semibold text-lg mb-2">${e(post.title)}</h3>
-                ${post.excerpt ? `<p class="text-gray-500 text-sm mb-4 leading-relaxed">${e(post.excerpt)}</p>` : ""}
-                <div class="flex items-center gap-4 text-xs text-gray-400">
-                  ${post.author ? `<span>${e(post.author)}</span>` : ""}
-                  ${post.date ? `<span>${e(post.date)}</span>` : ""}
-                </div>
-              </div>
-            </article>`).join("")}
-        </div>
-      </section>`;
-
-    case "FAQAccordion":
-      return `<section class="py-16 px-6 max-w-3xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Frequently Asked Questions")}</h2>
-        <div class="space-y-3">
-          ${(p.items || p.faqs || []).map((item: any, i: number) => `
-            <details class="${br} border border-gray-200" ${i === 0 ? "open" : ""}>
-              <summary class="px-6 py-4 font-semibold cursor-pointer hover:bg-gray-50 transition list-none flex items-center justify-between">
-                <span>${e(item.question || item.title)}</span>
-                <span class="text-gray-400 text-xl">+</span>
-              </summary>
-              <div class="px-6 pb-4 text-gray-600 leading-relaxed">${e(item.answer || item.content)}</div>
-            </details>`).join("")}
-        </div>
-      </section>`;
-
-    case "OrderTracking":
-      return `<section class="py-16 px-6 max-w-xl mx-auto text-center">
-        <h2 class="text-3xl font-bold mb-6">${e(p.title || "Track Your Order")}</h2>
-        <p class="text-gray-500 mb-8">${e(p.description || "Enter your order number to track its status")}</p>
-        <form class="flex gap-3">
-          <input type="text" placeholder="Order number" class="flex-1 px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <button type="submit" class="bg-gray-900 text-white font-semibold px-6 py-3 ${btn} hover:bg-gray-700 transition">Track</button>
-        </form>
-      </section>`;
-
-    case "WishlistGrid":
-      return `<section class="py-16 px-6 max-w-7xl mx-auto">
-        <h2 class="text-2xl font-bold mb-8">${e(p.title || "My Wishlist")}</h2>
-        ${(p.items || []).length === 0 ? `
-          <div class="text-center py-16 text-gray-400">
-            <div class="text-5xl mb-4">♡</div>
-            <p>Your wishlist is empty</p>
-          </div>` : `
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            ${(p.items || []).map((item: any) => `
-              <div class="group ${br} border border-gray-200 overflow-hidden hover:shadow-lg transition">
-                <img src="${e(item.image || placeholder(item.name || "Product"))}" alt="${e(item.name)}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" />
-                <div class="p-4">
-                  <h3 class="font-semibold text-sm mb-1 truncate">${e(item.name)}</h3>
-                  <span class="font-bold" style="color:${theme?.primaryColor || "#111827"}">$${e(item.price || "0")}</span>
-                  <button class="mt-3 w-full bg-gray-900 text-white text-sm py-2 ${btn} hover:bg-gray-700 transition">Add to Cart</button>
-                </div>
-              </div>`).join("")}
-          </div>`}
-      </section>`;
-
-    case "CartItems":
-      return `<div class="bg-white ${br} border border-gray-200 overflow-hidden">
-        <table class="w-full text-left">
-          <thead class="bg-gray-50 text-sm text-gray-500">
-            <tr>
-              <th class="px-6 py-3 font-semibold">Product</th>
-              <th class="px-6 py-3 font-semibold hidden md:table-cell">Price</th>
-              <th class="px-6 py-3 font-semibold">Quantity</th>
-              <th class="px-6 py-3 font-semibold hidden md:table-cell">Total</th>
-              <th class="px-6 py-3 font-semibold">Remove</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${(p.items || []).map((item: any) => `
-              <tr class="border-t border-gray-100">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-4">
-                    <img src="${e(item.image || placeholder(item.name || "Product", 80, 80))}" alt="${e(item.name)}" class="w-16 h-16 object-cover ${br}" />
-                    <div>
-                      <div class="font-semibold text-sm">${e(item.name)}</div>
-                      ${item.variant ? `<div class="text-gray-400 text-xs">${e(item.variant)}</div>` : ""}
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-sm hidden md:table-cell">$${e(item.price || "0")}</td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center border border-gray-300 ${br} w-fit">
-                    <button class="px-3 py-1 text-sm hover:bg-gray-50 transition">-</button>
-                    <span class="px-3 py-1 text-sm font-semibold">${e(item.quantity || 1)}</span>
-                    <button class="px-3 py-1 text-sm hover:bg-gray-50 transition">+</button>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-sm font-semibold hidden md:table-cell">$${e(item.total || item.price || "0")}</td>
-                <td class="px-6 py-4"><button class="text-gray-400 hover:text-red-500 transition text-sm">✕</button></td>
-              </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>`;
-
-    case "CartSummary":
-      return `<div class="${br} border border-gray-200 p-6 bg-gray-50">
-        <h3 class="font-bold text-lg mb-6">Order Summary</h3>
-        <div class="space-y-3 text-sm">
-          <div class="flex justify-between"><span class="text-gray-500">Subtotal</span><span class="font-semibold">$${e(p.subtotal || "0")}</span></div>
-          ${p.discount ? `<div class="flex justify-between text-green-600"><span>Discount</span><span>-$${e(p.discount)}</span></div>` : ""}
-          <div class="flex justify-between"><span class="text-gray-500">Shipping</span><span class="font-semibold">${p.shipping === 0 || p.shipping === "0" ? "Free" : `$${e(p.shipping || "0")}`}</span></div>
-          ${p.tax ? `<div class="flex justify-between"><span class="text-gray-500">Tax</span><span class="font-semibold">$${e(p.tax)}</span></div>` : ""}
-          <div class="border-t border-gray-200 pt-3 flex justify-between text-base font-bold">
-            <span>Total</span>
-            <span style="color:${theme?.primaryColor || "#111827"}">$${e(p.total || "0")}</span>
-          </div>
-        </div>
-        ${p.promoCode !== false ? `
-          <div class="flex gap-2 mt-6">
-            <input type="text" placeholder="Promo code" class="flex-1 px-4 py-2 border border-gray-300 ${br} text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <button class="px-4 py-2 border border-gray-900 ${btn} text-sm hover:bg-gray-900 hover:text-white transition">Apply</button>
-          </div>` : ""}
-        <button class="w-full mt-6 bg-gray-900 text-white font-semibold py-3 ${btn} hover:bg-gray-700 transition">Proceed to Checkout</button>
-        <a href="/" class="block text-center mt-3 text-sm text-gray-500 hover:text-gray-900 transition">← Continue Shopping</a>
-      </div>`;
-
-    case "CheckoutForm":
-      return `<section class="py-16 px-6 max-w-4xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-10">${e(p.title || "Checkout")}</h2>
-        <div class="flex justify-center gap-4 mb-10">
-          ${["Information", "Shipping", "Payment"].map((step, i) => `
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold ${i === 0 ? "bg-gray-900 text-white" : "bg-gray-200 text-gray-500"}">${i + 1}</div>
-              <span class="text-sm font-semibold ${i === 0 ? "text-gray-900" : "text-gray-400"}">${step}</span>
-              ${i < 2 ? '<div class="w-12 h-px bg-gray-300"></div>' : ""}
-            </div>`).join("")}
-        </div>
-        <form class="space-y-5">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <input type="text" placeholder="First name" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <input type="text" placeholder="Last name" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <input type="email" placeholder="Email" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input type="text" placeholder="Address" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
-            <input type="text" placeholder="City" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <input type="text" placeholder="State" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <input type="text" placeholder="ZIP code" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div class="border-t border-gray-200 pt-6 mt-6">
-            <div class="font-semibold mb-4">Payment</div>
-            <input type="text" placeholder="Card number" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <div class="grid grid-cols-2 gap-5 mt-4">
-              <input type="text" placeholder="MM / YY" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="text" placeholder="CVC" class="w-full px-4 py-3 border border-gray-300 ${br} focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-          </div>
-          <button type="submit" class="w-full bg-gray-900 text-white font-semibold py-3 ${btn} hover:bg-gray-700 transition mt-6">${e(p.submitText || "Place Order")}</button>
-        </form>
-      </section>`;
-
-    case "LegalContent":
-      return `<section class="py-16 px-6 max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8">${e(p.title || "Privacy Policy")}</h1>
-        ${p.lastUpdated ? `<p class="text-gray-400 text-sm mb-8">Last updated: ${e(p.lastUpdated)}</p>` : ""}
-        <div class="prose prose-gray max-w-none space-y-6">
-          ${(p.sections || p.content ? (p.sections || [{ title: "", content: p.content }]) : []).map((s: any) => `
-            <div>
-              ${s.title ? `<h2 class="text-xl font-semibold mb-3">${e(s.title)}</h2>` : ""}
-              <div class="text-gray-600 leading-relaxed">${e(s.content || s.text || "")}</div>
-            </div>`).join("")}
-        </div>
-      </section>`;
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Team</div><h2 class="sh-t">${esc(p.title || "Meet Our Team")}</h2></div></div>
+        <div class="gr gc2 md:gc4 g8">${(p.members || []).map((m: any) => `<div class="tc"><div style="width:120px;height:120px;border-radius:50%;margin:0 auto 16px;overflow:hidden;border:3px solid ${pri}20"><img src="${esc(m.avatar || ph(m.name || "Team", 300, 300))}" alt="${esc(m.name)}" style="width:100%;height:100%;object-fit:cover" /></div><div class="fs">${esc(m.name)}</div>${m.role ? `<div style="color:var(--ctxl);font-size:.9375rem;margin-top:2px">${esc(m.role)}</div>` : ""}${m.social ? `<div class="d jcc g3 mt3">${m.social.linkedin ? `<a href="${esc(m.social.linkedin)}" style="color:var(--ctxlr);transition:color .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxlr)'">LinkedIn</a>` : ""}${m.social.twitter ? `<a href="${esc(m.social.twitter)}" style="color:var(--ctxlr);transition:color .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxlr)'">Twitter</a>` : ""}</div>` : ""}</div>`).join("")}</div></div></section>`;
 
     case "CTABanner":
-      return `<section class="py-16 px-6 text-center" style="background:${p.backgroundImage ? `url('${e(p.backgroundImage)}') center/cover` : `linear-gradient(135deg, ${theme?.primaryColor || "#2563eb"}, ${theme?.secondaryColor || "#1e40af"})`}">
-        <div class="relative z-10 max-w-2xl mx-auto text-white">
-          <h2 class="text-3xl font-bold mb-4">${e(p.headline || p.title || "Ready to Get Started?")}</h2>
-          <p class="text-lg mb-8 opacity-90">${e(p.subheadline || p.description || "")}</p>
-          ${p.ctaText ? `<a href="${e(p.ctaLink || "#")}" class="inline-block bg-white font-semibold px-8 py-3 ${btn} hover:bg-gray-100 transition" style="color:${theme?.primaryColor || "#2563eb"}">${e(p.ctaText)}</a>` : ""}
-        </div>
-      </section>`;
+      return `<section class="py16 tc" style="background:${p.backgroundImage ? `url('${esc(p.backgroundImage)}') center/cover` : `linear-gradient(135deg,${pri},${sec})`}"><div class="csm" style="color:#fff"><h2 class="tx3 fb mb4">${esc(p.headline || p.title || "Ready to Get Started?")}</h2><p class="tl mb8" style="opacity:.9">${esc(p.subheadline || p.description || "")}</p>${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bw blg ${b}" style="color:${pri}">${esc(p.ctaText)}</a>` : ""}</div></section>`;
+
+    case "ContactInfo":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Get in Touch</div><h2 class="sh-t">${esc(p.title || "Contact Information")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${p.address ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:56px;height:56px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3 class="fs mb2">Address</h3><p style="color:var(--ctxl);font-size:.9375rem">${esc(p.address)}</p></div>` : ""}${p.phone ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:56px;height:56px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><h3 class="fs mb2">Phone</h3><p style="color:var(--ctxl);font-size:.9375rem">${esc(p.phone)}</p></div>` : ""}${p.email ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:56px;height:56px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg></div><h3 class="fs mb2">Email</h3><p style="color:var(--ctxl);font-size:.9375rem">${esc(p.email)}</p></div>` : ""}</div></div></section>`;
+
+    case "MapEmbed":
+      return `<section class="py16"><div class="ct"><div class="mp" style="min-height:400px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><div class="fs">Interactive Map</div>${p.address ? `<div class="ts">${esc(p.address)}</div>` : ""}</div></div></section>`;
+
+    case "BlogPreview":
+    case "BlogGrid":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Blog</div><h2 class="sh-t">${esc(p.title || "Latest Articles")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.posts || []).map((post: any) => `<article class="pc" style="text-decoration:none;display:block"><div class="pci" style="aspect-ratio:16/9"><img src="${esc(post.image || ph(post.title || "Blog", 600, 300))}" alt="${esc(post.title)}" class="pcimg" /></div><div class="pcbd">${post.category ? `<div class="pcbc" style="color:${pri}">${esc(post.category)}</div>` : ""}<h3 class="fs txl mb2">${esc(post.title)}</h3>${post.excerpt ? `<p style="color:var(--ctxl);font-size:.9375rem;line-height:1.6;margin-bottom:16px">${esc(post.excerpt)}</p>` : ""}<div class="d aic g4 tx" style="color:var(--ctxlr)">${post.author ? `<span>${esc(post.author)}</span>` : ""}${post.date ? `<span>${esc(post.date)}</span>` : ""}</div><a href="${esc(post.href || "#" + (post.slug || ""))}" class="btn bs2 bsm ${b}" style="margin-top:16px">Read More \u2192</a></div></article>`).join("")}</div></div></section>`;
+
+    case "OrderTracking":
+      return `<section class="py16 bga"><div class="cxs tc"><div class="sh"><div><div class="sh-sub">Track Order</div><h2 class="sh-t">${esc(p.title || "Track Your Order")}</h2></div></div><p style="color:var(--ctxl);margin-bottom:32px">${esc(p.description || "Enter your order number to track its status")}</p><form class="d g3" style="max-width:480px;margin:0 auto"><input type="text" placeholder="Order number" class="inp" style="flex:1" /><button type="submit" class="btn bp ${b}">Track</button></form></div></section>`;
+
+    case "WishlistGrid":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><h2 class="sh-t" style="text-align:left">${esc(p.title || "My Wishlist")}</h2></div></div>${(p.items || []).length === 0 ? `<div class="tc py16" style="color:var(--ctxlr)"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px;opacity:.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><p>Your wishlist is empty</p><a href="/shop" class="btn bp ${b} mt4">Browse Products</a></div>` : `<div class="gr gc2 md:gc4 g6">${(p.items || []).map((item: any) => {
+        const pid = `p_${esc(item.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+        const prodData = JSON.stringify({ id: pid, name: item.name, price: item.price, image: item.image || ph(item.name || "Product"), category: item.category || '' });
+        return `<div class="pc" data-product-card><div class="pci"><img src="${esc(item.image || ph(item.name || "Product"))}" alt="${esc(item.name)}" class="pcimg" /><div class="pco"><button class="btn bw bsm ${b}" data-toggle-wishlist='${prodData}'>Remove</button></div></div><div class="pcbd"><div class="pcbn">${esc(item.name)}</div><div class="pcbp"><span class="cur" style="color:${pri}">$${esc(item.price || "0")}</span></div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+      }).join("")}</div>`}</div></section>`;
+
+    case "CartItems":
+      return `<div style="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden"><div class="tw2"><table class="tbl"><thead><tr><th>Product</th><th class="hid md:blk">Price</th><th>Quantity</th><th class="hid md:blk">Total</th><th>Remove</th></tr></thead><tbody>${(p.items || []).map((item: any) => `<tr data-cart-item data-item-id="${esc(item.id || '')}" data-item-variant="${esc(item.variant || '')}" data-item-size="${esc(item.size || '')}" data-item-price="${esc(item.price || '0')}"><td><div class="d aic g4"><img src="${esc(item.image || ph(item.name || "Product", 80, 80))}" alt="${esc(item.name)}" style="width:64px;height:64px;object-fit:cover;border-radius:var(--rsm)" /><div><div class="fs" style="font-size:.9375rem">${esc(item.name)}</div>${item.variant ? `<div style="font-size:.8125rem;color:var(--ctxlr)">${esc(item.variant)}</div>` : ""}</div></div></td><td class="hid md:blk" style="font-size:.9375rem">$${esc(item.price || "0")}</td><td><div class="qty"><button class="qb" data-qty-minus style="width:28px;height:28px">\u2212</button><div class="qv" data-qty style="width:32px;font-size:.875rem">${esc(item.quantity || 1)}</div><button class="qb" data-qty-plus style="width:28px;height:28px">+</button></div></td><td class="hid md:blk" style="font-weight:600;font-size:.9375rem" data-item-total>$${esc(item.total || item.price || "0")}</td><td><button data-remove-item style="color:var(--ctxlr);cursor:pointer;transition:color .25s;border:none;background:none;font-size:1.125rem" onmouseover="this.style.color='var(--err)'" onmouseout="this.style.color='var(--ctxlr)'">\u2715</button></td></tr>`).join("")}</tbody></table></div></div>`;
+
+    case "CartSummary":
+      return `<div style="background:var(--bga);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><h3 class="fb txl mb6">Order Summary</h3><div style="display:flex;flex-direction:column;gap:14px;font-size:.9375rem"><div class="d jcsb"><span style="color:var(--ctxl)">Subtotal</span><span class="fs">$${esc(p.subtotal || "0")}</span></div>${p.discount ? `<div class="d jcsb" style="color:var(--ok)"><span>Discount</span><span>-$${esc(p.discount)}</span></div>` : ""}<div class="d jcsb"><span style="color:var(--ctxl)">Shipping</span><span class="fs">${p.shipping === 0 || p.shipping === "0" ? '<span style="color:var(--ok)">Free</span>' : `$${esc(p.shipping || "0")}`}</span></div>${p.tax ? `<div class="d jcsb"><span style="color:var(--ctxl)">Tax</span><span class="fs">$${esc(p.tax)}</span></div>` : ""}<div style="border-top:1px solid var(--bdr);padding-top:14px" class="d jcsb"><span class="fb txl">Total</span><span class="fb txl" style="color:${pri}">$${esc(p.total || "0")}</span></div></div>${p.couponCode !== false && p.promoCode !== false ? `<div class="d g2 mt6"><input type="text" placeholder="${esc(p.couponCode?.placeholder || 'Promo code')}" class="inp" style="flex:1;font-size:.9375rem" /><button class="btn bs2 bsm ${b}" data-coupon-apply>${esc(p.couponCode?.buttonText || 'Apply')}</button></div>` : ""}<button class="btn bp bbl ${b}" style="margin-top:24px">Proceed to Checkout</button><a href="/shop" class="blk tc mt3" style="color:var(--ctxl);font-size:.9375rem;transition:color .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxl)'">\u2190 Continue Shopping</a></div>`;
+
+    case "CheckoutForm":
+      return `<section class="py16"><div class="csm"><div class="sh"><div><h2 class="sh-t">${esc(p.title || "Checkout")}</h2></div></div>
+        <div class="steps mb10"><div class="stp act"><div class="stpn">1</div><div class="stpl">Information</div></div><div class="stpline"></div><div class="stp"><div class="stpn">2</div><div class="stpl">Shipping</div></div><div class="stpline"></div><div class="stp"><div class="stpn">3</div><div class="stpl">Payment</div></div></div>
+        <form style="display:flex;flex-direction:column;gap:20px"><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>First name</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Last name</label></div></div><div class="fl-wrap"><input type="email" placeholder=" " class="inp" /><label>Email address</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Street address</label></div><div class="gr gc3 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>City</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>State</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>ZIP code</label></div></div><div style="border-top:1px solid var(--bdr);padding-top:24px;margin-top:8px"><div class="fs mb4">Payment Information</div><div class="fl-wrap mb4" style="margin-bottom:16px"><input type="text" placeholder=" " class="inp" /><label>Card number</label></div><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>MM / YY</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>CVC</label></div></div></div><button type="submit" class="btn bp blg bbl ${b}" style="margin-top:16px">${esc(p.submitText || "Place Order")}</button></form></div></section>`;
+
+    case "LegalContent":
+      return `<section class="py16"><div class="cxs"><h1 class="tx3 fb mb4">${esc(p.title || "Privacy Policy")}</h1>${p.lastUpdated ? `<p style="color:var(--ctxlr);font-size:.9375rem;margin-bottom:32px">Last updated: ${esc(p.lastUpdated)}</p>` : ""}<div style="line-height:1.8">${(p.sections || p.content ? (p.sections || [{ title: "", content: p.content }]) : []).map((s: any) => `<div style="margin-bottom:24px">${s.title ? `<h2 class="txl fs mb3">${esc(s.title)}</h2>` : ""}<div style="color:var(--ctxl);line-height:1.8">${esc(s.content || s.text || "")}</div></div>`).join("")}</div></div></section>`;
+
+    // ─── ADDITIONAL SECTIONS ────────────────────────────
+
+    case "MenuHighlights":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Our Menu</div><h2 class="sh-t">${esc(p.title || "Menu Highlights")}</h2></div></div>
+        <div class="gr gc1 md:gc2 g8">${(p.items || p.menuItems || []).map((item: any) => `<div class="d g4" style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" style="width:120px;height:120px;object-fit:cover;flex-shrink:0" />` : ""}<div class="p4"><div class="d jcsb aic mb2"><div class="fs">${esc(item.name)}</div><div class="fb" style="color:${pri}">$${esc(item.price || "0")}</div></div><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(item.description || "")}</p>${item.badge ? `<span class="badge bdgp mt2">${esc(item.badge)}</span>` : ""}</div></div>`).join("")}</div></div></section>`;
+
+    case "DailySpecials":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Today</div><h2 class="sh-t">${esc(p.title || "Daily Specials")}</h2></div></div>
+        <div class="gr gc2 md:gc3 g6">${(p.items || p.specials || []).map((item: any) => `<div class="pc"><div class="pci" style="aspect-ratio:4/3">${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" class="pcimg" />` : `<div style="width:100%;height:100%;background:${pri}10;display:flex;align-items:center;justify-content:center;color:${pri};font-size:2rem">\ud83c\udf7d\ufe0f</div>`}</div><div class="pcbd"><div class="d jcsb aic mb2"><div class="pcbn">${esc(item.name)}</div><div class="fb" style="color:${pri}">$${esc(item.price || "0")}</div></div><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(item.description || "")}</p>${item.originalPrice ? `<div class="d aic g2 mt2"><span class="org">$${esc(item.originalPrice)}</span><span class="badge bdg-s">Save</span></div>` : ""}</div></div>`).join("")}</div></div></section>`;
+
+    case "ChefTable":
+      return `<section class="py16" style="background:linear-gradient(135deg,${pri},${sec})"><div class="ct tc" style="color:#fff"><div class="sh"><div><div class="sh-sub" style="color:#fff">Experience</div><h2 class="sh-t" style="color:#fff">${esc(p.title || "Chef's Table")}</h2></div></div><p style="max-width:640px;margin:0 auto 32px;opacity:.9;line-height:1.7">${esc(p.description || "An exclusive dining experience curated by our head chef.")}</p>${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bw blg ${b}" style="color:${pri}">${esc(p.ctaText)}</a>` : ""}</div></section>`;
+
+    case "ReservationForm":
+      return `<section class="py16 bga"><div class="csm"><div class="sh"><div><div class="sh-sub">Reserve</div><h2 class="sh-t">${esc(p.title || "Make a Reservation")}</h2></div></div>
+        <form style="display:flex;flex-direction:column;gap:20px;background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px"><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Full Name</label></div><div class="fl-wrap"><input type="tel" placeholder=" " class="inp" /><label>Phone Number</label></div></div><div class="fl-wrap"><input type="email" placeholder=" " class="inp" /><label>Email Address</label></div><div class="gr gc3 g5"><div class="fl-wrap"><input type="number" placeholder=" " class="inp" min="1" max="20" /><label>Guests</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Preferred Date</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Preferred Time</label></div></div><div class="fl-wrap"><textarea placeholder=" " class="inp txa"></textarea><label>Special Requests</label></div><button type="submit" class="btn bp blg ${b}">${esc(p.submitText || "Reserve Now")}</button></form></div></section>`;
+
+    case "Services":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Services</div><h2 class="sh-t">${esc(p.title || "Our Services")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.services || []).map((svc: any) => `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:56px;height:56px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.5rem">${esc(svc.icon || "\u2726")}</div><h3 class="fs mb2">${esc(svc.name || svc.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(svc.description || "")}</p>${svc.price ? `<div class="fb mt3" style="color:${pri}">From $${esc(svc.price)}</div>` : ""}</div>`).join("")}</div></div></section>`;
+
+    case "AppointmentBooking":
+      return `<section class="py16 bga"><div class="csm"><div class="sh"><div><div class="sh-sub">Book</div><h2 class="sh-t">${esc(p.title || "Book an Appointment")}</h2></div></div>
+        <form style="display:flex;flex-direction:column;gap:20px;background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px"><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Your Name</label></div><div class="fl-wrap"><input type="email" placeholder=" " class="inp" /><label>Email Address</label></div></div><div class="fl-wrap"><input type="tel" placeholder=" " class="inp" /><label>Phone Number</label></div><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Preferred Date</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Preferred Time</label></div></div><div class="fl-wrap"><textarea placeholder=" " class="inp txa"></textarea><label>Reason for Visit</label></div><button type="submit" class="btn bp blg ${b}">${esc(p.submitText || "Book Appointment")}</button></form></div></section>`;
+
+    case "DoctorProfiles":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Doctors</div><h2 class="sh-t">${esc(p.title || "Meet Our Doctors")}</h2></div></div>
+        <div class="gr gc2 md:gc4 g8">${(p.doctors || p.members || []).map((doc: any) => `<div class="tc"><div style="width:120px;height:120px;border-radius:var(--rlg);margin:0 auto 16px;overflow:hidden"><img src="${esc(doc.avatar || ph(doc.name || "Doctor", 300, 300))}" alt="${esc(doc.name)}" style="width:100%;height:100%;object-fit:cover" /></div><div class="fs">${esc(doc.name)}</div>${doc.specialty ? `<div style="color:${pri};font-size:.9375rem;font-weight:500;margin-top:2px">${esc(doc.specialty)}</div>` : ""}</div>`).join("")}</div></div></section>`;
+
+    case "HealthResources":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Resources</div><h2 class="sh-t">${esc(p.title || "Health Resources")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.resources || []).map((res: any) => `<article class="pc" style="text-decoration:none;display:block"><div class="pci" style="aspect-ratio:16/9">${res.image ? `<img src="${esc(res.image)}" alt="${esc(res.title)}" class="pcimg" />` : `<div style="width:100%;height:100%;background:${pri}10;display:flex;align-items:center;justify-content:center;color:${pri};font-size:2rem">\ud83d\udcc4</div>`}</div><div class="pcbd">${res.category ? `<div class="pcbc" style="color:${pri}">${esc(res.category)}</div>` : ""}<h3 class="fs mb2">${esc(res.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(res.description || "")}</p></div></article>`).join("")}</div></div></section>`;
+
+    case "CourseGrid":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Courses</div><h2 class="sh-t">${esc(p.title || "Browse Courses")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.courses || []).map((c: any) => `<div class="pc"><div class="pci" style="aspect-ratio:16/9">${c.image ? `<img src="${esc(c.image)}" alt="${esc(c.title)}" class="pcimg" />` : `<div style="width:100%;height:100%;background:${pri}10;display:flex;align-items:center;justify-content:center;color:${pri};font-size:2rem">\ud83d\udcda</div>`}</div><div class="pcbd">${c.category ? `<div class="pcbc" style="color:${pri}">${esc(c.category)}</div>` : ""}<h3 class="fs mb2">${esc(c.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.6;margin-bottom:12px">${esc(c.description || "")}</p><div class="d aic jcsb"><div class="d aic g2">${c.duration ? `<span class="ts" style="color:var(--ctxlr)">\u23f1 ${esc(c.duration)}</span>` : ""}${c.level ? `<span class="badge bdgp">${esc(c.level)}</span>` : ""}</div>${c.price !== undefined ? `<div class="fb" style="color:${pri}">$${esc(c.price)}</div>` : ""}</div></div></div>`).join("")}</div></div></section>`;
+
+    case "LearningPaths":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Paths</div><h2 class="sh-t">${esc(p.title || "Learning Paths")}</h2></div></div>
+        <div class="gr gc1 md:gc2 g8">${(p.paths || []).map((path: any) => `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:28px;display:flex;gap:20px;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:64px;height:64px;border-radius:var(--rmd);background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem">${esc(path.icon || "\ud83c\udfaf")}</div><div><h3 class="fs mb2">${esc(path.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(path.description || "")}</p>${path.courses ? `<div class="ts mt2" style="color:var(--ctxlr)">${path.courses} courses</div>` : ""}</div></div>`).join("")}</div></div></section>`;
+
+    case "StudentSuccess":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Success</div><h2 class="sh-t">${esc(p.title || "Student Success Stories")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.testimonials || p.students || []).map((s: any) => `<div class="tc2"><img src="${esc(s.avatar || ph(s.name || "Student", 80, 80))}" alt="${esc(s.name)}" class="tca" />${s.rating ? `<div class="mb3 d jcc">${starsHtml(s.rating)}</div>` : ""}<p class="tcq">&ldquo;${esc(s.quote || s.content || s.testimonial || "")}&rdquo;</p><div class="tcn">${esc(s.name)}</div>${s.role ? `<div class="tcr">${esc(s.role)}</div>` : ""}</div>`).join("")}</div></div></section>`;
+
+    case "InstructorProfiles":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Instructors</div><h2 class="sh-t">${esc(p.title || "Meet Our Instructors")}</h2></div></div>
+        <div class="gr gc2 md:gc4 g8">${(p.instructors || p.members || []).map((inst: any) => `<div class="tc"><div style="width:100px;height:100px;border-radius:50%;margin:0 auto 16px;overflow:hidden;border:3px solid ${pri}20"><img src="${esc(inst.avatar || ph(inst.name || "Instructor", 300, 300))}" alt="${esc(inst.name)}" style="width:100%;height:100%;object-fit:cover" /></div><div class="fs">${esc(inst.name)}</div>${inst.specialty ? `<div style="color:var(--ctxl);font-size:.9375rem;margin-top:2px">${esc(inst.specialty)}</div>` : ""}</div>`).join("")}</div></div></section>`;
+
+    case "PropertyGrid":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Properties</div><h2 class="sh-t">${esc(p.title || "Available Properties")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.properties || []).map((prop: any) => `<div class="pc"><div class="pci" style="aspect-ratio:16/10"><img src="${esc(prop.image || ph(prop.title || "Property", 600, 400))}" alt="${esc(prop.title)}" class="pcimg" />${prop.badge ? `<div class="pcb"><span class="badge bdg-n">${esc(prop.badge)}</span></div>` : ""}</div><div class="pcbd"><div class="d jcsb aic mb2"><div class="fb" style="color:${pri};font-size:1.125rem">$${esc(prop.price || "0")}</div>${prop.type ? `<span class="badge bdgp">${esc(prop.type)}</span>` : ""}</div><div class="pcbn" style="white-space:normal">${esc(prop.title)}</div><p class="ts" style="color:var(--ctxl);margin-bottom:12px">${esc(prop.address || "")}</p><div class="d aic g4" style="color:var(--ctxlr);font-size:.8125rem">${prop.beds ? `<span>${prop.beds} beds</span>` : ""}${prop.baths ? `<span>${prop.baths} baths</span>` : ""}${prop.sqft ? `<span>${prop.sqft} sqft</span>` : ""}</div></div></div>`).join("")}</div></div></section>`;
+
+    case "PropertySearch":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Search</div><h2 class="sh-t">${esc(p.title || "Find Your Perfect Home")}</h2></div></div>
+        <form style="display:flex;flex-direction:column;gap:16px;background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><div class="gr gc2 md:gc4 g4"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Location</label></div><div class="fl-wrap"><select class="inp sel"><option>Property Type</option></select></div><div class="fl-wrap"><select class="inp sel"><option>Price Range</option></select></div><button type="submit" class="btn bp blg ${b}">Search</button></div></form></div></section>`;
+
+    case "NeighborhoodGuide":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Explore</div><h2 class="sh-t">${esc(p.title || "Neighborhood Guide")}</h2></div></div>
+        <div class="gr gc2 md:gc3 g6">${(p.neighborhoods || []).map((n: any) => `<a href="${esc(n.href || "#")}" class="pc" style="text-decoration:none"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(n.image || ph(n.name || "Neighborhood", 400, 300))}" alt="${esc(n.name)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">Explore</span></div></div><div class="pcbd"><div class="pcbn" style="white-space:normal">${esc(n.name)}</div>${n.description ? `<p class="ts" style="color:var(--ctxl)">${esc(n.description)}</p>` : ""}</div></a>`).join("")}</div></div></section>`;
+
+    case "AgentProfiles":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Agents</div><h2 class="sh-t">${esc(p.title || "Our Agents")}</h2></div></div>
+        <div class="gr gc2 md:gc4 g8">${(p.agents || p.members || []).map((agent: any) => `<div class="tc"><div style="width:100px;height:100px;border-radius:var(--rlg);margin:0 auto 16px;overflow:hidden"><img src="${esc(agent.avatar || ph(agent.name || "Agent", 300, 300))}" alt="${esc(agent.name)}" style="width:100%;height:100%;object-fit:cover" /></div><div class="fs">${esc(agent.name)}</div>${agent.title ? `<div style="color:${pri};font-size:.875rem;font-weight:500;margin-top:2px">${esc(agent.title)}</div>` : ""}</div>`).join("")}</div></div></section>`;
+
+    case "DestinationGrid":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Destinations</div><h2 class="sh-t">${esc(p.title || "Explore Destinations")}</h2></div></div>
+        <div class="gr gc2 md:gc3 g6">${(p.destinations || []).map((dest: any) => `<div class="pc"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(dest.image || ph(dest.name || "Destination", 400, 300))}" alt="${esc(dest.name)}" class="pcimg" />${dest.price ? `<div class="pcb"><span class="badge bdg-n">From $${esc(dest.price)}</span></div>` : ""}<div class="pco"><button class="btn bw bsm ${b}">View Details</button></div></div><div class="pcbd"><div class="pcbn" style="white-space:normal">${esc(dest.name)}</div></div></div>`).join("")}</div></div></section>`;
+
+    case "TravelDeals":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Deals</div><h2 class="sh-t">${esc(p.title || "Travel Deals")}</h2></div></div>
+        <div class="gr gc1 md:gc2 g8">${(p.deals || []).map((deal: any) => `<div class="d g6" style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><img src="${esc(deal.image || ph(deal.title || "Deal", 400, 300))}" alt="${esc(deal.title)}" style="width:200px;height:160px;object-fit:cover;flex-shrink:0" /><div class="p5"><div class="d jcsb aic mb2"><div class="fs">${esc(deal.title)}</div>${deal.discount ? `<span class="badge bdg-s">-${esc(deal.discount)}%</span>` : ""}</div><p class="ts mb3" style="color:var(--ctxl);line-height:1.5">${esc(deal.description || "")}</p><div class="d jcsb aic"><div>${deal.originalPrice ? `<span style="text-decoration:line-through;color:var(--ctxlr);font-size:.875rem">$${esc(deal.originalPrice)}</span> ` : ""}<span class="fb" style="color:${pri}">$${esc(deal.price || "0")}</span></div><a href="${esc(deal.href || "#")}" class="btn bp bsm ${b}">Book Now</a></div></div></div>`).join("")}</div></div></section>`;
+
+    case "PackageGrid":
+      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Packages</div><h2 class="sh-t">${esc(p.title || "Travel Packages")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.packages || []).map((pkg: any) => `<div class="pc"><div class="pci" style="aspect-ratio:16/10"><img src="${esc(pkg.image || ph(pkg.title || "Package", 600, 400))}" alt="${esc(pkg.title)}" class="pcimg" />${pkg.badge ? `<div class="pcb"><span class="badge bdg-s">${esc(pkg.badge)}</span></div>` : ""}</div><div class="pcbd"><div class="d jcsb aic mb2"><div class="pcbn" style="white-space:normal">${esc(pkg.title)}</div><div class="fb" style="color:${pri}">$${esc(pkg.price || "0")}</div></div>${pkg.duration ? `<div class="ts mb2" style="color:var(--ctxlr)">\u23f1 ${esc(pkg.duration)}</div>` : ""}<p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(pkg.description || "")}</p><button class="btn bp bbl bsm ${b} mt4">View Package</button></div></div>`).join("")}</div></div></section>`;
+
+    case "TravelGuides":
+      return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Guides</div><h2 class="sh-t">${esc(p.title || "Travel Guides")}</h2></div></div>
+        <div class="gr gc1 md:gc3 g8">${(p.guides || []).map((guide: any) => `<article class="pc" style="text-decoration:none;display:block"><div class="pci" style="aspect-ratio:16/9">${guide.image ? `<img src="${esc(guide.image)}" alt="${esc(guide.title)}" class="pcimg" />` : `<div style="width:100%;height:100%;background:${pri}10;display:flex;align-items:center;justify-content:center;color:${pri};font-size:2rem">\ud83d\uddfa\ufe0f</div>`}</div><div class="pcbd">${guide.destination ? `<div class="pcbc" style="color:${pri}">${esc(guide.destination)}</div>` : ""}<h3 class="fs mb2">${esc(guide.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(guide.description || "")}</p></div></article>`).join("")}</div></div></section>`;
 
     default:
-      return `<section class="py-8 px-6 text-center text-gray-400 border border-dashed border-gray-300 ${br} mx-6 my-4">
-        <p class="text-sm">Section: ${e(component)}</p>
-      </section>`;
+      return `<section class="py8 px6 tc" style="color:var(--ctxlr);border:2px dashed var(--bdr);border-radius:var(--rmd);margin:16px 24px"><p class="ts">Section: ${esc(component)}</p></section>`;
   }
 };
 
-const renderNavigation = (siteName: string, navItems: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }>, theme?: ThemeData): string => {
-  const items = navItems.map(item => {
-    if (item.children && item.children.length > 0) {
-      return `<div class="relative group">
-        <button class="text-sm font-medium hover:opacity-70 transition flex items-center gap-1">${e(item.label)} <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="absolute top-full left-0 mt-2 bg-white shadow-lg border border-gray-100 rounded-lg py-2 min-w-[180px] hidden group-hover:block z-50">
-          ${item.children.map(c => `<a href="${e(c.href)}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">${e(c.label)}</a>`).join("")}
-        </div>
-      </div>`;
-    }
-    return `<a href="${e(item.href)}" class="text-sm font-medium hover:opacity-70 transition">${e(item.label)}</a>`;
-  }).join("");
-
-  return `<nav class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="/" class="text-xl font-bold" style="color:${theme?.primaryColor || "#111827"}">${e(siteName)}</a>
-      <div class="hidden md:flex items-center gap-6">${items}</div>
-      <div class="flex items-center gap-4">
-        <button class="text-gray-600 hover:text-gray-900 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        </button>
-        <button class="text-gray-600 hover:text-gray-900 transition relative">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-          <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">0</span>
-        </button>
-      </div>
-    </div>
-  </nav>`;
-};
-
-const renderFooter = (footer: { copyright?: string; links?: Array<{ label: string; href: string }> }, siteName: string, theme?: ThemeData): string => {
-  return `<footer class="bg-gray-900 text-white py-12 px-6">
-    <div class="max-w-7xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-        <div class="md:col-span-2">
-          <div class="text-xl font-bold mb-4">${e(siteName)}</div>
-          <p class="text-gray-400 text-sm leading-relaxed max-w-sm">Premium products and exceptional shopping experience.</p>
-        </div>
-        <div>
-          <div class="font-semibold mb-4">Quick Links</div>
-          <div class="space-y-2">
-            ${(footer.links || []).slice(0, 5).map(l => `<a href="${e(l.href)}" class="block text-gray-400 text-sm hover:text-white transition">${e(l.label)}</a>`).join("")}
-          </div>
-        </div>
-        <div>
-          <div class="font-semibold mb-4">Customer Service</div>
-          <div class="space-y-2 text-sm text-gray-400">
-            <div>Contact Us</div>
-            <div>Shipping & Returns</div>
-            <div>FAQ</div>
-            <div>Size Guide</div>
-          </div>
-        </div>
-      </div>
-      <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="text-gray-500 text-sm">${e(footer.copyright || `© ${new Date().getFullYear()} ${e(siteName)}. All rights reserved.`)}</div>
-        <div class="flex items-center gap-4 text-gray-500 text-sm">
-          <span>Visa</span>
-          <span>Mastercard</span>
-          <span>PayPal</span>
-          <span>Apple Pay</span>
-        </div>
-      </div>
-    </div>
-  </footer>`;
+const generateBaseCSS = (theme?: ThemeData): string => {
+  const p = theme?.primaryColor || "#1e3a5f";
+  const s = theme?.secondaryColor || "#2563eb";
+  const f = theme?.fontFamily || "Inter";
+  const bg = (theme as any)?.backgroundColor || "#ffffff";
+  const fg = (theme as any)?.foregroundColor || "#1e293b";
+  const muted = (theme as any)?.mutedColor || "#f1f5f9";
+  const mutedFg = (theme as any)?.mutedForegroundColor || "#64748b";
+  const border = (theme as any)?.borderColor || "#e2e8f0";
+  const card = (theme as any)?.cardColor || "#ffffff";
+  const style = theme?.style || "light";
+  const br = theme?.borderRadius || "10px";
+  const hexToRgb = (hex: string) => {
+    const n = hex.replace("#", "");
+    const full = n.length === 3 ? n.split("").map((c: string) => c + c).join("") : n;
+    const v = Number.parseInt(full, 16);
+    return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
+  };
+  const mixWithBlack = (hex: string, amount: number): string => {
+    const { r, g, b } = hexToRgb(hex);
+    const nr = Math.round(r * (1 - amount));
+    const ng = Math.round(g * (1 - amount));
+    const nb = Math.round(b * (1 - amount));
+    return `#${((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1)}`;
+  };
+  const mixWithWhite = (hex: string, amount: number): string => {
+    const { r, g, b } = hexToRgb(hex);
+    const nr = Math.round(r + (255 - r) * amount);
+    const ng = Math.round(g + (255 - g) * amount);
+    const nb = Math.round(b + (255 - b) * amount);
+    return `#${((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1)}`;
+  };
+  const isDark = style === "dark";
+  const bgd = isDark ? mixWithBlack(p, 0.9) : mixWithBlack(p, 0.85);
+  const navBg = isDark ? `rgba(0,0,0,.95)` : `rgba(255,255,255,.97)`;
+  const heroOverlay = isDark ? mixWithBlack(p, 0.5) : mixWithBlack(p, 0.6);
+  const brSm = br === "0" || br === "none" ? "0px" : br === "2px" || br === "4px" ? "3px" : br === "6px" || br === "8px" ? "6px" : br === "10px" || br === "12px" ? "8px" : br === "16px" || br === "20px" ? "12px" : br === "24px" ? "16px" : "6px";
+  const brMd = br === "0" || br === "none" ? "0px" : br === "2px" || br === "4px" ? "4px" : br === "6px" ? "6px" : br === "8px" || br === "10px" ? "10px" : br === "12px" ? "12px" : br === "16px" ? "16px" : br === "20px" ? "20px" : br === "24px" ? "24px" : "10px";
+  const brLg = br === "0" || br === "none" ? "0px" : br === "2px" || br === "4px" ? "6px" : br === "6px" || br === "8px" ? "10px" : br === "10px" || br === "12px" ? "14px" : br === "16px" ? "18px" : br === "20px" ? "22px" : br === "24px" ? "28px" : "16px";
+  return `
+  <style id="site-css">
+    :root{--c1:${p};--c1l:${p}15;--c1d:${p}e6;--c2:${s};--c2l:${s}15;--ctx:${fg};--ctxl:${mutedFg};--ctxlr:${mutedFg}aa;--bdr:${border};--bg:${bg};--bga:${muted};--bgc:${card};--bgd:${bgd};--ok:#059669;--wrn:#d97706;--err:#dc2626;--shs:0 1px 2px rgba(0,0,0,.05);--shm:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.05);--shl:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -4px rgba(0,0,0,.05);--shx:0 20px 25px -5px rgba(0,0,0,.08),0 8px 10px -6px rgba(0,0,0,.04);--rsm:${brSm};--rmd:${brMd};--rlg:${brLg};--rxl:${brLg};--rpl:9999px;--tr:.25s cubic-bezier(.4,0,.2,1);--fnt:'${f}',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--fnt);color:var(--ctx);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+    img{max-width:100%;height:auto;display:block}
+    a{color:inherit;text-decoration:none}
+    .tx{font-size:.75rem}.ts{font-size:.875rem}.tb{font-size:1rem}.tl{font-size:1.125rem}.txl{font-size:1.25rem}.tx2{font-size:1.5rem}.tx3{font-size:1.875rem}.tx4{font-size:2.25rem}.tx5{font-size:3rem}.tx6{font-size:3.75rem}
+    .fl{font-weight:300}.fn{font-weight:400}.fm{font-weight:500}.fs{font-weight:600}.fb{font-weight:700}
+    .lt{line-height:1.25}.ln{line-height:1.6}.lr{line-height:1.75}.tk{letter-spacing:-.025em}.tw{letter-spacing:.05em}.up{text-transform:uppercase}
+    .ct{width:100%;max-width:1280px;margin:0 auto;padding:0 24px}.csm{max-width:960px;margin:0 auto;padding:0 24px}.cxs{max-width:720px;margin:0 auto;padding:0 24px}
+    .d{display:flex}.dc{flex-direction:column}.dw{flex-wrap:wrap}.aic{align-items:center}.ais{align-items:flex-start}.aie{align-items:flex-end}.jcc{justify-content:center}.jcsb{justify-content:space-between}.jce{justify-content:flex-end}
+    .g1{gap:4px}.g2{gap:8px}.g3{gap:12px}.g4{gap:16px}.g5{gap:20px}.g6{gap:24px}.g8{gap:32px}.g10{gap:40px}.g12{gap:48px}.f1{flex:1 1 0%}.ns{flex-shrink:0}
+    .gr{display:grid}.gc1{grid-template-columns:repeat(1,1fr)}.gc2{grid-template-columns:repeat(2,1fr)}.gc3{grid-template-columns:repeat(3,1fr)}.gc4{grid-template-columns:repeat(4,1fr)}.gc6{grid-template-columns:repeat(6,1fr)}
+    .p0{padding:0}.p2{padding:8px}.p3{padding:12px}.p4{padding:16px}.p5{padding:20px}.p6{padding:24px}.p8{padding:32px}.p10{padding:40px}
+    .px3{padding-left:12px;padding-right:12px}.px4{padding-left:16px;padding-right:16px}.px5{padding-left:20px;padding-right:20px}.px6{padding-left:24px;padding-right:24px}.px8{padding-left:32px;padding-right:32px}
+    .py2{padding-top:8px;padding-bottom:8px}.py3{padding-top:12px;padding-bottom:12px}.py4{padding-top:16px;padding-bottom:16px}.py6{padding-top:24px;padding-bottom:24px}.py8{padding-top:32px;padding-bottom:32px}.py10{padding-top:40px;padding-bottom:40px}.py12{padding-top:48px;padding-bottom:48px}.py16{padding-top:64px;padding-bottom:64px}.py20{padding-top:80px;padding-bottom:80px}.py24{padding-top:96px;padding-bottom:96px}
+    .mt1{margin-top:4px}.mt2{margin-top:8px}.mt3{margin-top:12px}.mt4{margin-top:16px}.mt6{margin-top:24px}.mt8{margin-top:32px}.mt10{margin-top:40px}.mt12{margin-top:48px}
+    .mb1{margin-bottom:4px}.mb2{margin-bottom:8px}.mb3{margin-bottom:12px}.mb4{margin-bottom:16px}.mb6{margin-bottom:24px}.mb8{margin-bottom:32px}.mb10{margin-bottom:40px}.mb12{margin-bottom:48px}
+    .mr2{margin-right:8px}.mr3{margin-right:12px}.ml2{margin-left:8px}.mla{margin-left:auto}.mx{margin-left:auto;margin-right:auto}
+    .rel{position:relative}.abs{position:absolute}.fx{position:fixed}.stk{position:sticky}.i0{top:0;right:0;bottom:0;left:0}.t0{top:0}.l0{left:0}.z10{z-index:10}.z20{z-index:20}.z50{z-index:50}
+    .blk{display:block}.ib{display:inline-block}.hid{display:none}.oh{overflow:hidden}
+    .wf{width:100%}.hf{height:100%}.mhs{min-height:100vh}
+    .tw{color:#fff}.tgr4{color:var(--ctxlr)}.tgr5{color:var(--ctxl)}.tgr6{color:#4b5563}.tgr7{color:#374151}.tgr8{color:var(--ctx)}.tgr9{color:#111827}.tr5{color:var(--err)}.tr6{color:#b91c1c}.tg6{color:var(--ok)}.tc{text-align:center}.tnc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tln{text-decoration:line-through}.ti{font-style:italic}
+    .bgw{background:var(--bgc)}.bga{background:var(--bga)}.bg1{background:var(--bga)}.bg2{background:var(--bdr)}.bgd{background:var(--bgd)}.bgp{background:var(--c1)}.bgs{background:var(--c2)}
+    .bd{border:1px solid var(--bdr)}.bd0{border:0}.bdt{border-top:1px solid var(--bdr)}.bdb{border-bottom:1px solid var(--bdr)}.bdg2{border-color:var(--bdr)}.bdg3{border-color:var(--bdr)}.bdr5{border-color:var(--err)}.bdr2{border-color:var(--err)}.bd2{border-width:2px}
+    .rn{border-radius:var(--rsm)}.rmd{border-radius:var(--rmd)}.rlg{border-radius:var(--rlg)}.rxl{border-radius:var(--rxl)}.rfl{border-radius:9999px}.r-sm{border-radius:var(--rsm)}.r-md{border-radius:var(--rmd)}.r-lg{border-radius:var(--rlg)}.r-xl{border-radius:var(--rxl)}
+    .shs{box-shadow:var(--shs)}.shm{box-shadow:var(--shm)}.shl{box-shadow:var(--shl)}.shx{box-shadow:var(--shx)}
+    .tr{transition:all var(--tr)}.trc{transition:color var(--tr),background-color var(--tr),border-color var(--tr)}
+    .ho7:hover{opacity:.75}.ho8:hover{opacity:.8}.ho1:hover{opacity:1}.hbga:hover{background:var(--bga)}.hbg1:hover{background:var(--bga)}.htgr9:hover{color:var(--ctx)}.htw:hover{color:#fff}.hbd4:hover{border-color:var(--ctxlr)}
+    .oc{object-fit:cover}.oi{object-fit:contain}.cp{cursor:pointer}
+    .sn{list-style:none}.o6{opacity:.6}.o8{opacity:.8}.o9{opacity:.9}
+    .sy2>*+*{margin-top:8px}.sy3>*+*{margin-top:12px}.sy4>*+*{margin-top:16px}.sy5>*+*{margin-top:20px}.sy6>*+*{margin-top:24px}.sy8>*+*{margin-top:32px}
+    .stars{display:inline-flex;gap:1px}.si{width:16px;height:16px}.sf{color:#f59e0b;fill:#f59e0b}.sh{color:#f59e0b}.se{color:#d1d5db;fill:#d1d5db}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:.875rem;line-height:1.5;padding:10px 24px;border:2px solid transparent;cursor:pointer;transition:all var(--tr);text-decoration:none;white-space:nowrap;font-family:var(--fnt)}.btn:active{transform:scale(.97)}
+    .bp{background:var(--c1);color:#fff;border-color:var(--c1)}.bp:hover{filter:brightness(1.1);box-shadow:0 4px 14px var(--c1d)}
+    .bs2{background:transparent;color:var(--c1);border-color:var(--c1)}.bs2:hover{background:var(--c1);color:#fff}
+    .bw{background:var(--bgc);color:var(--c1);border-color:var(--bgc)}.bw:hover{background:var(--bga)}
+    .bk{background:#111827;color:#fff;border-color:#111827}.bk:hover{background:#1f2937;border-color:#1f2937}
+    .br{background:var(--err);color:#fff;border-color:var(--err)}.br:hover{background:#b91c1c}
+    .bsm{padding:6px 16px;font-size:.8125rem}.blg{padding:14px 32px;font-size:1rem}.bbl{width:100%}.b-pill{border-radius:var(--rpl)}.b-sq{border-radius:0}.b-def{border-radius:var(--rmd)}
+    .inp{width:100%;padding:12px 16px;border:1.5px solid var(--bdr);border-radius:var(--rmd);font-size:.9375rem;font-family:var(--fnt);color:var(--ctx);background:var(--bgc);transition:border-color var(--tr),box-shadow var(--tr);outline:none}.inp:focus{border-color:var(--c1);box-shadow:0 0 0 3px var(--c1l)}.inp::placeholder{color:var(--ctxlr)}.txa{min-height:120px;resize:vertical}.sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+    .fl-wrap{position:relative}.fl-wrap .inp{padding-top:20px;padding-bottom:6px}.fl-wrap label{position:absolute;top:14px;left:16px;font-size:.9375rem;color:var(--ctxlr);transition:all .2s ease;pointer-events:none}.fl-wrap .inp:focus~label,.fl-wrap .inp:not(:placeholder-shown)~label{top:4px;left:16px;font-size:.75rem;color:var(--c1);font-weight:500}
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;font-size:.75rem;font-weight:600;border-radius:var(--rpl);line-height:1.5}.bdgp{background:var(--c1l);color:var(--c1)}.bdgd{background:var(--err);color:#fff}.bdgs{background:var(--ok);color:#fff}.bdgw{background:var(--wrn);color:#fff}.bdg-s{background:var(--err);color:#fff}.bdg-n{background:var(--c1);color:#fff}
+    .pc{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden;transition:all var(--tr)}.pc:hover{box-shadow:var(--shx);transform:translateY(-4px)}
+    .pci{position:relative;overflow:hidden;aspect-ratio:1}.pcimg{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.pc:hover .pcimg{transform:scale(1.08)}
+    .pco{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transition:opacity .3s ease}.pc:hover .pco{opacity:1}.pco .btn{padding:10px 20px;font-size:.8125rem;backdrop-filter:blur(4px)}
+    .pcb{position:absolute;top:12px;left:12px;z-index:2;display:flex;flex-direction:column;gap:6px}
+    .pcbd{padding:16px}.pcbc{font-size:.75rem;font-weight:500;color:var(--ctxlr);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.pcbn{font-size:.9375rem;font-weight:600;color:var(--ctx);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pcbp{display:flex;align-items:center;gap:8px;margin-top:8px}.pcbp .cur{font-size:1.125rem;font-weight:700;color:var(--c1)}.pcbp .org{font-size:.875rem;color:var(--ctxlr);text-decoration:line-through}
+    .hero{position:relative;width:100%;min-height:540px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;overflow:hidden}.hero-ov{position:absolute;inset:0;background:linear-gradient(135deg,${heroOverlay},rgba(0,0,0,.3));z-index:1}.hero-c{position:relative;z-index:2;max-width:720px;padding:80px 24px}
+    .hero-b{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:var(--rpl);font-size:.8125rem;font-weight:600;margin-bottom:20px;letter-spacing:.02em}
+    .hero-t{font-size:3.5rem;font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}.hero-s{font-size:1.25rem;opacity:.9;margin-bottom:32px;line-height:1.6}.hero-a{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .sh{display:flex;align-items:center;justify-content:center;margin-bottom:48px}.sh-sub{display:inline-block;font-size:.8125rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--c1);margin-bottom:8px}.sh-t{font-size:2.25rem;font-weight:700;color:var(--ctx);letter-spacing:-.02em;margin-bottom:12px;text-align:center}.sh-d{font-size:1.0625rem;color:var(--ctxl);max-width:560px;margin:0 auto;line-height:1.6;text-align:center}
+    .tc2{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all var(--tr)}.tc2:hover{box-shadow:var(--shl);transform:translateY(-4px)}.tca{width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:3px solid var(--c1l)}.tcq{font-size:1rem;color:var(--ctxl);line-height:1.7;margin-bottom:16px;font-style:italic}.tcn{font-weight:600;color:var(--ctx)}.tcr{font-size:.8125rem;color:var(--ctxlr);margin-top:2px}
+    .fi{border:1px solid var(--bdr);border-radius:var(--rmd);overflow:hidden;margin-bottom:12px;transition:all var(--tr)}.fi:hover{border-color:var(--c1)}
+    .ftt{width:100%;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;background:var(--bgc);border:none;cursor:pointer;font-size:1rem;font-weight:600;color:var(--ctx);text-align:left;font-family:var(--fnt);transition:background var(--tr)}.ftt:hover{background:var(--bga)}
+    .fti{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bga);color:var(--ctxl);flex-shrink:0;transition:all var(--tr);font-size:1.125rem;line-height:1}.fi[open] .fti{background:var(--c1);color:#fff;transform:rotate(45deg)}
+    .fc{padding:0 24px 18px;color:var(--ctxl);line-height:1.7}.ftt::-webkit-details-marker{display:none}.ftt::marker{display:none;content:''}
+    .brd{display:flex;align-items:center;gap:8px;font-size:.875rem;color:var(--ctxlr);padding:16px 0;flex-wrap:wrap}.brd a{transition:color var(--tr)}.brd a:hover{color:var(--c1)}.brd-s{color:var(--ctxlr);margin:0 2px}.brd-c{color:var(--ctx);font-weight:500}
+    .tw2{overflow-x:auto}.tbl{width:100%;border-collapse:collapse}.tbl th{padding:14px 20px;font-size:.8125rem;font-weight:600;color:var(--ctxl);text-align:left;text-transform:uppercase;letter-spacing:.05em;background:var(--bga);border-bottom:1px solid var(--bdr)}.tbl td{padding:16px 20px;font-size:.9375rem;border-bottom:1px solid var(--bdr);vertical-align:middle}.tbl tbody tr{transition:background var(--tr)}.tbl tbody tr:hover{background:var(--bga)}
+    .qty{display:inline-flex;align-items:center;border:1.5px solid var(--bdr);border-radius:var(--rmd);overflow:hidden}.qb{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:none;background:transparent;cursor:pointer;font-size:1rem;color:var(--ctx);transition:background var(--tr)}.qb:hover{background:var(--bga)}.qv{width:40px;text-align:center;font-weight:600;font-size:.9375rem;border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);padding:6px 0}
+    .steps{display:flex;align-items:center;justify-content:center;gap:0}.stp{display:flex;align-items:center;gap:10px}.stpn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:700;background:var(--bga);color:var(--ctxlr);border:2px solid var(--bdr);transition:all var(--tr)}.stp.act .stpn{background:var(--c1);color:#fff;border-color:var(--c1)}.stp.dn .stpn{background:var(--ok);color:#fff;border-color:var(--ok)}.stpl{font-size:.875rem;font-weight:500;color:var(--ctxlr)}.stp.act .stpl{color:var(--ctx)}.stpline{width:48px;height:2px;background:var(--bdr);margin:0 12px}
+    .nlb{background:linear-gradient(135deg,var(--c1),var(--c2));padding:64px 24px;text-align:center;color:#fff}.nlf{display:flex;gap:12px;max-width:480px;margin:0 auto}.nlf .inp{flex:1;background:var(--bgc);border:none}@media(max-width:640px){.nlf{flex-direction:column}}
+    .ph{background:var(--bgd);color:#fff;padding:64px 24px}.phi{max-width:1280px;margin:0 auto}
+    .mp{background:var(--bga);border:2px dashed var(--bdr);border-radius:var(--rlg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--ctxlr);min-height:320px}.mp svg{width:48px;height:48px;opacity:.5}
+    .nav{position:sticky;top:0;z-index:1000;background:${navBg};backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr);transition:box-shadow var(--tr)}.nav.sc{box-shadow:0 2px 20px rgba(0,0,0,.08)}
+    .nav-in{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:72px;max-width:1280px;margin:0 auto}
+    .nav-l{font-size:1.375rem;font-weight:700;color:var(--c1);letter-spacing:-.02em;display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .nav-ks{display:flex;align-items:center;gap:32px}
+    .nav-k{font-size:.9375rem;font-weight:500;color:var(--ctx);transition:color var(--tr);position:relative;padding:4px 0}.nav-k:hover{color:var(--c1)}.nav-k::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:var(--c1);transition:width var(--tr)}.nav-k:hover::after{width:100%}
+    .nav-dd{position:relative}    .nav-dd-m{position:absolute;top:100%;left:-16px;margin-top:12px;background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rmd);box-shadow:var(--shl);min-width:200px;padding:8px 0;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .2s ease;z-index:100}.nav-dd:hover .nav-dd-m{opacity:1;visibility:visible;transform:translateY(0)}
+    .nav-dd-i{display:block;padding:10px 20px;font-size:.875rem;color:var(--ctx);transition:background var(--tr)}.nav-dd-i:hover{background:var(--bga);color:var(--c1)}
+    .nav-a{display:flex;align-items:center;gap:16px}
+    .nav-ab{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--ctx);cursor:pointer;transition:all var(--tr);position:relative}.nav-ab:hover{background:var(--bga);color:var(--c1)}.nav-ab svg{width:20px;height:20px}
+    .cc{position:absolute;top:2px;right:0;width:18px;height:18px;background:var(--err);color:#fff;font-size:.6875rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1}
+    .mtog{display:none}.ham{display:none;flex-direction:column;justify-content:center;gap:5px;width:28px;height:28px;cursor:pointer;background:none;border:none;padding:0}.ham span{display:block;width:100%;height:2px;background:var(--ctx);border-radius:2px;transition:all .3s ease}
+    .mnav{display:none;position:fixed;top:72px;left:0;right:0;bottom:0;background:var(--bg);z-index:999;padding:24px;overflow-y:auto;transform:translateX(-100%);transition:transform .3s ease}.mnav.op{transform:translateX(0)}.mnav-k{display:block;padding:14px 0;font-size:1.0625rem;font-weight:500;color:var(--ctx);border-bottom:1px solid var(--bdr)}.mnav-s{padding-left:16px}.mnav-s a{display:block;padding:10px 0;font-size:.9375rem;color:var(--ctxl)}
+    @media(max-width:768px){.nav-ks{display:none}.ham{display:flex}.mtog:checked~.mnav{display:block}.mtog:checked~label .ham span:nth-child(1){transform:translateY(7px) rotate(45deg)}.mtog:checked~label .ham span:nth-child(2){opacity:0}.mtog:checked~label .ham span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}.gc2,.gc3,.gc4,.gc6{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:769px){.mnav{display:none!important}}
+    .footer{background:var(--bgd);color:var(--ctxl);padding:64px 24px 32px}.ftg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1280px;margin:0 auto}.ftb{max-width:320px}.ftbn{font-size:1.375rem;font-weight:700;color:#fff;margin-bottom:12px}.ftbd{font-size:.875rem;line-height:1.7;color:var(--ctxlr)}.fth{font-size:.9375rem;font-weight:600;color:#fff;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}.ftl{list-style:none}.ftl li{margin-bottom:10px}.ftl a{font-size:.875rem;color:var(--ctxlr);transition:color var(--tr)}.ftl a:hover{color:#fff}
+    .fts{display:flex;gap:12px;margin-top:20px}.fts a{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);color:var(--ctxlr);transition:all var(--tr)}.fts a:hover{background:var(--c1);color:#fff;transform:translateY(-2px)}.fts svg{width:16px;height:16px}
+    .ftbt{max-width:1280px;margin:40px auto 0;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}.ftc{font-size:.8125rem;color:var(--ctxlr)}.ftp{display:flex;gap:8px}.ftpb{display:inline-flex;align-items:center;justify-content:center;padding:4px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rsm);font-size:.75rem;font-weight:500;color:var(--ctxlr)}
+    @media(max-width:768px){.ftg{grid-template-columns:1fr 1fr}.ftb{grid-column:1/-1}}@media(max-width:480px){.ftg{grid-template-columns:1fr}}
+    @keyframes fiu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    ${theme?.animations ? (theme.animations === true ? `section{animation:fiu .6s ease-out both}` : theme.animations === "subtle" ? `section{animation:fiu .8s ease-out both}` : theme.animations === "full" ? `section{animation:fiu .4s cubic-bezier(.22,1,.36,1) both}` : `section{animation:fiu .6s ease-out both}`) : ""}
+  </style>`;
 };
 
 const generatePageHtml = (
   page: { slug: string; title: string; sections: Array<{ id: string; component: string; props: Record<string, any>; order: number }> },
   siteName: string,
   navigation: { items?: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }> } | undefined,
-  footer: { copyright?: string; links?: Array<{ label: string; href: string }> } | undefined,
-  theme?: ThemeData
+  footer: { copyright?: string; links?: Array<{ label: string; href: string }>; socialMedia?: Record<string, string> } | undefined,
+  theme?: ThemeData,
+  seo?: { metaTitle?: string; metaDescription?: string; keywords?: string[] }
 ): string => {
   const fontName = theme?.fontFamily || "Inter";
   const sections = [...page.sections]
@@ -921,51 +694,350 @@ const generatePageHtml = (
   const navItems = navigation?.items || [];
   const brandedNav = navItems.length > 0
     ? navItems
-    : [{ label: "Home", href: "/" }, { label: "Shop", href: "/shop" }, { label: "About", href: "/about" }, { label: "Contact", href: "/contact" }];
+    : [{ label: "Home", href: "/" }, { label: "Shop", href: "/shop" }, { label: "About", href: "/about_us" }, { label: "Contact", href: "/contact_us" }];
 
-  const primaryHex = theme?.primaryColor || "#1e3a5f";
-  const secondaryHex = theme?.secondaryColor || "#2563eb";
+  const metaTitle = seo?.metaTitle || `${page.title} | ${siteName}`;
+  const metaDescription = seo?.metaDescription || page.title;
+  const keywords = seo?.keywords?.join(", ") || "";
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${e(page.title)} | ${e(siteName)}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '${primaryHex}',
-            secondary: '${secondaryHex}'
-          },
-          fontFamily: {
-            body: ['${fontName}', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
+  <meta name="description" content="${esc(metaDescription)}">
+  ${keywords ? `<meta name="keywords" content="${esc(keywords)}">` : ""}
+  <meta property="og:title" content="${esc(metaTitle)}">
+  <meta property="og:description" content="${esc(metaDescription)}">
+  <meta property="og:type" content="website">
+  <title>${esc(metaTitle)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, "+")}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: '${fontName}', sans-serif; }
-    ${theme?.animations ? `
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    section { animation: fadeIn 0.6s ease-out; }` : ""}
-    details[open] summary span:last-child { content: '−'; }
-    details summary::-webkit-details-marker { display: none; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, "+")}:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  ${generateBaseCSS(theme)}
 </head>
-<body class="bg-white text-gray-900 antialiased">
-  ${renderNavigation(siteName, brandedNav, theme)}
+<body>
+  ${renderNavigation(siteName, brandedNav)}
   <main>
     ${sections}
   </main>
-  ${renderFooter(footer || {}, siteName, theme)}
+  ${renderFooter(footer || {}, siteName)}
+  <script>
+    // ── Store State ──
+    var Store = {
+      _key: 'site_store',
+      _data: { cart: [], wishlist: [], recentlyViewed: [] },
+      init: function() {
+        try { var s = localStorage.getItem(this._key); if (s) this._data = JSON.parse(s); } catch(e) {}
+      },
+      save: function() { try { localStorage.setItem(this._key, JSON.stringify(this._data)); } catch(e) {} },
+      getCart: function() { return this._data.cart; },
+      getWishlist: function() { return this._data.wishlist; },
+      addToCart: function(product) {
+        var existing = this._data.cart.find(function(i){ return i.id === product.id && i.variant === product.variant && i.size === product.size; });
+        if (existing) { existing.quantity += (product.quantity || 1); }
+        else { product.quantity = product.quantity || 1; this._data.cart.push(product); }
+        this.save(); this._updateUI(); this._showToast(product.name + ' added to cart');
+      },
+      removeFromCart: function(id, variant, size) {
+        this._data.cart = this._data.cart.filter(function(i){ return !(i.id === id && i.variant === variant && i.size === size); });
+        this.save(); this._updateUI();
+      },
+      updateCartQty: function(id, variant, size, qty) {
+        var item = this._data.cart.find(function(i){ return i.id === id && i.variant === variant && i.size === size; });
+        if (item) { item.quantity = Math.max(1, qty); this.save(); this._updateUI(); }
+      },
+      getCartTotal: function() {
+        return this._data.cart.reduce(function(sum, i){ return sum + (parseFloat(i.price) || 0) * i.quantity; }, 0);
+      },
+      getCartCount: function() {
+        return this._data.cart.reduce(function(sum, i){ return sum + i.quantity; }, 0);
+      },
+      toggleWishlist: function(product) {
+        var idx = this._data.wishlist.findIndex(function(i){ return i.id === product.id; });
+        if (idx >= 0) { this._data.wishlist.splice(idx, 1); this._showToast('Removed from wishlist'); }
+        else { this._data.wishlist.push(product); this._showToast(product.name + ' added to wishlist'); }
+        this.save(); this._updateUI();
+      },
+      isInWishlist: function(id) {
+        return this._data.wishlist.some(function(i){ return i.id === id; });
+      },
+      moveToCart: function(id) {
+        var item = this._data.wishlist.find(function(i){ return i.id === id; });
+        if (item) { this.addToCart(item); this._data.wishlist = this._data.wishlist.filter(function(i){ return i.id !== id; }); this.save(); this._updateUI(); }
+      },
+      _updateUI: function() {
+        var count = this.getCartCount();
+        document.querySelectorAll('.cc').forEach(function(el){ el.textContent = count; el.style.display = count > 0 ? 'flex' : 'none'; });
+        document.querySelectorAll('.wish-h').forEach(function(el){ el.textContent = Store.getWishlist().length; });
+      },
+      _showToast: function(msg) {
+        var t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:14px 24px;border-radius:12px;font-size:.875rem;font-weight:500;z-index:10000;box-shadow:0 10px 25px rgba(0,0,0,.15);animation:toastIn .3s ease;max-width:320px';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(function(){ t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 2500);
+      }
+    };
+    Store.init();
+
+    // ── Product Data ──
+    var Products = {
+      _data: [],
+      init: function() {
+        var els = document.querySelectorAll('[data-product]');
+        var self = this;
+        els.forEach(function(el) {
+          try { self._data.push(JSON.parse(el.getAttribute('data-product'))); } catch(e) {}
+        });
+      },
+      getAll: function() { return this._data; },
+      getById: function(id) { return this._data.find(function(p){ return p.id === id; }); },
+      search: function(q) {
+        q = q.toLowerCase();
+        return this._data.filter(function(p){ return (p.name || '').toLowerCase().indexOf(q) >= 0 || (p.category || '').toLowerCase().indexOf(q) >= 0; });
+      },
+      filter: function(opts) {
+        var results = this._data;
+        if (opts.category) results = results.filter(function(p){ return p.category === opts.category; });
+        if (opts.minPrice) results = results.filter(function(p){ return parseFloat(p.price) >= opts.minPrice; });
+        if (opts.maxPrice) results = results.filter(function(p){ return parseFloat(p.price) <= opts.maxPrice; });
+        if (opts.search) results = this.search(opts.search);
+        return results;
+      },
+      sort: function(items, by) {
+        var arr = items.slice();
+        switch(by) {
+          case 'price_asc': arr.sort(function(a,b){ return parseFloat(a.price) - parseFloat(b.price); }); break;
+          case 'price_desc': arr.sort(function(a,b){ return parseFloat(b.price) - parseFloat(a.price); }); break;
+          case 'name': arr.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); }); break;
+          case 'rating': arr.sort(function(a,b){ return (b.rating||0) - (a.rating||0); }); break;
+          default: break;
+        }
+        return arr;
+      }
+    };
+
+    // ── Pagination ──
+    var Pagination = {
+      render: function(container, items, perPage, renderFn) {
+        var page = 1;
+        var totalPages = Math.ceil(items.length / perPage);
+        function show(p) {
+          page = p;
+          var start = (p - 1) * perPage;
+          var pageItems = items.slice(start, start + perPage);
+          renderFn(pageItems);
+          var html = '';
+          if (totalPages > 1) {
+            html += '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:32px">';
+            html += '<button class="pg-btn" data-page="' + (p-1) + '"' + (p===1?' disabled':'') + ' style="padding:8px 16px;border:1px solid var(--bdr);border-radius:var(--rmd);background:var(--bgc);cursor:pointer;font-size:.875rem">\u2190 Prev</button>';
+            for (var i = 1; i <= totalPages; i++) {
+              html += '<button class="pg-btn" data-page="' + i + '" style="width:36px;height:36px;border-radius:var(--rmd);border:1px solid ' + (i===p?'var(--c1)':'var(--bdr)') + ';background:' + (i===p?'var(--c1)':'var(--bgc)') + ';color:' + (i===p?'#fff':'var(--ctx)') + ';cursor:pointer;font-size:.875rem;font-weight:600">' + i + '</button>';
+            }
+            html += '<button class="pg-btn" data-page="' + (p+1) + '"' + (p===totalPages?' disabled':'') + ' style="padding:8px 16px;border:1px solid var(--bdr);border-radius:var(--rmd);background:var(--bgc);cursor:pointer;font-size:.875rem">Next \u2192</button>';
+            html += '</div>';
+          }
+          container.innerHTML = html;
+          container.querySelectorAll('.pg-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              var pg = parseInt(this.getAttribute('data-page'));
+              if (pg >= 1 && pg <= totalPages) show(pg);
+            });
+          });
+        }
+        show(1);
+      }
+    };
+
+    // ── Interactive Components ──
+    document.addEventListener('DOMContentLoaded', function() {
+      // Nav scroll
+      var nav = document.getElementById('main-nav');
+      if (nav) {
+        window.addEventListener('scroll', function() {
+          if (window.scrollY > 10) nav.classList.add('sc');
+          else nav.classList.remove('sc');
+        });
+      }
+      // Mobile nav toggle
+      var toggle = document.getElementById('mtog');
+      var mnav = document.getElementById('mnav');
+      if (toggle && mnav) {
+        toggle.addEventListener('change', function() {
+          if (this.checked) document.body.style.overflow = 'hidden';
+          else document.body.style.overflow = '';
+        });
+        mnav.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            toggle.checked = false;
+            document.body.style.overflow = '';
+          });
+        });
+      }
+      // Init products
+      Products.init();
+      Store._updateUI();
+      // Add to Cart buttons
+      document.querySelectorAll('[data-add-to-cart]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var data = this.getAttribute('data-add-to-cart');
+          try {
+            var product = JSON.parse(data);
+            var card = this.closest('.pc, .pcbd, [data-product-card]');
+            if (card) {
+              var colorEl = card.querySelector('[data-selected-color]');
+              var sizeEl = card.querySelector('[data-selected-size]');
+              var qtyEl = card.querySelector('[data-qty]');
+              if (colorEl) product.variant = colorEl.getAttribute('data-selected-color');
+              if (sizeEl) product.size = sizeEl.getAttribute('data-selected-size');
+              if (qtyEl) product.quantity = parseInt(qtyEl.textContent) || 1;
+            }
+            Store.addToCart(product);
+          } catch(err) { console.error('Add to cart error:', err); }
+        });
+      });
+      // Wishlist buttons
+      document.querySelectorAll('[data-toggle-wishlist]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          try {
+            var product = JSON.parse(this.getAttribute('data-toggle-wishlist'));
+            Store.toggleWishlist(product);
+            this.classList.toggle('wish-active');
+          } catch(err) {}
+        });
+      });
+      // Quantity buttons
+      document.querySelectorAll('[data-qty-plus]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var el = this.parentElement.querySelector('[data-qty]');
+          if (el) el.textContent = Math.max(1, parseInt(el.textContent) + 1);
+        });
+      });
+      document.querySelectorAll('[data-qty-minus]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var el = this.parentElement.querySelector('[data-qty]');
+          if (el) el.textContent = Math.max(1, parseInt(el.textContent) - 1);
+        });
+      });
+      // Color selectors
+      document.querySelectorAll('[data-color-select]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var group = this.closest('[data-color-group]');
+          if (group) {
+            group.querySelectorAll('[data-color-select]').forEach(function(b){ b.style.outline = 'none'; b.style.outlineOffset = '0'; });
+            this.style.outline = '2px solid var(--c1)';
+            this.style.outlineOffset = '2px';
+            var card = this.closest('[data-product-card]');
+            if (card) card.setAttribute('data-selected-color', this.getAttribute('data-color-select'));
+          }
+        });
+      });
+      // Size selectors
+      document.querySelectorAll('[data-size-select]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var group = this.closest('[data-size-group]');
+          if (group) {
+            group.querySelectorAll('[data-size-select]').forEach(function(b){ b.style.background = 'var(--bgc)'; b.style.color = 'var(--ctx)'; b.style.borderColor = 'var(--bdr)'; });
+            this.style.background = 'var(--c1)';
+            this.style.color = '#fff';
+            this.style.borderColor = 'var(--c1)';
+            var card = this.closest('[data-product-card]');
+            if (card) card.setAttribute('data-selected-size', this.getAttribute('data-size-select'));
+          }
+        });
+      });
+      // Search
+      document.querySelectorAll('[data-search-input]').forEach(function(input) {
+        var debounce;
+        input.addEventListener('input', function() {
+          var self = this;
+          clearTimeout(debounce);
+          debounce = setTimeout(function() {
+            var q = self.value.toLowerCase();
+            document.querySelectorAll('[data-searchable]').forEach(function(el) {
+              var name = (el.getAttribute('data-search-name') || '').toLowerCase();
+              var cat = (el.getAttribute('data-search-category') || '').toLowerCase();
+              el.style.display = (!q || name.indexOf(q) >= 0 || cat.indexOf(q) >= 0) ? '' : 'none';
+            });
+            var counter = document.querySelector('[data-result-count]');
+            if (counter) {
+              var visible = document.querySelectorAll('[data-searchable]:not([style*="display: none"]):not([style*="display:none"])').length;
+              counter.textContent = visible + ' products';
+            }
+          }, 200);
+        });
+      });
+      // Sort
+      document.querySelectorAll('[data-sort-select]').forEach(function(select) {
+        select.addEventListener('change', function() {
+          var grid = document.querySelector('[data-product-grid]');
+          if (!grid) return;
+          var items = Array.from(grid.querySelectorAll('[data-searchable]'));
+          var by = this.value;
+          items.sort(function(a, b) {
+            var pa = parseFloat(a.getAttribute('data-price') || '0');
+            var pb = parseFloat(b.getAttribute('data-price') || '0');
+            var na = a.getAttribute('data-search-name') || '';
+            var nb = b.getAttribute('data-search-name') || '';
+            var ra = parseFloat(a.getAttribute('data-rating') || '0');
+            var rb = parseFloat(b.getAttribute('data-rating') || '0');
+            switch(by) {
+              case 'price_asc': return pa - pb;
+              case 'price_desc': return pb - pa;
+              case 'name': return na.localeCompare(nb);
+              case 'rating': return rb - ra;
+              default: return 0;
+            }
+          });
+          items.forEach(function(item) { grid.appendChild(item); });
+        });
+      });
+      // Category filter
+      document.querySelectorAll('[data-category-filter]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var cat = this.getAttribute('data-category-filter');
+          document.querySelectorAll('[data-category-filter]').forEach(function(b){ b.style.background = 'var(--bgc)'; b.style.color = 'var(--ctx)'; });
+          this.style.background = 'var(--c1)';
+          this.style.color = '#fff';
+          document.querySelectorAll('[data-searchable]').forEach(function(el) {
+            el.style.display = (!cat || cat === 'all' || el.getAttribute('data-search-category') === cat) ? '' : 'none';
+          });
+        });
+      });
+      // Coupon apply
+      document.querySelectorAll('[data-coupon-apply]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var input = this.previousElementSibling;
+          if (input && input.value) {
+            this.textContent = '✓ Applied';
+            this.style.background = 'var(--ok)';
+            this.style.color = '#fff';
+            this.style.borderColor = 'var(--ok)';
+          }
+        });
+      });
+      // Initialize wishlist active state
+      document.querySelectorAll('[data-toggle-wishlist]').forEach(function(btn) {
+        try {
+          var product = JSON.parse(btn.getAttribute('data-toggle-wishlist'));
+          if (Store.isInWishlist(product.id)) btn.classList.add('wish-active');
+        } catch(e) {}
+      });
+    });
+  </script>
+  <style>
+    @keyframes toastIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    [data-add-to-cart]:active { transform: scale(0.95); }
+    .wish-active svg { fill: #ef4444 !important; color: #ef4444 !important; }
+    [data-color-select]:hover { transform: scale(1.15); }
+    [data-size-select]:hover { border-color: var(--c1) !important; }
+    [data-category-filter] { cursor:pointer; transition:all var(--tr); }
+    [data-qty-plus],[data-qty-minus] { cursor:pointer; user-select:none; }
+    [data-qty-plus]:hover,[data-qty-minus]:hover { background:var(--bga); }
+  </style>
 </body>
 </html>`;
 };
@@ -982,6 +1054,7 @@ export const publish = async (projectId: string): Promise<IPublishedSite> => {
   const theme = siteSpec.theme;
   const navigation = siteSpec.navigation;
   const footer = siteSpec.footer;
+  const seo = siteSpec.seo;
 
   const buildDir = path.join(GENERATED_DIR, projectId);
   fs.mkdirSync(buildDir, { recursive: true });
@@ -995,14 +1068,14 @@ export const publish = async (projectId: string): Promise<IPublishedSite> => {
       : path.join(buildDir, slug);
     fs.mkdirSync(dir, { recursive: true });
 
-    const html = generatePageHtml(page, siteName, navigation, footer, theme);
+    const html = generatePageHtml(page, siteName, navigation, footer, theme, seo);
     fs.writeFileSync(path.join(dir, "index.html"), html, "utf-8");
   }
 
   if (pages.length === 0) {
     const html = generatePageHtml(
       { slug: "home", title: siteName, sections: [] },
-      siteName, navigation, footer, theme
+      siteName, navigation, footer, theme, seo
     );
     fs.writeFileSync(path.join(buildDir, "index.html"), html, "utf-8");
   }
