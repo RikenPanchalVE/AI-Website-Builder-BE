@@ -2062,7 +2062,9 @@ class MockAIProvider extends AIProvider {
       properties: { label: "Properties", href: "/properties" }, listings: { label: "Listings", href: "/listings" },
       courses: { label: "Courses", href: "/courses" }, admissions: { label: "Admissions", href: "/admissions" },
       destinations: { label: "Destinations", href: "/destinations" }, itineraries: { label: "Itineraries", href: "/itineraries" },
-      faq: { label: "FAQ", href: "/faq" }, track_order: { label: "Track Order", href: "/track-order" },
+      faq: { label: "FAQ", href: "/faq" }, cart: { label: "Cart", href: "/cart" },
+      checkout: { label: "Checkout", href: "/checkout" },
+      track_order: { label: "Track Order", href: "/track-order" },
       privacy_policy: { label: "Privacy Policy", href: "/privacy-policy" },
       terms_conditions: { label: "Terms & Conditions", href: "/terms-conditions" },
       refund_policy: { label: "Refund Policy", href: "/refund-policy" },
@@ -2097,6 +2099,7 @@ class MockAIProvider extends AIProvider {
       terms_conditions: { label: "Terms & Conditions", href: "/terms-conditions" },
       refund_policy: { label: "Refund Policy", href: "/refund-policy" },
       track_order: { label: "Track Order", href: "/track-order" },
+      cart: { label: "Cart", href: "/cart" }, checkout: { label: "Checkout", href: "/checkout" },
     };
     // Add all selected pages as footer links
     for (const slug of selectedPages) {

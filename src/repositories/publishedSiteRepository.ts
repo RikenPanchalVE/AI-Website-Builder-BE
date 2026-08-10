@@ -1042,6 +1042,95 @@ const generatePageHtml = (
 </html>`;
 };
 
+const CLIENT_DIST = path.join(__dirname, "..", "..", "..", "client", "dist");
+
+const findAsset = (dir: string, pattern: RegExp): string | null => {
+  try {
+    const files = fs.readdirSync(path.join(dir, "assets"));
+    const match = files.find((f) => pattern.test(f));
+    return match ? `./assets/${match}` : null;
+  } catch {
+    return null;
+  }
+};
+
+const copyClientAssets = (buildDir: string): void => {
+  const assetsDir = path.join(buildDir, "assets");
+  fs.mkdirSync(assetsDir, { recursive: true });
+  try {
+    const srcAssets = path.join(CLIENT_DIST, "assets");
+    const files = fs.readdirSync(srcAssets);
+    for (const file of files) {
+      fs.copyFileSync(path.join(srcAssets, file), path.join(assetsDir, file));
+    }
+  } catch (err) {
+    console.warn("Could not copy client assets:", err);
+  }
+  try {
+    const favicon = path.join(CLIENT_DIST, "favicon.svg");
+    if (fs.existsSync(favicon)) {
+      fs.copyFileSync(favicon, path.join(buildDir, "favicon.svg"));
+    }
+  } catch {}
+};
+
+const generateShellHtml = (
+  page: { slug: string; title: string },
+  siteSpec: SiteSpec,
+  projectId: string
+): string => {
+  const siteName = siteSpec.name || "My Store";
+  const fontName = siteSpec.theme?.fontFamily || "Inter";
+  const metaTitle = siteSpec.seo?.metaTitle
+    ? `${siteSpec.seo.metaTitle} | ${siteName}`
+    : `${page.title} | ${siteName}`;
+  const metaDescription = siteSpec.seo?.metaDescription || page.title;
+
+  const cssPath = findAsset(CLIENT_DIST, /\.css$/);
+  const jsPath = findAsset(CLIENT_DIST, /generated-site.*\.js$/)
+    || findAsset(CLIENT_DIST, /index-.*\.js$/);
+
+  const siteDataForClient: Record<string, any> = {
+    name: siteName,
+    pages: siteSpec.pages || [],
+    theme: siteSpec.theme,
+    navigation: siteSpec.navigation,
+    footer: siteSpec.footer,
+    seo: siteSpec.seo,
+    __basePath: `/generated-sites/${projectId}`,
+  };
+
+  const isHome = page.slug === "home" || page.slug === "index";
+  const baseHref = isHome ? "./" : "../";
+
+  const siteDataJson = JSON.stringify(siteDataForClient, null, 0);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="${baseHref}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="${esc(metaDescription)}">
+  <meta property="og:title" content="${esc(metaTitle)}">
+  <meta property="og:description" content="${esc(metaDescription)}">
+  <meta property="og:type" content="website">
+  <title>${esc(metaTitle)}</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, "+")}:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  ${cssPath ? `<link rel="stylesheet" href="${cssPath}">` : ""}
+</head>
+<body>
+  <div id="app"></div>
+  <script type="application/json" id="site-data">${siteDataJson}</script>
+  <script>window.__INITIAL_PAGE__ = ${JSON.stringify(page.slug || "home")};</script>
+  ${jsPath ? `<script type="module" src="${jsPath}"></script>` : ""}
+</body>
+</html>`;
+};
+
 export const publish = async (projectId: string): Promise<IPublishedSite> => {
   const project = await Project.findOne({ projectId });
   if (!project) throw new ApiError(404, "Project not found");
@@ -1051,13 +1140,11 @@ export const publish = async (projectId: string): Promise<IPublishedSite> => {
 
   const siteSpec = (spec as unknown as SiteSpec);
   const siteName = siteSpec.name || project.name || "My Store";
-  const theme = siteSpec.theme;
-  const navigation = siteSpec.navigation;
-  const footer = siteSpec.footer;
-  const seo = siteSpec.seo;
 
   const buildDir = path.join(GENERATED_DIR, projectId);
   fs.mkdirSync(buildDir, { recursive: true });
+
+  copyClientAssets(buildDir);
 
   const pages = siteSpec.pages || [];
 
@@ -1068,14 +1155,15 @@ export const publish = async (projectId: string): Promise<IPublishedSite> => {
       : path.join(buildDir, slug);
     fs.mkdirSync(dir, { recursive: true });
 
-    const html = generatePageHtml(page, siteName, navigation, footer, theme, seo);
+    const html = generateShellHtml(page, siteSpec, projectId);
     fs.writeFileSync(path.join(dir, "index.html"), html, "utf-8");
   }
 
   if (pages.length === 0) {
-    const html = generatePageHtml(
-      { slug: "home", title: siteName, sections: [] },
-      siteName, navigation, footer, theme, seo
+    const html = generateShellHtml(
+      { slug: "home", title: siteName },
+      siteSpec,
+      projectId
     );
     fs.writeFileSync(path.join(buildDir, "index.html"), html, "utf-8");
   }
