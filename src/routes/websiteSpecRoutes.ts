@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as websiteSpecController from "../controllers/websiteSpecController";
+import * as downloadController from "../controllers/downloadController";
 
 const router = Router();
 
@@ -16,5 +17,7 @@ router.post("/:projectId/pricing/calculate", websiteSpecController.calculatePric
 router.post("/:projectId/payment/process", websiteSpecController.processPayment);
 
 router.post("/:projectId/publish", websiteSpecController.publish);
+
+router.get("/:projectId/download", downloadController.downloadSource);
 
 export default router;

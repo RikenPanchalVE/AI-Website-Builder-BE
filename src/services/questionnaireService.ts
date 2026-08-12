@@ -18,6 +18,17 @@ export const saveQuestionnaire = async (
   const businessType = incoming.business?.type || incoming.industry || project.enquiry.businessType || "";
   const businessName = incoming.business?.name || incoming.businessName || project.enquiry.businessName || "";
 
+  // business.socialLinks is an array of { platform, url } — flatten to a
+  // { platform: url } map, which is what MockAIProvider/components expect.
+  const socialLinksArray: Array<{ platform?: string; url?: string }> =
+    incoming.business?.socialLinks || incoming.socialLinks || [];
+  const socialMedia: Record<string, string> = { ...(incoming.socialMedia || {}) };
+  for (const link of socialLinksArray) {
+    if (link?.platform && link?.url) {
+      socialMedia[link.platform.toLowerCase()] = link.url;
+    }
+  }
+
   // Flatten the new WebsiteConfig into the answers format expected by MockAIProvider
   const mergedAnswers: Record<string, any> = {
     ...incoming,
@@ -25,20 +36,42 @@ export const saveQuestionnaire = async (
     industry: businessType,
     businessDescription: incoming.business?.description || incoming.businessDescription || "",
     targetAudience: incoming.business?.targetAudience || incoming.targetAudience || "",
+    location: incoming.business?.location || incoming.location || "",
+    // Real contact details the client actually typed in — must flow through
+    // to the generated Contact page/footer instead of being discarded.
+    phone: incoming.business?.phone || incoming.phone || project.enquiry.phone || "",
+    email: incoming.business?.email || incoming.email || project.enquiry.email || "",
+    address: incoming.business?.address || incoming.address || "",
+    socialMedia,
     logo: incoming.branding?.logo || incoming.logo || null,
     themeStyle: incoming.theme?.style || incoming.themeStyle || "",
     primaryColor: incoming.theme?.primaryColor || incoming.primaryColor || "",
     secondaryColor: incoming.theme?.secondaryColor || incoming.secondaryColor || "",
     fontStyle: incoming.theme?.typography || incoming.fontStyle || "",
+    themeMode: incoming.theme?.mode || incoming.themeMode || "auto",
+    accentStyle: incoming.theme?.accentStyle || incoming.accentStyle || "",
     pages: incoming.pages || [],
     homepageSections: incoming.sections?.home || Object.values(incoming.sections || {}).flat() as string[],
     pageSections: incoming.sections || {},
-    features: incoming.goals || [],
     selectedPages: incoming.pages || [],
     // Pass through content items
     services: incoming.content?.services || [],
     testimonials: incoming.content?.testimonials || [],
     faq: incoming.content?.faq || [],
+    portfolioItems: incoming.content?.portfolio || [],
+    galleryImages: incoming.content?.gallery || [],
+    teamMembers: incoming.content?.team || [],
+    whyChooseUsReasons: incoming.content?.whyChooseUs || [],
+    pricingPlans: incoming.content?.pricingPlans || [],
+    menuItems: incoming.content?.menuItems || [],
+    dailySpecials: incoming.content?.dailySpecials || [],
+    blogPosts: incoming.content?.blogPosts || [],
+    stats: incoming.content?.stats || [],
+    timeline: incoming.content?.timeline || [],
+    businessHours: incoming.content?.businessHours || [],
+    classSchedule: incoming.content?.classSchedule || [],
+    courses: incoming.content?.courses || [],
+    destinations: incoming.content?.destinations || [],
     // Component selections
     componentSelections: incoming.components || {},
   };

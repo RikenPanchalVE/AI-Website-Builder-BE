@@ -26,6 +26,66 @@ const TESTIMONIALS: Record<string, Array<{ name: string; role: string; content: 
     { name: "Amanda R.", role: "Bride", content: "My bridal makeup was absolutely flawless. Everyone at the wedding asked who did my makeup. Best beauty salon experience!", rating: 5 },
     { name: "Sophia M.", role: "Regular Client", content: "The facials here are transformative. My skin has never been so clear and glowing. The staff is incredibly knowledgeable about skincare.", rating: 5 },
   ],
+  Agency: [
+    { name: "Priya N.", role: "Marketing Director", content: "They rebuilt our entire digital presence in six weeks. Traffic and conversions both doubled within the first quarter.", rating: 5 },
+    { name: "Tom R.", role: "Startup Founder", content: "Sharp strategic thinking paired with flawless execution. They feel like an extension of our own team.", rating: 5 },
+    { name: "Grace L.", role: "E-commerce Owner", content: "Our brand finally looks as good as our product. Every deliverable exceeded the brief.", rating: 5 },
+  ],
+  Consulting: [
+    { name: "Daniel K.", role: "COO", content: "Their framework cut our operating costs by 18% in the first two quarters without touching headcount.", rating: 5 },
+    { name: "Rachel B.", role: "VP Strategy", content: "Clear-eyed analysis and pragmatic recommendations. No fluff, just results we could act on immediately.", rating: 5 },
+    { name: "Omar S.", role: "Managing Director", content: "They understood our industry faster than consultants we've paid triple for. Genuinely impressive.", rating: 5 },
+  ],
+  "Real Estate": [
+    { name: "Karen W.", role: "First-Time Buyer", content: "They found us the perfect home in a market we thought we couldn't compete in. Patient, sharp, and honest throughout.", rating: 5 },
+    { name: "Victor H.", role: "Property Investor", content: "Consistently ahead of the market. Every property they've placed for me has appreciated faster than expected.", rating: 5 },
+    { name: "Nina P.", role: "Seller", content: "Sold above asking in nine days. Their staging and pricing strategy made all the difference.", rating: 5 },
+  ],
+  Fitness: [
+    { name: "Chris D.", role: "Member, 2 years", content: "Down 30 pounds and stronger than I've ever been. The coaches actually know your name and your goals.", rating: 5 },
+    { name: "Amara J.", role: "Member", content: "Best community I've trained with. Classes are challenging but the energy keeps you coming back.", rating: 5 },
+    { name: "Leo F.", role: "Personal Training Client", content: "My trainer rebuilt my program after an injury and I came back stronger than before. Truly invested in results.", rating: 5 },
+  ],
+  Technology: [
+    { name: "Sam K.", role: "Engineering Lead", content: "Integration took an afternoon, not a sprint. The API documentation alone saved us weeks.", rating: 5 },
+    { name: "Ines M.", role: "Product Manager", content: "Our team's shipping velocity jumped noticeably after switching. Support is fast and actually technical.", rating: 5 },
+    { name: "Owen T.", role: "CTO", content: "Scales exactly the way they said it would. Zero surprises during our traffic spike over launch week.", rating: 5 },
+  ],
+  Finance: [
+    { name: "Patricia A.", role: "Small Business Owner", content: "They restructured our books and found savings we didn't know existed. Tax season is no longer a nightmare.", rating: 5 },
+    { name: "Marcus V.", role: "Client, 5 years", content: "Straightforward advice, no jargon, and my portfolio has consistently outperformed my expectations.", rating: 5 },
+    { name: "Helen Q.", role: "Retiree", content: "They made retirement planning feel manageable instead of overwhelming. I trust them completely with my future.", rating: 5 },
+  ],
+  Portfolio: [
+    { name: "Julia S.", role: "Creative Director", content: "Hired them for a single campaign and now they're our go-to for every major launch. Consistently original work.", rating: 5 },
+    { name: "Ben C.", role: "Art Buyer", content: "A rare eye for detail and composition. Every project comes back better than the brief asked for.", rating: 5 },
+    { name: "Ana R.", role: "Gallery Owner", content: "Their work stopped visitors in their tracks. We've featured them in three shows since.", rating: 5 },
+  ],
+  Legal: [
+    { name: "Frank D.", role: "Client", content: "They walked me through a complicated case with patience and clarity I didn't expect from a law firm.", rating: 5 },
+    { name: "Wendy H.", role: "Small Business Owner", content: "Resolved our contract dispute in weeks, not months. Responsive at every step and worth every dollar.", rating: 5 },
+    { name: "Curtis M.", role: "Client", content: "Genuinely cared about the outcome, not just the billable hours. Highly recommend for anyone facing litigation.", rating: 5 },
+  ],
+  "Local Business": [
+    { name: "Diane K.", role: "Neighbor", content: "Been coming here for years — always friendly faces and service you just can't get from a big chain.", rating: 5 },
+    { name: "Ray P.", role: "Regular Customer", content: "They remember your name and what you need. That kind of care is rare these days.", rating: 5 },
+    { name: "Monica T.", role: "Local Resident", content: "Genuinely part of the community. Fast, honest, and fairly priced every single time.", rating: 5 },
+  ],
+  Startup: [
+    { name: "Ravi C.", role: "Early Adopter", content: "Watched this product go from beta to indispensable in our workflow in under a year. Impressive pace.", rating: 5 },
+    { name: "Zoe L.", role: "Investor", content: "The team ships fast and listens even faster. One of the sharpest early-stage teams I've backed.", rating: 5 },
+    { name: "Marcus E.", role: "Beta User", content: "Gave feedback on a Friday, saw it shipped by Monday. That's the kind of team you want to bet on.", rating: 5 },
+  ],
+  Automotive: [
+    { name: "Gary S.", role: "Customer", content: "No-pressure sales and honest pricing. Drove away in the car I actually wanted, not the one they pushed.", rating: 5 },
+    { name: "Renee F.", role: "Repeat Buyer", content: "Third vehicle I've bought here. The service department alone is worth the loyalty.", rating: 5 },
+    { name: "Tyrell B.", role: "Customer", content: "Financing was transparent from the first conversation. No last-minute surprises at signing.", rating: 5 },
+  ],
+  Travel: [
+    { name: "Sofia N.", role: "Traveler", content: "Every detail was handled — flights, transfers, even a restaurant reservation we didn't ask for. Flawless trip.", rating: 5 },
+    { name: "Derek W.", role: "Repeat Client", content: "Booked our honeymoon and two anniversary trips since. They always find something we wouldn't have discovered alone.", rating: 5 },
+    { name: "Priyanka G.", role: "Group Traveler", content: "Coordinated a 12-person trip without a single hiccup. Genuinely stress-free from booking to landing.", rating: 5 },
+  ],
   default: [
     { name: "John D.", role: "Customer", content: "Outstanding service and quality. Highly recommend to anyone looking for a reliable partner.", rating: 5 },
     { name: "Sarah K.", role: "Client", content: "Professional, responsive, and delivered beyond our expectations. Will definitely work with them again.", rating: 5 },
@@ -53,6 +113,66 @@ const FAQ_DATA: Record<string, Array<{ question: string; answer: string }>> = {
     { question: "Do I need an appointment?", answer: "We highly recommend booking an appointment to ensure availability. Walk-ins are welcome but subject to availability." },
     { question: "What hair services do you offer?", answer: "We offer cuts, color, highlights, balayage, extensions, keratin treatments, bridal styling, and more." },
     { question: "Do you offer skincare treatments?", answer: "Yes! Our skincare menu includes facials, chemical peels, microdermabrasion, and anti-aging treatments." },
+  ],
+  Agency: [
+    { question: "What's included in a typical engagement?", answer: "Strategy, design, build, and a launch plan — scoped together upfront so there are no surprises mid-project." },
+    { question: "How long does a project take?", answer: "Most engagements run 4-10 weeks depending on scope. We'll give you a firm timeline before kickoff." },
+    { question: "Do you work with our existing brand?", answer: "Yes — we can build on an existing brand system or develop one from scratch, whichever you need." },
+  ],
+  Consulting: [
+    { question: "How do you structure engagements?", answer: "We typically start with a diagnostic phase, then move into a scoped project with clear milestones and deliverables." },
+    { question: "Do you work with companies our size?", answer: "We work with organizations from early-stage startups to established enterprises, tailoring our approach accordingly." },
+    { question: "What does the first meeting look like?", answer: "A free discovery call to understand your challenges and confirm we're the right fit before any commitment." },
+  ],
+  "Real Estate": [
+    { question: "Do you work with both buyers and sellers?", answer: "Yes, our agents represent buyers, sellers, and investors across the areas we serve." },
+    { question: "How do I get a home valuation?", answer: "Request a free, no-obligation valuation through our contact form and an agent will follow up within 24 hours." },
+    { question: "Do you offer virtual tours?", answer: "Most of our listings include virtual walkthroughs so you can preview a property before an in-person visit." },
+  ],
+  Fitness: [
+    { question: "Do I need to be in shape to start?", answer: "Not at all — our programs are built for every fitness level, with modifications for beginners in every class." },
+    { question: "Can I try a class before committing?", answer: "Yes, we offer a free trial class so you can experience our coaching and community firsthand." },
+    { question: "What should I bring to my first session?", answer: "Just comfortable workout clothes and a water bottle. We provide all the equipment you'll need." },
+  ],
+  Technology: [
+    { question: "Is there a free trial?", answer: "Yes, every plan includes a 14-day free trial with full feature access — no credit card required to start." },
+    { question: "How does onboarding work?", answer: "Our team provides guided setup and documentation, with live support available during your first 30 days." },
+    { question: "Is my data secure?", answer: "We use enterprise-grade encryption and undergo regular third-party security audits to keep your data safe." },
+  ],
+  Finance: [
+    { question: "What services do you offer?", answer: "From bookkeeping and tax planning to investment advisory and retirement planning, tailored to your goals." },
+    { question: "Do you work with individuals or businesses?", answer: "Both — we support individual clients as well as small and mid-sized businesses." },
+    { question: "How are your fees structured?", answer: "Fees vary by service; we provide a transparent breakdown during your free initial consultation." },
+  ],
+  Portfolio: [
+    { question: "Are you available for freelance projects?", answer: "Yes, I'm currently accepting new projects — reach out with your timeline and scope to check availability." },
+    { question: "What's your typical turnaround time?", answer: "Most projects take 2-4 weeks depending on scope, with regular check-ins throughout the process." },
+    { question: "Do you offer revisions?", answer: "Every project includes two rounds of revisions to make sure the final result matches your vision." },
+  ],
+  Legal: [
+    { question: "Do you offer free consultations?", answer: "Yes, we offer a complimentary initial consultation to discuss your case and outline your options." },
+    { question: "What areas of law do you practice?", answer: "Our attorneys handle a range of practice areas — reach out and we'll match you with the right specialist." },
+    { question: "How are fees structured?", answer: "Depending on the case, we offer hourly, flat-fee, and contingency arrangements, explained clearly upfront." },
+  ],
+  "Local Business": [
+    { question: "What are your hours?", answer: "We're open Monday through Saturday — check our contact page for exact hours and holiday schedules." },
+    { question: "Do you offer delivery or pickup?", answer: "Yes, both options are available. Reach out or check our contact page for details." },
+    { question: "Are walk-ins welcome?", answer: "Absolutely — walk-ins are always welcome, though booking ahead guarantees your spot." },
+  ],
+  Startup: [
+    { question: "Is this product ready for production use?", answer: "Yes, we're live with paying customers today and ship improvements every week based on user feedback." },
+    { question: "Do you offer onboarding support?", answer: "Every new account gets a guided onboarding session with our founding team." },
+    { question: "What's on the roadmap?", answer: "We share a public roadmap and prioritize features based directly on customer requests." },
+  ],
+  Automotive: [
+    { question: "Do you offer financing?", answer: "Yes, we work with multiple lenders to find financing options that fit your budget, including for all credit types." },
+    { question: "Can I trade in my current vehicle?", answer: "Absolutely — bring your vehicle in for a free appraisal and we'll apply the value toward your purchase." },
+    { question: "Do you service what you sell?", answer: "Yes, our certified service center handles maintenance and repairs for every vehicle we sell." },
+  ],
+  Travel: [
+    { question: "Do you handle custom itineraries?", answer: "Yes, every trip we plan is built around your preferences, budget, and travel style." },
+    { question: "What if my plans change?", answer: "We offer flexible rebooking on most packages and will work with you if your travel dates shift." },
+    { question: "Do you assist with travel documents?", answer: "Yes, we provide guidance on visas, passports, and any required travel documentation for your destination." },
   ],
   default: [
     { question: "How can I get started?", answer: "Simply reach out to us through our contact form or give us a call. We'll schedule a consultation to discuss your needs." },
@@ -83,6 +203,66 @@ const SERVICES_DATA: Record<string, Array<{ title: string; description: string; 
     { title: "Manicure & Pedicure", description: "Luxurious nail care services including gel, acrylics, and spa pedicures.", icon: "hand" },
     { title: "Bridal Makeup", description: "Flawless bridal beauty packages for your special day including trial sessions.", icon: "heart" },
   ],
+  Agency: [
+    { title: "Brand Strategy", description: "Positioning, messaging, and visual identity that set you apart from the competition.", icon: "target" },
+    { title: "Web Design & Development", description: "Fast, conversion-focused websites built to grow with your business.", icon: "layout" },
+    { title: "Digital Marketing", description: "SEO, paid media, and content strategy that turn visitors into customers.", icon: "trending-up" },
+  ],
+  Consulting: [
+    { title: "Strategic Advisory", description: "Data-driven recommendations to help you navigate growth, change, and competitive pressure.", icon: "compass" },
+    { title: "Operational Efficiency", description: "Streamline processes and cut costs without sacrificing quality or morale.", icon: "settings" },
+    { title: "Change Management", description: "Guide your organization through transitions with a clear, structured roadmap.", icon: "git-branch" },
+  ],
+  "Real Estate": [
+    { title: "Buyer Representation", description: "Expert guidance from search to closing, with your best interests always first.", icon: "key" },
+    { title: "Seller Services", description: "Strategic pricing, staging, and marketing to sell faster and for more.", icon: "home" },
+    { title: "Investment Properties", description: "Identify and evaluate opportunities with strong long-term return potential.", icon: "trending-up" },
+  ],
+  Fitness: [
+    { title: "Group Classes", description: "High-energy, coach-led sessions for every fitness level, from beginner to advanced.", icon: "users" },
+    { title: "Personal Training", description: "One-on-one programs tailored to your goals, schedule, and starting point.", icon: "activity" },
+    { title: "Nutrition Coaching", description: "Practical, sustainable nutrition guidance to complement your training.", icon: "heart-pulse" },
+  ],
+  Technology: [
+    { title: "Platform Integration", description: "Connect your existing tools with our API in hours, not weeks.", icon: "cpu" },
+    { title: "Dedicated Support", description: "Technical support from engineers who actually know the product.", icon: "headphones" },
+    { title: "Enterprise Security", description: "SOC 2-aligned infrastructure with encryption at rest and in transit.", icon: "shield" },
+  ],
+  Finance: [
+    { title: "Wealth Management", description: "Personalized investment strategy aligned with your goals and risk tolerance.", icon: "trending-up" },
+    { title: "Tax Planning", description: "Proactive tax strategy that keeps more of what you earn, year-round.", icon: "file-text" },
+    { title: "Retirement Planning", description: "A clear, achievable path to the retirement you're actually working toward.", icon: "shield" },
+  ],
+  Portfolio: [
+    { title: "Brand & Visual Identity", description: "Distinctive design systems that make brands instantly recognizable.", icon: "star" },
+    { title: "Illustration & Art Direction", description: "Original artwork and creative direction tailored to your story.", icon: "sparkles" },
+    { title: "Freelance Collaboration", description: "Flexible engagement for one-off projects or ongoing creative partnership.", icon: "message-circle" },
+  ],
+  Legal: [
+    { title: "Litigation & Disputes", description: "Aggressive, strategic representation when you need to protect your interests.", icon: "shield" },
+    { title: "Contracts & Compliance", description: "Clear, thorough agreements that protect your business from day one.", icon: "file-text" },
+    { title: "Consultation & Advisory", description: "Straightforward legal guidance before problems become expensive ones.", icon: "message-circle" },
+  ],
+  "Local Business": [
+    { title: "In-Store Service", description: "Friendly, knowledgeable service every time you walk through our door.", icon: "users" },
+    { title: "Custom Orders", description: "Tell us what you need and we'll make it happen, no matter how specific.", icon: "settings" },
+    { title: "Community Support", description: "Proud to sponsor and support the neighborhood that supports us.", icon: "heart" },
+  ],
+  Startup: [
+    { title: "Core Platform", description: "The tools your team needs to move faster, built for how modern teams actually work.", icon: "cpu" },
+    { title: "Fast Onboarding", description: "Get your whole team set up and productive in under a day.", icon: "zap" },
+    { title: "Responsive Support", description: "Direct access to our founding team when you need help, not a ticket queue.", icon: "message-circle" },
+  ],
+  Automotive: [
+    { title: "New & Certified Pre-Owned", description: "A wide inventory with transparent pricing and no-pressure sales.", icon: "car" },
+    { title: "Service & Maintenance", description: "Certified technicians keeping your vehicle running at its best.", icon: "settings" },
+    { title: "Flexible Financing", description: "Financing options for every credit profile, with clear terms upfront.", icon: "file-text" },
+  ],
+  Travel: [
+    { title: "Custom Itineraries", description: "Trips designed around your interests, pace, and budget — not a template.", icon: "map" },
+    { title: "Group & Corporate Travel", description: "Seamless coordination for teams, families, and large groups.", icon: "users" },
+    { title: "24/7 Trip Support", description: "Real help, day or night, if anything changes while you're on the road.", icon: "headphones" },
+  ],
   default: [
     { title: "Consultation", description: "Expert guidance tailored to your specific needs and goals.", icon: "message-circle" },
     { title: "Custom Solutions", description: "Bespoke services designed to deliver measurable results.", icon: "settings" },
@@ -95,18 +275,18 @@ const SERVICES_DATA: Record<string, Array<{ title: string; description: string; 
 /* -------------------------------------------------------------------------- */
 
 const DESIGN_STYLE_DEFAULTS: Record<string, Record<string, string>> = {
-  minimal: { hero: "Hero1", services: "Services1", portfolio: "Portfolio1", testimonials: "Testimonials1", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery1", blog: "BlogPreview" },
-  modern: { hero: "Hero2", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery2", blog: "BlogPreview" },
-  premium: { hero: "Hero3", services: "Services3", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery1", blog: "BlogPreview" },
-  corporate: { hero: "Hero2", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview" },
-  creative: { hero: "Hero4", services: "Services3", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview" },
-  luxury: { hero: "Hero5", services: "Services4", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview" },
-  friendly: { hero: "Hero1", services: "Services1", portfolio: "Portfolio1", testimonials: "Testimonials1", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview" },
-  professional: { hero: "Hero2", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview" },
-  bold: { hero: "Hero4", services: "Services3", portfolio: "Portfolio3", testimonials: "Testimonials1", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview" },
-  elegant: { hero: "Hero5", services: "Services4", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview" },
-  tech: { hero: "Hero3", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview" },
-  editorial: { hero: "Hero5", services: "Services4", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview" },
+  minimal: { navbar: "Navbar3", hero: "Hero1", services: "Services1", portfolio: "Portfolio1", testimonials: "Testimonials1", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery1", blog: "BlogPreview", footer: "Footer3", about: "About1" },
+  modern: { navbar: "Navbar1", hero: "Hero2", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery2", blog: "BlogPreview", footer: "Footer2", about: "About2" },
+  premium: { navbar: "Navbar2", hero: "Hero3", services: "Services3", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery1", blog: "BlogPreview", footer: "Footer1", about: "About1" },
+  corporate: { navbar: "Navbar1", hero: "Hero2", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview", footer: "Footer1", about: "About2" },
+  creative: { navbar: "Navbar2", hero: "Hero4", services: "Services3", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview", footer: "Footer2", about: "About1" },
+  luxury: { navbar: "Navbar3", hero: "Hero5", services: "Services4", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview", footer: "Footer3", about: "About1" },
+  friendly: { navbar: "Navbar1", hero: "Hero1", services: "Services1", portfolio: "Portfolio1", testimonials: "Testimonials1", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview", footer: "Footer2", about: "About2" },
+  professional: { navbar: "Navbar1", hero: "Hero2", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview", footer: "Footer1", about: "About2" },
+  bold: { navbar: "Navbar2", hero: "Hero4", services: "Services3", portfolio: "Portfolio3", testimonials: "Testimonials1", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview", footer: "Footer2", about: "About1" },
+  elegant: { navbar: "Navbar3", hero: "Hero5", services: "Services4", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview", footer: "Footer3", about: "About1" },
+  tech: { navbar: "Navbar2", hero: "Hero3", services: "Services2", portfolio: "Portfolio2", testimonials: "Testimonials2", pricing: "Pricing2", faq: "FAQ2", cta: "CTA2", contact: "Contact2", gallery: "Gallery1", blog: "BlogPreview", footer: "Footer1", about: "About2" },
+  editorial: { navbar: "Navbar3", hero: "Hero5", services: "Services4", portfolio: "Portfolio3", testimonials: "Testimonials3", pricing: "Pricing1", faq: "FAQ1", cta: "CTA1", contact: "Contact1", gallery: "Gallery2", blog: "BlogPreview", footer: "Footer3", about: "About1" },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -114,6 +294,7 @@ const DESIGN_STYLE_DEFAULTS: Record<string, Record<string, string>> = {
 /* -------------------------------------------------------------------------- */
 
 const COMPONENT_MAP: Record<string, string> = {
+  navbar1: "Navbar1", navbar2: "Navbar2", navbar3: "Navbar3",
   hero1: "Hero1", hero2: "Hero2", hero3: "Hero3", hero4: "Hero4", hero5: "Hero5",
   services1: "Services1", services2: "Services2", services3: "Services3", services4: "Services4",
   portfolio1: "Portfolio1", portfolio2: "Portfolio2", portfolio3: "Portfolio3",
@@ -123,6 +304,8 @@ const COMPONENT_MAP: Record<string, string> = {
   cta1: "CTA1", cta2: "CTA2",
   contact1: "Contact1", contact2: "Contact2",
   gallery1: "Gallery1", gallery2: "Gallery2",
+  footer1: "Footer1", footer2: "Footer2", footer3: "Footer3",
+  about1: "About1", about2: "About2",
 };
 
 function resolveComponent(
@@ -157,6 +340,15 @@ const HERO_CONTENT: Record<string, { headline: string; subheadline: string; ctaT
   Travel: { headline: "Explore the World with {name}", subheadline: "Curated travel experiences and exclusive vacation packages", ctaText: "Plan Your Trip", badge: "Deals Available" },
   Automotive: { headline: "Drive Your Dream", subheadline: "New and certified pre-owned vehicles with flexible financing", ctaText: "Browse Inventory", badge: "Special Offers" },
   Beauty: { headline: "Discover Your Beauty", subheadline: "Expert hair, skin, and beauty services tailored just for you", ctaText: "Book Appointment", badge: "New Client Special" },
+  Agency: { headline: "We Build Brands That Grow", subheadline: "Strategy, design, and marketing that turn attention into revenue", ctaText: "Start a Project", badge: "Now Booking Q2" },
+  Consulting: { headline: "Clarity for Complex Problems", subheadline: "Strategic guidance that turns uncertainty into a clear path forward", ctaText: "Book a Consultation", badge: "Trusted Advisors" },
+  Fitness: { headline: "Stronger Starts Today", subheadline: "Expert coaching and a community that keeps you accountable", ctaText: "Start Free Trial", badge: "First Class Free" },
+  Technology: { headline: "Ship Faster with {name}", subheadline: "The platform modern teams use to build, launch, and scale", ctaText: "Start Free Trial", badge: "14-Day Free Trial" },
+  Finance: { headline: "Plan Your Financial Future", subheadline: "Personalized advisory for wealth, tax, and retirement planning", ctaText: "Book a Consultation", badge: "Fee-Only Advisors" },
+  Portfolio: { headline: "Hi, I'm {name}", subheadline: "Selected work across brand, design, and visual storytelling", ctaText: "View My Work", badge: "Available for Projects" },
+  Legal: { headline: "Experienced Legal Representation", subheadline: "Straightforward counsel when you need it most", ctaText: "Free Consultation", badge: "Free Case Review" },
+  "Local Business": { headline: "Proudly Serving Our Community", subheadline: "Quality service and honest prices from a name you can trust", ctaText: "Get In Touch", badge: "Locally Owned" },
+  Startup: { headline: "The Future, Built Today", subheadline: "Join the teams already using {name} to move faster", ctaText: "Get Started Free", badge: "Backed by Leading Investors" },
 };
 
 const ABOUT_TITLE: Record<string, string> = {
@@ -165,6 +357,17 @@ const ABOUT_TITLE: Record<string, string> = {
   Education: "About Our Institution",
   "Real Estate": "About Our Agency",
   Travel: "About Us",
+  Agency: "Who We Are",
+  Consulting: "Our Approach",
+  Fitness: "Our Mission",
+  Technology: "About the Platform",
+  Finance: "About Our Firm",
+  Portfolio: "About Me",
+  Legal: "About Our Firm",
+  "Local Business": "Our Story",
+  Startup: "Our Mission",
+  Automotive: "About the Dealership",
+  Beauty: "About the Studio",
 };
 
 const BLOG_POSTS: Record<string, Array<{ title: string; excerpt: string; author: string; date: string; readTime: string }>> = {
@@ -186,59 +389,141 @@ const BLOG_POSTS: Record<string, Array<{ title: string; excerpt: string; author:
     { title: "How to Choose the Right Course for Your Career", excerpt: "A comprehensive guide to selecting courses that align with your career goals and learning style.", author: "Prof. Adams", date: "2026-01-15", readTime: "6 min read" },
     { title: "The Rise of Online Learning in 2026", excerpt: "Explore how digital education is transforming the way we learn and grow professionally.", author: "Dr. Lee", date: "2026-01-10", readTime: "4 min read" },
   ],
+  Agency: [
+    { title: "5 Signs Your Brand Needs a Refresh", excerpt: "How to tell when your visual identity is holding your growth back.", author: "Studio Team", date: "2026-01-15", readTime: "4 min read" },
+    { title: "What Makes a Website Actually Convert", excerpt: "The design and copy decisions that turn visitors into customers.", author: "Studio Team", date: "2026-01-08", readTime: "5 min read" },
+  ],
+  Consulting: [
+    { title: "Three Levers for Sustainable Growth", excerpt: "The frameworks we use to help clients scale without burning out their teams.", author: "Advisory Team", date: "2026-01-15", readTime: "6 min read" },
+    { title: "When to Bring in Outside Perspective", excerpt: "How to know if your team needs an external advisor — and when it doesn't.", author: "Advisory Team", date: "2026-01-08", readTime: "4 min read" },
+  ],
+  Fitness: [
+    { title: "Why Consistency Beats Intensity", excerpt: "The training principle our most successful members swear by.", author: "Coach Team", date: "2026-01-15", readTime: "3 min read" },
+    { title: "Fueling Your Workouts: A Beginner's Guide", excerpt: "Simple nutrition changes that make a measurable difference in performance.", author: "Coach Team", date: "2026-01-08", readTime: "5 min read" },
+  ],
+  Technology: [
+    { title: "What's New This Quarter", excerpt: "A roundup of the latest features, integrations, and performance improvements.", author: "Product Team", date: "2026-01-15", readTime: "4 min read" },
+    { title: "How Teams Are Using Our API in Production", excerpt: "Three real-world integration patterns from our fastest-growing customers.", author: "Engineering Team", date: "2026-01-08", readTime: "6 min read" },
+  ],
+  Finance: [
+    { title: "Year-End Tax Moves Worth Making", excerpt: "A few practical steps that can meaningfully reduce your tax bill.", author: "Advisory Team", date: "2026-01-15", readTime: "5 min read" },
+    { title: "Building a Retirement Plan That Actually Works", excerpt: "The fundamentals we walk every client through before anything else.", author: "Advisory Team", date: "2026-01-08", readTime: "5 min read" },
+  ],
+  Portfolio: [
+    { title: "Behind the Scenes of a Recent Project", excerpt: "A look at the process, from first sketch to final delivery.", author: "Me", date: "2026-01-15", readTime: "4 min read" },
+    { title: "Tools I Can't Work Without", excerpt: "The software and hardware in my everyday creative workflow.", author: "Me", date: "2026-01-08", readTime: "3 min read" },
+  ],
+  Legal: [
+    { title: "What to Expect During Your First Consultation", excerpt: "A walkthrough of our process so you know exactly what's ahead.", author: "Firm Team", date: "2026-01-15", readTime: "4 min read" },
+    { title: "Common Contract Mistakes Small Businesses Make", excerpt: "Simple clauses that prevent costly disputes down the road.", author: "Firm Team", date: "2026-01-08", readTime: "5 min read" },
+  ],
+  "Local Business": [
+    { title: "Meet the Team Behind the Counter", excerpt: "Get to know the people who make this place what it is.", author: "Team", date: "2026-01-15", readTime: "3 min read" },
+    { title: "What's New This Season", excerpt: "The latest additions and updates from around the shop.", author: "Team", date: "2026-01-08", readTime: "3 min read" },
+  ],
+  Startup: [
+    { title: "Our Product Roadmap for 2026", excerpt: "What we're building next, based directly on customer feedback.", author: "Founding Team", date: "2026-01-15", readTime: "4 min read" },
+    { title: "Lessons from Our First 1,000 Customers", excerpt: "What surprised us, what we got wrong, and what we'd do again.", author: "Founding Team", date: "2026-01-08", readTime: "6 min read" },
+  ],
   default: [
     { title: "Industry Trends to Watch in 2026", excerpt: "Stay ahead of the curve with these emerging trends shaping the industry.", author: "Team", date: "2026-01-15", readTime: "5 min read" },
     { title: "How We Deliver Exceptional Results", excerpt: "A look at our process and commitment to quality that sets us apart.", author: "Team", date: "2026-01-10", readTime: "4 min read" },
   ],
 };
 
-const BEAUTY_SALON_SERVICES = [
-  { title: "Hair Styling", description: "Expert cuts, color, blowouts, and styling for every occasion.", icon: "scissors" },
-  { title: "Facials & Skincare", description: "Customized facials, peels, and treatments for radiant skin.", icon: "sparkles" },
-  { title: "Manicure & Pedicure", description: "Luxurious nail care including gel, acrylics, and spa pedicures.", icon: "hand" },
-  { title: "Bridal Makeup", description: "Flawless bridal beauty packages for your special day.", icon: "heart" },
-  { title: "Hair Treatments", description: "Keratin, deep conditioning, and restorative hair therapies.", icon: "wind" },
-  { title: "Waxing Services", description: "Professional waxing for smooth, hair-free skin.", icon: "flower" },
-];
-
-const BEAUTY_SALON_TESTIMONIALS = [
-  { name: "Jessica L.", role: "Loyal Client", content: "I've been coming here for years and they never disappoint. My hair has never looked better!", rating: 5 },
-  { name: "Amanda R.", role: "Bride", content: "My bridal makeup was absolutely flawless. Everyone at the wedding asked who did my makeup.", rating: 5 },
-  { name: "Sophia M.", role: "Regular Client", content: "The facials here are transformative. My skin has never been so clear and glowing.", rating: 5 },
-];
-
-const BEAUTY_SALON_FAQ = [
-  { question: "Do I need an appointment?", answer: "We highly recommend booking an appointment to ensure availability. Walk-ins are welcome but subject to availability." },
-  { question: "What hair services do you offer?", answer: "We offer cuts, color, highlights, balayage, extensions, keratin treatments, bridal styling, and more." },
-  { question: "Do you offer skincare treatments?", answer: "Yes! Our skincare menu includes facials, chemical peels, microdermabrasion, and anti-aging treatments." },
-  { question: "How do I prepare for my appointment?", answer: "Come with clean hair for cuts, and avoid sun exposure 24 hours before facials. We'll handle the rest!" },
-];
-
 /* -------------------------------------------------------------------------- */
 /*                          Helper Functions                                  */
 /* -------------------------------------------------------------------------- */
 
+// Canonical industry names used as keys across every content dictionary
+// above. The questionnaire sends the client's lowercase/hyphenated business
+// type slug (e.g. "real-estate", "local-business") — this maps those slugs
+// (and a few legacy Title-Case variants) onto the canonical names so content
+// selection actually varies by business type instead of silently falling
+// through to the generic "default" bucket for almost everyone.
+const INDUSTRY_ALIASES: Record<string, string> = {
+  restaurant: "Restaurant",
+  agency: "Agency",
+  consulting: "Consulting",
+  "real-estate": "Real Estate",
+  "real estate": "Real Estate",
+  healthcare: "Healthcare",
+  education: "Education",
+  fitness: "Fitness",
+  travel: "Travel",
+  technology: "Technology",
+  finance: "Finance",
+  beauty: "Beauty",
+  portfolio: "Portfolio",
+  "local-business": "Local Business",
+  "local business": "Local Business",
+  legal: "Legal",
+  automotive: "Automotive",
+  startup: "Startup",
+  fashion: "Fashion",
+  electronics: "Electronics",
+  grocery: "Grocery",
+  furniture: "Furniture",
+  sports: "Sports",
+  jewelry: "Jewelry",
+  books: "Books",
+  "pet-store": "Pet Store",
+  "pet store": "Pet Store",
+  "home-services": "Home Services",
+  "home services": "Home Services",
+  other: "Other",
+};
+
 function getIndustry(industry: string): string {
-  const map: Record<string, string> = {
-    Restaurant: "Restaurant",
-    Healthcare: "Healthcare",
-    Education: "Education",
-    "Real Estate": "Real Estate",
-    Travel: "Travel",
-    Automotive: "Automotive",
-    Beauty: "Beauty",
-    Fashion: "Fashion",
-    Electronics: "Electronics",
-    Grocery: "Grocery",
-    Furniture: "Furniture",
-    Sports: "Sports",
-    Jewelry: "Jewelry",
-    Books: "Books",
-    "Pet Store": "Pet Store",
-    "Home Services": "Home Services",
-    Other: "Other",
-  };
-  return map[industry] || industry || "Other";
+  if (!industry) return "Other";
+  const normalized = industry.trim().toLowerCase();
+  return INDUSTRY_ALIASES[normalized] || industry;
+}
+
+// The client sends the Typography step's selection id (e.g. "playfair"),
+// not a real CSS font-family name. Most ids happened to survive because CSS
+// font-family matching is ASCII case-insensitive (so "poppins" ~= "Poppins"),
+// but "playfair", "opensans", and "cormorant" don't match their real family
+// names ("Playfair Display", "Open Sans", "Cormorant Garamond") at all, so
+// those three silently fell back to the design style's default font.
+const TYPOGRAPHY_FONT_MAP: Record<string, string> = {
+  inter: "Inter",
+  poppins: "Poppins",
+  playfair: "Playfair Display",
+  montserrat: "Montserrat",
+  lato: "Lato",
+  roboto: "Roboto",
+  merriweather: "Merriweather",
+  cormorant: "Cormorant Garamond",
+  nunito: "Nunito",
+  opensans: "Open Sans",
+};
+
+function getFontFamily(typographyId: string): string {
+  if (!typographyId) return "";
+  return TYPOGRAPHY_FONT_MAP[typographyId.trim().toLowerCase()] || typographyId;
+}
+
+// The Hero's CTA button used to always link to /contact regardless of what
+// it said — "View Our Menu" landed on the Contact form, "View My Work"
+// never reached the Portfolio page, etc. Route each known CTA label to the
+// page it actually names, but only when that page was selected; otherwise
+// fall back to Contact, which always exists.
+const CTA_TARGET_PAGE: Record<string, string> = {
+  "View Our Menu": "menu",
+  "Explore Courses": "courses",
+  "Browse Properties": "properties",
+  "Plan Your Trip": "destinations",
+  "Browse Inventory": "inventory",
+  "View My Work": "portfolio",
+  "Start Free Trial": "pricing",
+  "Get Started Free": "pricing",
+};
+
+function resolveCtaLink(ctaText: string, selectedPages: string[]): string {
+  const targetSlug = CTA_TARGET_PAGE[ctaText];
+  if (targetSlug && selectedPages.includes(targetSlug)) return `/${targetSlug}`;
+  return "/contact";
 }
 
 function getAboutTitle(industry: string): string {
@@ -261,8 +546,92 @@ function getBlogPosts(industry: string): Array<{ title: string; excerpt: string;
   return BLOG_POSTS[industry] || BLOG_POSTS["default"];
 }
 
+// BlogPreview/BlogGrid use post.id as a React key and link to /blog/{slug},
+// plus optionally show post.image and post.category — none of which exist on
+// the raw BLOG_POSTS entries. Without this the blog sections rendered but
+// every card linked to "/blog/undefined" and used index-only keys.
+function withBlogMeta(
+  posts: Array<{ title: string; excerpt: string; author?: string; date?: string; readTime?: string; image?: string | null; category?: string }>,
+  industry: string,
+  imagePaths: string[] = []
+): Array<Record<string, unknown>> {
+  return posts.map((post, i) => ({
+    author: "",
+    date: "",
+    readTime: "",
+    ...post,
+    id: String(i + 1),
+    slug: (post.title || `post-${i + 1}`)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") || `post-${i + 1}`,
+    image: post.image ?? imagePaths[i] ?? null,
+    category: post.category || industry,
+  }));
+}
+
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* -------------------------------------------------------------------------- */
+/*                  Per-Page Custom Content Overrides                         */
+/* -------------------------------------------------------------------------- */
+
+// What the client typed in for a specific page's Hero / About-story / CTA
+// sections while building the questionnaire (see StepPageDetail on the
+// client). Any field left blank falls back to the mock industry content —
+// custom text always wins over the mock default when provided.
+export interface PageContentOverride {
+  hero?: { headline?: string; subheadline?: string; ctaText?: string };
+  about_story?: { content?: string };
+  cta?: { headline?: string; subheadline?: string; ctaText?: string };
+}
+
+function heroCopy(
+  pageContent: PageContentOverride | undefined,
+  fallbackTitle: string,
+  fallbackSubtitle: string
+): { title: string; subtitle: string } {
+  const override = pageContent?.hero;
+  return {
+    title: override?.headline?.trim() || fallbackTitle,
+    subtitle: override?.subheadline?.trim() || fallbackSubtitle,
+  };
+}
+
+function ctaCopy(
+  pageContent: PageContentOverride | undefined,
+  fallback: { headline: string; subheadline: string; ctaText: string }
+): { headline: string; subheadline: string; ctaText: string } {
+  const override = pageContent?.cta;
+  return {
+    headline: override?.headline?.trim() || fallback.headline,
+    subheadline: override?.subheadline?.trim() || fallback.subheadline,
+    ctaText: override?.ctaText?.trim() || fallback.ctaText,
+  };
+}
+
+function aboutStoryCopy(pageContent: PageContentOverride | undefined, fallbackContent: string): string {
+  return pageContent?.about_story?.content?.trim() || fallbackContent;
+}
+
+// Mixes a hex color toward white (amount 0 = pure color, 1 = pure white).
+// Used to give light-mode backgrounds a subtle brand tint instead of flat
+// white, so the chosen primary color is visible beyond just buttons.
+function mixWithWhite(hex: string, amount: number): string {
+  const normalized = hex.replace("#", "");
+  const full = normalized.length === 3
+    ? normalized.split("").map((c) => c + c).join("")
+    : normalized;
+  const num = Number.parseInt(full, 16);
+  if (Number.isNaN(num)) return hex;
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  const mix = (channel: number) => Math.round(channel + (255 - channel) * amount);
+  const toHex = (channel: number) => channel.toString(16).padStart(2, "0");
+  return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -283,7 +652,8 @@ class MockAIProvider extends AIProvider {
     const themeStyle = answers.themeStyle || "modern";
     const primaryColor = answers.primaryColor || "#3B82F6";
     const secondaryColor = answers.secondaryColor || "#1E40AF";
-    const fontStyle = answers.fontStyle || "";
+    const fontStyle = getFontFamily(answers.fontStyle || "");
+    const accentStyle = answers.accentStyle || "";
     const logo = answers.logo || null;
 
     const selectedPages = answers.selectedPages || answers.pages || ["home"];
@@ -291,24 +661,52 @@ class MockAIProvider extends AIProvider {
     const pageSections = answers.pageSections || {};
     const componentSelections = answers.componentSelections || {};
     const socialMedia = answers.socialMedia || {};
+    const themeMode = answers.themeMode || "auto";
+
+    // Real contact details typed in by the client. Only fall back to generic
+    // placeholder text when the field was genuinely left blank, so the
+    // generated site always reflects what the client actually entered.
+    const contactPhone = answers.phone || "+1 (555) 123-4567";
+    const contactEmail = answers.email || "hello@example.com";
+    const contactAddress = answers.address || answers.location || "123 Business St, Suite 100";
 
     const userServices = answers.services || [];
     const userTestimonials = answers.testimonials || [];
     const userFaq = answers.faq || [];
+    const userPortfolio = answers.portfolioItems || [];
+    const userGalleryImages = answers.galleryImages || [];
+    const userTeam = answers.teamMembers || [];
+    const userWhyChooseUs = answers.whyChooseUsReasons || [];
+    const userPricingPlans = answers.pricingPlans || [];
+    const userMenuItems = answers.menuItems || [];
+    const userDailySpecials = answers.dailySpecials || [];
+    const userBlogPosts = answers.blogPosts || [];
+    const userStats = answers.stats || [];
+    const userTimeline = answers.timeline || [];
+    const userBusinessHours = answers.businessHours || [];
+    const userClassSchedule = answers.classSchedule || [];
+    const userCourses = answers.courses || [];
+    const userDestinations = answers.destinations || [];
+
+    // Custom Hero / About-story / CTA text the client typed in per page
+    // (see StepPageDetail on the client). Keyed by page slug.
+    const pageContentMap: Record<string, PageContentOverride> = answers.pageContent || {};
 
     const imagePaths = (assets || [])
       .filter((a: any) => a.type === "image" || a.mimeType?.startsWith("image/"))
       .map((a: any) => a.url || a.path || "");
 
     const config: BusinessTypeConfig = BUSINESS_TYPES[industry] || BUSINESS_TYPES["Other"];
-    const colorScheme = config.colorSchemes[0];
 
     const pages: Array<Record<string, unknown>> = [];
-    let sectionOrder = 0;
+
+    // Normalized page slugs (selectedPages can be a plain string[] or an
+    // array of {slug} objects) — used so CTA buttons only ever link to a
+    // page that's actually part of this site.
+    const selectedPageSlugs: string[] = selectedPages.map((p: any) => (typeof p === "string" ? p : p?.slug || "home"));
 
     for (const pageSlug of selectedPages) {
       const slug = typeof pageSlug === "string" ? pageSlug : (pageSlug as any).slug || "home";
-      sectionOrder = 0;
 
       switch (slug) {
         case "home":
@@ -319,7 +717,12 @@ class MockAIProvider extends AIProvider {
               businessName, businessDescription, industry, config,
               logoPath: logo, imagePaths, homepageSections: pageSections["home"] || homepageSections, socialMedia,
               userServices, userTestimonials, userFaq,
+              userPortfolio, userGalleryImages, userTeam, userWhyChooseUs, userPricingPlans,
+              userBlogPosts,
               componentSelections, themeStyle,
+              contactPhone, contactEmail, contactAddress,
+              selectedPages: selectedPageSlugs,
+              pageContent: pageContentMap["home"],
             }),
           });
           break;
@@ -331,6 +734,8 @@ class MockAIProvider extends AIProvider {
               businessName, businessDescription, industry,
               logoPath: logo, imagePaths, componentSelections, themeStyle,
               pageSections: pageSections["about"] || [],
+              pageContent: pageContentMap["about"],
+              userTeam, userStats, userTimeline,
             }),
           });
           break;
@@ -341,8 +746,10 @@ class MockAIProvider extends AIProvider {
             title: slug === "services" ? "Services" : "Service Details",
             sections: this._buildServicesSections({
               businessName, businessDescription, industry,
-              userServices, componentSelections, themeStyle,
+              userServices, userWhyChooseUs, userTestimonials,
+              componentSelections, themeStyle,
               pageSections: pageSections[slug] || [],
+              pageContent: pageContentMap[slug],
             }),
           });
           break;
@@ -352,7 +759,8 @@ class MockAIProvider extends AIProvider {
             slug,
             title: slug === "portfolio" ? "Portfolio" : "Portfolio Details",
             sections: this._buildPortfolioSections({
-              businessName, industry, imagePaths, componentSelections, themeStyle,
+              businessName, industry, imagePaths, userPortfolio, componentSelections, themeStyle,
+              pageContent: pageContentMap[slug],
             }),
           });
           break;
@@ -361,7 +769,8 @@ class MockAIProvider extends AIProvider {
             slug: "pricing",
             title: "Pricing",
             sections: this._buildPricingSections({
-              businessName, industry, componentSelections, themeStyle,
+              businessName, industry, userPricingPlans, componentSelections, themeStyle,
+              pageContent: pageContentMap["pricing"],
             }),
           });
           break;
@@ -371,7 +780,8 @@ class MockAIProvider extends AIProvider {
             slug,
             title: slug === "blog" ? "Blog" : "Blog Details",
             sections: this._buildBlogSections({
-              businessName, industry, componentSelections, themeStyle,
+              businessName, industry, userBlogPosts, componentSelections, themeStyle,
+              pageContent: pageContentMap[slug],
             }),
           });
           break;
@@ -382,6 +792,10 @@ class MockAIProvider extends AIProvider {
             sections: this._buildContactSections({
               businessName, businessDescription, industry,
               componentSelections, themeStyle,
+              contactPhone, contactEmail, contactAddress,
+              pageSections: pageSections["contact"] || [],
+              userBusinessHours,
+              pageContent: pageContentMap["contact"],
             }),
           });
           break;
@@ -391,6 +805,7 @@ class MockAIProvider extends AIProvider {
             title: "FAQ",
             sections: this._buildFaqSections({
               businessName, industry, userFaq, componentSelections, themeStyle,
+              pageContent: pageContentMap["faq"],
             }),
           });
           break;
@@ -400,6 +815,7 @@ class MockAIProvider extends AIProvider {
             title: "Testimonials",
             sections: this._buildTestimonialsSections({
               businessName, industry, userTestimonials, componentSelections, themeStyle,
+              pageContent: pageContentMap["testimonials"],
             }),
           });
           break;
@@ -408,7 +824,8 @@ class MockAIProvider extends AIProvider {
             slug: "gallery",
             title: "Gallery",
             sections: this._buildGallerySections({
-              businessName, industry, imagePaths, componentSelections, themeStyle,
+              businessName, industry, imagePaths, userGalleryImages, componentSelections, themeStyle,
+              pageContent: pageContentMap["gallery"],
             }),
           });
           break;
@@ -417,16 +834,8 @@ class MockAIProvider extends AIProvider {
             slug: "menu",
             title: "Menu",
             sections: this._buildMenuSections({
-              businessName, industry, componentSelections, themeStyle,
-            }),
-          });
-          break;
-        case "reservations":
-          pages.push({
-            slug: "reservations",
-            title: "Reservations",
-            sections: this._buildReservationsSections({
-              businessName, industry, componentSelections, themeStyle,
+              businessName, industry, userMenuItems, userDailySpecials, componentSelections, themeStyle,
+              pageContent: pageContentMap["menu"],
             }),
           });
           break;
@@ -435,16 +844,74 @@ class MockAIProvider extends AIProvider {
             slug: "team",
             title: "Team",
             sections: this._buildTeamSections({
-              businessName, industry, componentSelections, themeStyle,
+              businessName, industry, userTeam, componentSelections, themeStyle,
+              pageContent: pageContentMap["team"],
             }),
           });
           break;
-        case "booking":
+        case "properties":
           pages.push({
-            slug: "booking",
-            title: "Booking",
-            sections: this._buildBookingSections({
-              businessName, industry, componentSelections, themeStyle,
+            slug: "properties",
+            title: "Properties",
+            sections: this._buildPropertiesSections({
+              businessName, industry, userTeam, componentSelections, themeStyle,
+              pageSections: pageSections["properties"] || [],
+              pageContent: pageContentMap["properties"],
+            }),
+          });
+          break;
+        case "courses":
+          pages.push({
+            slug: "courses",
+            title: "Courses",
+            sections: this._buildCoursesSections({
+              businessName, industry, userCourses, userWhyChooseUs, userTestimonials, componentSelections, themeStyle,
+              pageSections: pageSections["courses"] || [],
+              pageContent: pageContentMap["courses"],
+            }),
+          });
+          break;
+        case "classes":
+          pages.push({
+            slug: "classes",
+            title: "Classes",
+            sections: this._buildClassesSections({
+              businessName, industry, userClassSchedule, userTeam, userPricingPlans, componentSelections, themeStyle,
+              pageSections: pageSections["classes"] || [],
+              pageContent: pageContentMap["classes"],
+            }),
+          });
+          break;
+        case "destinations":
+          pages.push({
+            slug: "destinations",
+            title: "Destinations",
+            sections: this._buildDestinationsSections({
+              businessName, industry, userDestinations, userDailySpecials, userTestimonials, componentSelections, themeStyle,
+              pageSections: pageSections["destinations"] || [],
+              pageContent: pageContentMap["destinations"],
+            }),
+          });
+          break;
+        case "features":
+          pages.push({
+            slug: "features",
+            title: "Features",
+            sections: this._buildFeaturesSections({
+              businessName, industry, userServices, userWhyChooseUs, userTestimonials, componentSelections, themeStyle,
+              pageSections: pageSections["features"] || [],
+              pageContent: pageContentMap["features"],
+            }),
+          });
+          break;
+        case "inventory":
+          pages.push({
+            slug: "inventory",
+            title: "Inventory",
+            sections: this._buildInventorySections({
+              businessName, industry, userPortfolio, imagePaths, userTestimonials, componentSelections, themeStyle,
+              pageSections: pageSections["inventory"] || [],
+              pageContent: pageContentMap["inventory"],
             }),
           });
           break;
@@ -454,32 +921,48 @@ class MockAIProvider extends AIProvider {
             title: capitalize(slug.replace(/_/g, " ")),
             sections: this._buildGenericSections({
               businessName, industry, componentSelections, themeStyle,
+              pageContent: pageContentMap[slug],
             }),
           });
           break;
       }
     }
 
+    // Navbar and footer are generated like any other section — driven by the
+    // client's componentSelections — instead of being hardcoded by the
+    // renderer, so the chosen navbar/footer style is what actually ships.
+    const navbarComp = resolveComponent(componentSelections, "navbar", "Navbar2", themeStyle);
     const footerComp = resolveComponent(componentSelections, "footer", "Footer2", themeStyle);
-    const footerLinks = pages.map((p: any) => ({ label: p.title, href: `/${p.slug}` }));
-    const footerSocialLinks = Object.entries(socialMedia).map(([platform, href]) => ({ platform, href }));
+    const chromeLinks = pages.map((p: any) => ({ label: p.title, href: `/${p.slug}` }));
+    const chromeSocialLinks = Object.entries(socialMedia).map(([platform, href]) => ({ platform, href }));
     for (const page of pages) {
       const p = page as any;
+      p.sections.forEach((s: any) => { s.order = s.order + 1; });
+      p.sections.unshift({
+        id: "navbar",
+        component: navbarComp,
+        props: {
+          logo,
+          brandName: businessName,
+          links: chromeLinks,
+        },
+        order: 0,
+      });
       p.sections.push({
         id: "footer",
         component: footerComp,
         props: {
           brandName: businessName,
           description: businessDescription || `${businessName} - Professional services`,
-          links: footerLinks,
-          socialLinks: footerSocialLinks,
+          links: chromeLinks,
+          socialLinks: chromeSocialLinks,
         },
-        order: p.sections.length + 1,
+        order: p.sections.length,
       });
     }
 
     const theme = this._buildTheme({
-      primaryColor, secondaryColor, fontStyle, themeStyle, config,
+      primaryColor, secondaryColor, fontStyle, themeStyle, themeMode, accentStyle, config,
     });
 
     const navItems = pages.map((p: any) => ({
@@ -549,6 +1032,8 @@ class MockAIProvider extends AIProvider {
     businessName: string; businessDescription: string; industry: string;
     imagePaths: string[]; logoPath: string | null;
     componentSelections: Record<string, string>; themeStyle: string;
+    selectedPages: string[];
+    pageContent?: PageContentOverride;
   }): Record<string, unknown> {
     const content = HERO_CONTENT[ctx.industry] || {
       headline: `Welcome to ${ctx.businessName}`,
@@ -557,7 +1042,11 @@ class MockAIProvider extends AIProvider {
       badge: "Welcome",
     };
 
-    const headline = content.headline.replace("{name}", ctx.businessName);
+    const defaultHeadline = content.headline.replace("{name}", ctx.businessName);
+    const override = ctx.pageContent?.hero;
+    const headline = override?.headline?.trim() || defaultHeadline;
+    const subheadline = override?.subheadline?.trim() || content.subheadline;
+    const ctaText = override?.ctaText?.trim() || content.ctaText;
     const heroComp = resolveComponent(ctx.componentSelections, "hero", "Hero1", ctx.themeStyle);
 
     return {
@@ -565,9 +1054,9 @@ class MockAIProvider extends AIProvider {
       component: heroComp,
       props: {
         headline,
-        subheadline: content.subheadline,
-        ctaText: content.ctaText,
-        ctaLink: "/contact",
+        subheadline,
+        ctaText,
+        ctaLink: resolveCtaLink(ctaText, ctx.selectedPages),
         badge: content.badge,
         image: ctx.imagePaths[0] || null,
         logo: ctx.logoPath || null,
@@ -581,9 +1070,18 @@ class MockAIProvider extends AIProvider {
     config: BusinessTypeConfig; logoPath: string | null; imagePaths: string[];
     homepageSections: string[]; socialMedia: Record<string, string>;
     userServices: Array<{ title: string; description: string; icon: string }>;
-    userTestimonials: Array<{ name: string; role: string; content: string; rating: number }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
     userFaq: Array<{ question: string; answer: string }>;
+    userPortfolio: Array<{ title: string; description: string; image?: string | null }>;
+    userGalleryImages: Array<{ url: string; alt?: string }>;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    userWhyChooseUs: Array<{ title: string; description: string }>;
+    userPricingPlans: Array<{ name: string; price: string; period?: string; features: string[]; popular?: boolean }>;
+    userBlogPosts: Array<{ title: string; excerpt: string; author?: string; date?: string; image?: string | null; category?: string }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    contactPhone: string; contactEmail: string; contactAddress: string;
+    selectedPages: string[];
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
     const sections: Array<Record<string, unknown>> = [];
     let order = 0;
@@ -630,20 +1128,27 @@ class MockAIProvider extends AIProvider {
             order: order++,
           });
           break;
-        case "gallery":
+        case "gallery": {
+          // Gallery1/Gallery2 both expect `images` as a flat array of URL
+          // strings (they render <img src={img}>), not {url,alt} objects —
+          // passing objects rendered every tile as a broken "[object Object]" src.
+          const galleryUrls = ctx.userGalleryImages.length > 0
+            ? ctx.userGalleryImages.map((g) => g.url)
+            : ctx.imagePaths.length > 0
+              ? ctx.imagePaths
+              : Array.from({ length: 6 }, () => null as unknown as string);
           sections.push({
             id: "gallery",
             component: resolveComponent(ctx.componentSelections, "gallery", "Gallery1", ctx.themeStyle),
             props: {
               title: "Our Gallery",
               subtitle: "Take a look at our work",
-              images: ctx.imagePaths.length > 0
-                ? ctx.imagePaths.map((url, i) => ({ url, alt: `Gallery image ${i + 1}` }))
-                : Array.from({ length: 6 }, (_, i) => ({ url: null, alt: `Gallery image ${i + 1}` })),
+              images: galleryUrls,
             },
             order: order++,
           });
           break;
+        }
         case "faq":
           sections.push({
             id: "faq",
@@ -661,9 +1166,11 @@ class MockAIProvider extends AIProvider {
             id: "cta",
             component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
             props: {
-              headline: "Ready to Get Started?",
-              subheadline: "Contact us today to learn how we can help you",
-              ctaText: "Contact Us",
+              ...ctaCopy(ctx.pageContent, {
+                headline: "Ready to Get Started?",
+                subheadline: "Contact us today to learn how we can help you",
+                ctaText: "Contact Us",
+              }),
               ctaLink: "/contact",
             },
             order: order++,
@@ -676,11 +1183,18 @@ class MockAIProvider extends AIProvider {
             props: {
               title: "Our Work",
               subtitle: "Recent projects",
-              items: ctx.imagePaths.slice(0, 6).map((url, i) => ({
-                title: `Project ${i + 1}`,
-                description: "A showcase of our work",
-                image: url,
-              })),
+              // Portfolio1/2/3 all destructure `projects`, not `items` — the
+              // old key meant projects.map() ran on undefined and crashed
+              // the section entirely. Portfolio3 also uses `category` to
+              // build its filter pills, so default it for custom entries.
+              projects: ctx.userPortfolio.length > 0
+                ? ctx.userPortfolio.map((p) => ({ category: "Featured", ...p }))
+                : ctx.imagePaths.slice(0, 6).map((url, i) => ({
+                    title: `Project ${i + 1}`,
+                    description: "A showcase of our work",
+                    image: url,
+                    category: "Featured",
+                  })),
             },
             order: order++,
           });
@@ -692,11 +1206,13 @@ class MockAIProvider extends AIProvider {
             props: {
               title: "Pricing Plans",
               subtitle: "Choose the plan that works for you",
-              plans: [
-                { name: "Basic", price: "$29/mo", features: ["Feature 1", "Feature 2", "Feature 3"] },
-                { name: "Pro", price: "$79/mo", features: ["Everything in Basic", "Feature 4", "Feature 5"], popular: true },
-                { name: "Enterprise", price: "$199/mo", features: ["Everything in Pro", "Feature 6", "Feature 7"] },
-              ],
+              plans: ctx.userPricingPlans.length > 0
+                ? ctx.userPricingPlans
+                : [
+                    { name: "Basic", price: "$29/mo", features: ["Feature 1", "Feature 2", "Feature 3"] },
+                    { name: "Pro", price: "$79/mo", features: ["Everything in Basic", "Feature 4", "Feature 5"], popular: true },
+                    { name: "Enterprise", price: "$199/mo", features: ["Everything in Pro", "Feature 6", "Feature 7"] },
+                  ],
             },
             order: order++,
           });
@@ -741,12 +1257,14 @@ class MockAIProvider extends AIProvider {
             props: {
               title: "Why Choose Us",
               subtitle: "What sets us apart",
-              reasons: [
-                { title: "Expert Team", description: "Our experienced professionals deliver outstanding results." },
-                { title: "Quality Service", description: "We never compromise on quality and attention to detail." },
-                { title: "Customer First", description: "Your satisfaction is our top priority in everything we do." },
-                { title: "Proven Results", description: "Track record of delivering measurable, impactful outcomes." },
-              ],
+              reasons: ctx.userWhyChooseUs.length > 0
+                ? ctx.userWhyChooseUs
+                : [
+                    { title: "Expert Team", description: "Our experienced professionals deliver outstanding results." },
+                    { title: "Quality Service", description: "We never compromise on quality and attention to detail." },
+                    { title: "Customer First", description: "Your satisfaction is our top priority in everything we do." },
+                    { title: "Proven Results", description: "Track record of delivering measurable, impactful outcomes." },
+                  ],
             },
             order: order++,
           });
@@ -758,8 +1276,8 @@ class MockAIProvider extends AIProvider {
             props: {
               title: getAboutTitle(ctx.industry),
               subtitle: "Learn about our journey",
-              content: `${ctx.businessName} was founded with a vision to deliver exceptional ${ctx.industry.toLowerCase()} services. Over the years, we've built a reputation for quality, innovation, and customer satisfaction. Our team of dedicated professionals works tirelessly to exceed expectations and deliver results that make a difference.`,
-        backgroundImage: ctx.imagePaths[0] || null,
+              content: aboutStoryCopy(ctx.pageContent, `${ctx.businessName} was founded with a vision to deliver exceptional ${ctx.industry.toLowerCase()} services. Over the years, we've built a reputation for quality, innovation, and customer satisfaction. Our team of dedicated professionals works tirelessly to exceed expectations and deliver results that make a difference.`),
+              backgroundImage: ctx.imagePaths[0] || null,
             },
             order: order++,
           });
@@ -771,11 +1289,13 @@ class MockAIProvider extends AIProvider {
             props: {
               title: "Meet Our Team",
               subtitle: "The people behind our success",
-              members: [
-                { name: "John Smith", role: "Founder & CEO", avatar: null },
-                { name: "Jane Doe", role: "Creative Director", avatar: null },
-                { name: "Mike Johnson", role: "Lead Developer", avatar: null },
-              ],
+              members: ctx.userTeam.length > 0
+                ? ctx.userTeam
+                : [
+                    { name: "John Smith", role: "Founder & CEO", avatar: null },
+                    { name: "Jane Doe", role: "Creative Director", avatar: null },
+                    { name: "Mike Johnson", role: "Lead Developer", avatar: null },
+                  ],
             },
             order: order++,
           });
@@ -787,9 +1307,9 @@ class MockAIProvider extends AIProvider {
             props: {
               title: "Get In Touch",
               subtitle: "We'd love to hear from you",
-              phone: "+1 (555) 123-4567",
-              email: "hello@example.com",
-              address: "123 Business St, Suite 100",
+              phone: ctx.contactPhone,
+              email: ctx.contactEmail,
+              address: ctx.contactAddress,
             },
             order: order++,
           });
@@ -801,7 +1321,9 @@ class MockAIProvider extends AIProvider {
             props: {
               title: "Latest Insights",
               subtitle: "Read our latest thoughts and updates",
-              posts: getBlogPosts(ctx.industry).slice(0, 3),
+              posts: ctx.userBlogPosts.length > 0
+                ? withBlogMeta(ctx.userBlogPosts, ctx.industry, ctx.imagePaths).slice(0, 3)
+                : withBlogMeta(getBlogPosts(ctx.industry), ctx.industry, ctx.imagePaths).slice(0, 3),
             },
             order: order++,
           });
@@ -836,9 +1358,11 @@ class MockAIProvider extends AIProvider {
         id: "cta_default",
         component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
         props: {
-          headline: "Ready to Get Started?",
-          subheadline: "Contact us today to learn how we can help you",
-          ctaText: "Contact Us",
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Contact us today to learn how we can help you",
+            ctaText: "Contact Us",
+          }),
           ctaLink: "/contact",
         },
         order: order++,
@@ -853,89 +1377,162 @@ class MockAIProvider extends AIProvider {
     logoPath: string | null; imagePaths: string[];
     componentSelections: Record<string, string>; themeStyle: string;
     pageSections?: string[];
+    pageContent?: PageContentOverride;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    userStats: Array<{ label: string; value: string }>;
+    userTimeline: Array<{ year: string; title: string; description?: string }>;
   }): Array<Record<string, unknown>> {
-    return [
+    const hero = heroCopy(ctx.pageContent, getAboutTitle(ctx.industry), `Learn more about ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: getAboutTitle(ctx.industry),
-          subtitle: `Learn more about ${ctx.businessName}`,
+          title: hero.title,
+          subtitle: hero.subtitle,
           image: ctx.imagePaths[0] || null,
         },
         order: 0,
       },
-      {
-        id: "about_story",
-        component: "AboutStory",
-        props: {
-          title: getAboutTitle(ctx.industry),
-          subtitle: "Our Journey",
-          content: `${ctx.businessName} was founded with a vision to deliver exceptional ${ctx.industry.toLowerCase()} services. ${ctx.businessDescription || "We are committed to quality, innovation, and customer satisfaction."} Over the years, we've built a reputation for excellence, serving hundreds of satisfied clients. Our team of dedicated professionals brings together diverse expertise and a shared passion for delivering outstanding results.`,
-          image: ctx.imagePaths[1] || ctx.imagePaths[0] || null,
-        },
-        order: 1,
-      },
-      {
-        id: "about_values",
-        component: "AboutValues",
-        props: {
-          title: "Our Values",
-          subtitle: "What drives us every day",
-          values: [
-            { title: "Excellence", description: "We strive for excellence in everything we do, setting high standards and exceeding expectations.", icon: "star" },
-            { title: "Integrity", description: "We conduct our business with honesty, transparency, and ethical practices.", icon: "shield" },
-            { title: "Innovation", description: "We embrace new ideas and continuously improve our approach to better serve our clients.", icon: "lightbulb" },
-            { title: "Customer Focus", description: "Our clients are at the heart of every decision we make.", icon: "heart" },
-          ],
-        },
-        order: 2,
-      },
-      {
-        id: "team",
-        component: "TeamSection",
-        props: {
-          title: "Meet Our Team",
-          subtitle: "The talented people behind our success",
-          members: [
-            { name: "John Smith", role: "Founder & CEO", avatar: null, bio: "Visionary leader with 15+ years of industry experience." },
-            { name: "Jane Doe", role: "Creative Director", avatar: null, bio: "Award-winning creative with a passion for design." },
-            { name: "Mike Johnson", role: "Operations Manager", avatar: null, bio: "Ensures seamless delivery of all projects." },
-          ],
-        },
-        order: 3,
-      },
-      {
-        id: "cta",
-        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
-        props: {
+    ];
+    let order = 1;
+
+    // This page's body used to be a fixed list regardless of which section
+    // checkboxes were selected — Statistics and Timeline had no effect at
+    // all. Now it actually reflects the client's choices, defaulting to the
+    // previous fixed set (story/values/team) when nothing is selected yet.
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["story", "values", "team"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "story":
+          sections.push({
+            id: "about_story",
+            component: "AboutStory",
+            props: {
+              title: getAboutTitle(ctx.industry),
+              subtitle: "Our Journey",
+              content: aboutStoryCopy(ctx.pageContent, `${ctx.businessName} was founded with a vision to deliver exceptional ${ctx.industry.toLowerCase()} services. ${ctx.businessDescription || "We are committed to quality, innovation, and customer satisfaction."} Over the years, we've built a reputation for excellence, serving hundreds of satisfied clients. Our team of dedicated professionals brings together diverse expertise and a shared passion for delivering outstanding results.`),
+              image: ctx.imagePaths[1] || ctx.imagePaths[0] || null,
+            },
+            order: order++,
+          });
+          break;
+        case "values":
+          sections.push({
+            id: "about_values",
+            component: "AboutValues",
+            props: {
+              title: "Our Values",
+              subtitle: "What drives us every day",
+              values: [
+                { title: "Excellence", description: "We strive for excellence in everything we do, setting high standards and exceeding expectations.", icon: "star" },
+                { title: "Integrity", description: "We conduct our business with honesty, transparency, and ethical practices.", icon: "shield" },
+                { title: "Innovation", description: "We embrace new ideas and continuously improve our approach to better serve our clients.", icon: "lightbulb" },
+                { title: "Customer Focus", description: "Our clients are at the heart of every decision we make.", icon: "heart" },
+              ],
+            },
+            order: order++,
+          });
+          break;
+        case "team":
+          sections.push({
+            id: "team",
+            component: "TeamSection",
+            props: {
+              title: "Meet Our Team",
+              subtitle: "The talented people behind our success",
+              members: ctx.userTeam.length > 0
+                ? ctx.userTeam
+                : [
+                    { name: "John Smith", role: "Founder & CEO", avatar: null, bio: "Visionary leader with 15+ years of industry experience." },
+                    { name: "Jane Doe", role: "Creative Director", avatar: null, bio: "Award-winning creative with a passion for design." },
+                    { name: "Mike Johnson", role: "Operations Manager", avatar: null, bio: "Ensures seamless delivery of all projects." },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "stats":
+          sections.push({
+            id: "stats",
+            component: "Stats",
+            props: {
+              title: "By the Numbers",
+              stats: ctx.userStats.length > 0
+                ? ctx.userStats
+                : [
+                    { label: "Happy Clients", value: "250+" },
+                    { label: "Years of Experience", value: "10+" },
+                    { label: "Projects Completed", value: "500+" },
+                    { label: "Team Members", value: "15+" },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "timeline":
+          sections.push({
+            id: "timeline",
+            component: "Timeline",
+            props: {
+              title: "Our Journey",
+              milestones: ctx.userTimeline.length > 0
+                ? ctx.userTimeline
+                : [
+                    { year: "Year One", title: "Founded", description: "Started with a simple idea and a small team." },
+                    { year: "Today", title: "Where We Are Now", description: `${ctx.businessName} has grown into a trusted name in the industry.` },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    sections.push({
+      id: "cta",
+      component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+      props: {
+        ...ctaCopy(ctx.pageContent, {
           headline: "Want to Work With Us?",
           subheadline: "We'd love to hear about your project",
           ctaText: "Get In Touch",
-          ctaLink: "/contact",
-        },
-        order: 4,
+        }),
+        ctaLink: "/contact",
       },
-    ];
+      order: order++,
+    });
+
+    return sections;
   }
 
   private _buildServicesSections(ctx: {
     businessName: string; businessDescription: string; industry: string;
     userServices: Array<{ title: string; description: string; icon: string }>;
+    userWhyChooseUs: Array<{ title: string; description: string }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
     componentSelections: Record<string, string>; themeStyle: string;
     pageSections?: string[];
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
     const services = ctx.userServices.length > 0
       ? ctx.userServices
       : getServices(ctx.industry);
+    const testimonials = ctx.userTestimonials.length > 0
+      ? ctx.userTestimonials
+      : getTestimonials(ctx.industry);
+    const hero = heroCopy(ctx.pageContent, "Our Services", `What ${ctx.businessName} offers`);
 
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Our Services",
-          subtitle: `What ${ctx.businessName} offers`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -955,12 +1552,14 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Why Choose Us",
           subtitle: "What sets us apart from the competition",
-          reasons: [
-            { title: "Expert Team", description: "Our professionals bring years of experience to every project." },
-            { title: "Quality Guarantee", description: "We stand behind our work with a satisfaction guarantee." },
-            { title: "Competitive Pricing", description: "Premium services at fair, transparent prices." },
-            { title: "24/7 Support", description: "We're here whenever you need us, day or night." },
-          ],
+          reasons: ctx.userWhyChooseUs.length > 0
+            ? ctx.userWhyChooseUs
+            : [
+                { title: "Expert Team", description: "Our professionals bring years of experience to every project." },
+                { title: "Quality Guarantee", description: "We stand behind our work with a satisfaction guarantee." },
+                { title: "Competitive Pricing", description: "Premium services at fair, transparent prices." },
+                { title: "24/7 Support", description: "We're here whenever you need us, day or night." },
+              ],
         },
         order: 2,
       },
@@ -970,7 +1569,7 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "What Clients Say About Our Services",
           subtitle: "Don't just take our word for it",
-          testimonials: getTestimonials(ctx.industry),
+          testimonials,
         },
         order: 3,
       },
@@ -978,9 +1577,11 @@ class MockAIProvider extends AIProvider {
         id: "cta",
         component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
         props: {
-          headline: "Ready to Experience the Difference?",
-          subheadline: "Let's discuss how we can help you",
-          ctaText: "Contact Us",
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Experience the Difference?",
+            subheadline: "Let's discuss how we can help you",
+            ctaText: "Contact Us",
+          }),
           ctaLink: "/contact",
         },
         order: 4,
@@ -990,15 +1591,18 @@ class MockAIProvider extends AIProvider {
 
   private _buildPortfolioSections(ctx: {
     businessName: string; industry: string; imagePaths: string[];
+    userPortfolio: Array<{ title: string; description: string; image?: string | null }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Portfolio", `A showcase of ${ctx.businessName}'s finest work`);
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Our Portfolio",
-          subtitle: `A showcase of ${ctx.businessName}'s finest work`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1008,19 +1612,23 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Featured Projects",
           subtitle: "Explore our recent work",
-          items: ctx.imagePaths.length > 0
-            ? ctx.imagePaths.map((url, i) => ({
-                title: `Project ${i + 1}`,
-                description: "A showcase of our creative work",
-                image: url,
-                category: "Featured",
-              }))
-            : Array.from({ length: 6 }, (_, i) => ({
-                title: `Project ${i + 1}`,
-                description: "A showcase of our creative work",
-                image: null,
-                category: i % 2 === 0 ? "Featured" : "Recent",
-              })),
+          // Portfolio1/2/3 all destructure `projects`, not `items`, and
+          // Portfolio3 uses `category` for its filter pills.
+          projects: ctx.userPortfolio.length > 0
+            ? ctx.userPortfolio.map((p) => ({ category: "Featured", ...p }))
+            : ctx.imagePaths.length > 0
+              ? ctx.imagePaths.map((url, i) => ({
+                  title: `Project ${i + 1}`,
+                  description: "A showcase of our creative work",
+                  image: url,
+                  category: "Featured",
+                }))
+              : Array.from({ length: 6 }, (_, i) => ({
+                  title: `Project ${i + 1}`,
+                  description: "A showcase of our creative work",
+                  image: null,
+                  category: i % 2 === 0 ? "Featured" : "Recent",
+                })),
         },
         order: 1,
       },
@@ -1028,9 +1636,11 @@ class MockAIProvider extends AIProvider {
         id: "cta",
         component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
         props: {
-          headline: "Like What You See?",
-          subheadline: "Let's create something amazing together",
-          ctaText: "Start Your Project",
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Like What You See?",
+            subheadline: "Let's create something amazing together",
+            ctaText: "Start Your Project",
+          }),
           ctaLink: "/contact",
         },
         order: 2,
@@ -1040,15 +1650,18 @@ class MockAIProvider extends AIProvider {
 
   private _buildPricingSections(ctx: {
     businessName: string; industry: string;
+    userPricingPlans: Array<{ name: string; price: string; period?: string; features: string[]; popular?: boolean }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Pricing", `Simple, transparent pricing for ${ctx.businessName}`);
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Pricing",
-          subtitle: `Simple, transparent pricing for ${ctx.businessName}`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1058,11 +1671,13 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Choose Your Plan",
           subtitle: "Select the plan that best fits your needs",
-          plans: [
-            { name: "Starter", price: "$29/mo", description: "Perfect for getting started", features: ["5 Projects", "Basic Analytics", "Email Support", "1GB Storage"], cta: "Get Started" },
-            { name: "Professional", price: "$79/mo", description: "Best for growing businesses", features: ["25 Projects", "Advanced Analytics", "Priority Support", "10GB Storage", "Custom Domain", "API Access"], popular: true, cta: "Start Free Trial" },
-            { name: "Enterprise", price: "$199/mo", description: "For large-scale operations", features: ["Unlimited Projects", "Full Analytics Suite", "24/7 Dedicated Support", "100GB Storage", "Custom Domain", "API Access", "Custom Integrations", "SLA"], cta: "Contact Sales" },
-          ],
+          plans: ctx.userPricingPlans.length > 0
+            ? ctx.userPricingPlans
+            : [
+                { name: "Starter", price: "$29/mo", description: "Perfect for getting started", features: ["5 Projects", "Basic Analytics", "Email Support", "1GB Storage"], cta: "Get Started" },
+                { name: "Professional", price: "$79/mo", description: "Best for growing businesses", features: ["25 Projects", "Advanced Analytics", "Priority Support", "10GB Storage", "Custom Domain", "API Access"], popular: true, cta: "Start Free Trial" },
+                { name: "Enterprise", price: "$199/mo", description: "For large-scale operations", features: ["Unlimited Projects", "Full Analytics Suite", "24/7 Dedicated Support", "100GB Storage", "Custom Domain", "API Access", "Custom Integrations", "SLA"], cta: "Contact Sales" },
+              ],
         },
         order: 1,
       },
@@ -1081,17 +1696,22 @@ class MockAIProvider extends AIProvider {
 
   private _buildBlogSections(ctx: {
     businessName: string; industry: string;
+    userBlogPosts: Array<{ title: string; excerpt: string; author?: string; date?: string; image?: string | null; category?: string }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
-    const posts = getBlogPosts(ctx.industry);
+    const posts = ctx.userBlogPosts.length > 0
+      ? withBlogMeta(ctx.userBlogPosts, ctx.industry)
+      : withBlogMeta(getBlogPosts(ctx.industry), ctx.industry);
+    const hero = heroCopy(ctx.pageContent, "Blog", `Latest news and insights from ${ctx.businessName}`);
 
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Blog",
-          subtitle: `Latest news and insights from ${ctx.businessName}`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1120,55 +1740,113 @@ class MockAIProvider extends AIProvider {
   private _buildContactSections(ctx: {
     businessName: string; businessDescription: string; industry: string;
     componentSelections: Record<string, string>; themeStyle: string;
+    contactPhone: string; contactEmail: string; contactAddress: string;
+    pageSections?: string[];
+    userBusinessHours: Array<{ day: string; hours: string }>;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
-    return [
+    const hero = heroCopy(ctx.pageContent, "Contact Us", `Get in touch with ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Contact Us",
-          subtitle: `Get in touch with ${ctx.businessName}`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
-      {
-        id: "contact_form",
-        component: resolveComponent(ctx.componentSelections, "contact", "Contact1", ctx.themeStyle),
-        props: {
-          title: "Send Us a Message",
-          subtitle: "We'll get back to you within 24 hours",
-          phone: "+1 (555) 123-4567",
-          email: "hello@example.com",
-          address: "123 Business St, Suite 100, City, State 12345",
-        },
-        order: 1,
-      },
-      {
-        id: "map",
-        component: "MapEmbed",
-        props: {
-          title: "Find Us",
-          address: "123 Business St, Suite 100, City, State 12345",
-        },
-        order: 2,
-      },
     ];
+    let order = 1;
+
+    // This page used to always render exactly contact_form + map regardless
+    // of the section checkboxes — Contact Info and Business Hours had no
+    // effect at all. Now it reflects the client's choices, defaulting to
+    // the previous fixed pair when nothing is selected yet.
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["contact-form", "map"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "contact-form":
+          sections.push({
+            id: "contact_form",
+            component: resolveComponent(ctx.componentSelections, "contact", "Contact1", ctx.themeStyle),
+            props: {
+              title: "Send Us a Message",
+              subtitle: "We'll get back to you within 24 hours",
+              phone: ctx.contactPhone,
+              email: ctx.contactEmail,
+              address: ctx.contactAddress,
+            },
+            order: order++,
+          });
+          break;
+        case "map":
+          sections.push({
+            id: "map",
+            component: "MapEmbed",
+            props: {
+              title: "Find Us",
+              address: ctx.contactAddress,
+            },
+            order: order++,
+          });
+          break;
+        case "info":
+          sections.push({
+            id: "contact_info",
+            component: "ContactInfo",
+            props: {
+              methods: [
+                { title: "Phone", value: ctx.contactPhone, description: "Call us directly" },
+                { title: "Email", value: ctx.contactEmail, description: "Send us a message" },
+                { title: "Address", value: ctx.contactAddress, description: "" },
+              ],
+            },
+            order: order++,
+          });
+          break;
+        case "hours":
+          sections.push({
+            id: "business_hours",
+            component: "BusinessHours",
+            props: {
+              title: "Business Hours",
+              hours: ctx.userBusinessHours.length > 0
+                ? ctx.userBusinessHours
+                : [
+                    { day: "Monday - Friday", hours: "9:00 AM - 6:00 PM" },
+                    { day: "Saturday", hours: "10:00 AM - 4:00 PM" },
+                    { day: "Sunday", hours: "Closed" },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    return sections;
   }
 
   private _buildFaqSections(ctx: {
     businessName: string; industry: string;
     userFaq: Array<{ question: string; answer: string }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
     const faq = ctx.userFaq.length > 0 ? ctx.userFaq : getFaq(ctx.industry);
+    const hero = heroCopy(ctx.pageContent, "FAQ", "Frequently Asked Questions");
 
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "FAQ",
-          subtitle: "Frequently Asked Questions",
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1186,9 +1864,11 @@ class MockAIProvider extends AIProvider {
         id: "cta",
         component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
         props: {
-          headline: "Still Have Questions?",
-          subheadline: "We're here to help",
-          ctaText: "Contact Us",
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Still Have Questions?",
+            subheadline: "We're here to help",
+            ctaText: "Contact Us",
+          }),
           ctaLink: "/contact",
         },
         order: 2,
@@ -1200,18 +1880,20 @@ class MockAIProvider extends AIProvider {
     businessName: string; industry: string;
     userTestimonials: Array<{ name: string; role: string; content: string; rating: number }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
     const testimonials = ctx.userTestimonials.length > 0
       ? ctx.userTestimonials
       : getTestimonials(ctx.industry);
+    const hero = heroCopy(ctx.pageContent, "Testimonials", "What our clients say about us");
 
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Testimonials",
-          subtitle: "What our clients say about us",
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1229,9 +1911,11 @@ class MockAIProvider extends AIProvider {
         id: "cta",
         component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
         props: {
-          headline: "Ready to Join Our Happy Clients?",
-          subheadline: "Let us help you achieve your goals",
-          ctaText: "Get Started",
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Join Our Happy Clients?",
+            subheadline: "Let us help you achieve your goals",
+            ctaText: "Get Started",
+          }),
           ctaLink: "/contact",
         },
         order: 2,
@@ -1241,15 +1925,24 @@ class MockAIProvider extends AIProvider {
 
   private _buildGallerySections(ctx: {
     businessName: string; industry: string; imagePaths: string[];
+    userGalleryImages: Array<{ url: string; alt?: string }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Gallery", `A visual showcase from ${ctx.businessName}`);
+    // Gallery1/Gallery2 expect `images` as a flat string[] of URLs.
+    const galleryUrls = ctx.userGalleryImages.length > 0
+      ? ctx.userGalleryImages.map((g) => g.url)
+      : ctx.imagePaths.length > 0
+        ? ctx.imagePaths
+        : Array.from({ length: 9 }, () => null as unknown as string);
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Gallery",
-          subtitle: `A visual showcase from ${ctx.businessName}`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1259,36 +1952,7 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Our Gallery",
           subtitle: "Browse through our collection",
-          images: ctx.imagePaths.length > 0
-            ? ctx.imagePaths.map((url, i) => ({ url, alt: `Gallery image ${i + 1}` }))
-            : Array.from({ length: 9 }, (_, i) => ({ url: null, alt: `Gallery image ${i + 1}` })),
-        },
-        order: 1,
-      },
-    ];
-  }
-
-  private _buildBookingSections(ctx: {
-    businessName: string; industry: string;
-    componentSelections: Record<string, string>; themeStyle: string;
-  }): Array<Record<string, unknown>> {
-    return [
-      {
-        id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
-        props: {
-          title: "Book an Appointment",
-          subtitle: `Schedule your visit to ${ctx.businessName}`,
-        },
-        order: 0,
-      },
-      {
-        id: "booking_form",
-        component: "ReservationForm",
-        props: {
-          title: "Book Your Appointment",
-          subtitle: "Fill in the details below to schedule your visit",
-          businessName: ctx.businessName,
+          images: galleryUrls,
         },
         order: 1,
       },
@@ -1297,7 +1961,10 @@ class MockAIProvider extends AIProvider {
 
   private _buildMenuSections(ctx: {
     businessName: string; industry: string;
+    userMenuItems: Array<{ name: string; description: string; price: string; image?: string | null }>;
+    userDailySpecials: Array<{ name: string; description: string; price: string; tag?: string; originalPrice?: string }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
     const menuCategories: Record<string, Array<{ name: string; description: string; price: string }>> = {
       Restaurant: [
@@ -1312,15 +1979,27 @@ class MockAIProvider extends AIProvider {
         { name: "Classics", description: "Customer favorites", price: "" },
       ],
     };
-    const categories = menuCategories[ctx.industry] || menuCategories["default"];
+    // MenuHighlights/DailySpecials both destructure `items`, not
+    // `categories` — the old key meant neither section ever had anything to
+    // render, which is exactly why the Menu page looked broken.
+    const menuItems = ctx.userMenuItems.length > 0
+      ? ctx.userMenuItems
+      : menuCategories[ctx.industry] || menuCategories["default"];
+    const dailySpecials = ctx.userDailySpecials.length > 0
+      ? ctx.userDailySpecials
+      : [
+          { name: "Today's Special", description: "A limited-time dish available only today.", price: "", tag: "Today's Special" },
+          { name: "Weekend Feature", description: "Available Friday through Sunday while supplies last.", price: "", tag: "Weekend Only" },
+        ];
+    const hero = heroCopy(ctx.pageContent, "Our Menu", `Explore what ${ctx.businessName} has to offer`);
 
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Our Menu",
-          subtitle: `Explore what ${ctx.businessName} has to offer`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1330,7 +2009,7 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Our Menu",
           subtitle: "Carefully crafted selections",
-          categories,
+          items: menuItems,
         },
         order: 1,
       },
@@ -1340,6 +2019,7 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Today's Specials",
           subtitle: "Chef's picks for today",
+          items: dailySpecials,
         },
         order: 2,
       },
@@ -1356,57 +2036,20 @@ class MockAIProvider extends AIProvider {
     ];
   }
 
-  private _buildReservationsSections(ctx: {
-    businessName: string; industry: string;
-    componentSelections: Record<string, string>; themeStyle: string;
-  }): Array<Record<string, unknown>> {
-    return [
-      {
-        id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
-        props: {
-          title: "Make a Reservation",
-          subtitle: `Book your table at ${ctx.businessName}`,
-        },
-        order: 0,
-      },
-      {
-        id: "reservation_form",
-        component: "ReservationForm",
-        props: {
-          title: "Reserve a Table",
-          subtitle: "Select your preferred date and time",
-          businessName: ctx.businessName,
-        },
-        order: 1,
-      },
-      {
-        id: "contact_info",
-        component: "ContactInfo",
-        props: {
-          methods: [
-            { title: "Phone", value: "+1 (555) 123-4567", description: "Call us directly" },
-            { title: "Email", value: "reservations@example.com", description: "Send us a message" },
-            { title: "Address", value: "123 Business St, City, State 12345", description: "" },
-            { title: "Hours", value: "Mon-Sun: 11:00 AM - 10:00 PM", description: "" },
-          ],
-        },
-        order: 2,
-      },
-    ];
-  }
-
   private _buildTeamSections(ctx: {
     businessName: string; industry: string;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Team", `Meet the talented people behind ${ctx.businessName}`);
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: "Our Team",
-          subtitle: `Meet the talented people behind ${ctx.businessName}`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1416,11 +2059,13 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Meet the Team",
           subtitle: "Dedicated professionals committed to excellence",
-          members: [
-            { name: "John Smith", role: "Founder & CEO", avatar: null, bio: "Visionary leader with years of industry experience." },
-            { name: "Jane Doe", role: "Creative Director", avatar: null, bio: "Award-winning creative with a passion for design." },
-            { name: "Mike Johnson", role: "Operations Manager", avatar: null, bio: "Ensures seamless delivery of all projects." },
-          ],
+          members: ctx.userTeam.length > 0
+            ? ctx.userTeam
+            : [
+                { name: "John Smith", role: "Founder & CEO", avatar: null, bio: "Visionary leader with years of industry experience." },
+                { name: "Jane Doe", role: "Creative Director", avatar: null, bio: "Award-winning creative with a passion for design." },
+                { name: "Mike Johnson", role: "Operations Manager", avatar: null, bio: "Ensures seamless delivery of all projects." },
+              ],
         },
         order: 1,
       },
@@ -1428,9 +2073,11 @@ class MockAIProvider extends AIProvider {
         id: "cta",
         component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
         props: {
-          headline: "Want to Join Our Team?",
-          subheadline: "We're always looking for talented people",
-          ctaText: "View Open Positions",
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Want to Join Our Team?",
+            subheadline: "We're always looking for talented people",
+            ctaText: "View Open Positions",
+          }),
           ctaLink: "/contact",
         },
         order: 2,
@@ -1438,17 +2085,529 @@ class MockAIProvider extends AIProvider {
     ];
   }
 
+  private _buildPropertiesSections(ctx: {
+    businessName: string; industry: string;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Properties", `Find your next home with ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["agents"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "agents":
+          sections.push({
+            id: "agents",
+            component: "AgentProfiles",
+            props: {
+              title: "Meet Our Agents",
+              subtitle: "Local experts ready to help you buy or sell",
+              agents: ctx.userTeam.length > 0
+                ? ctx.userTeam.map((t) => ({ name: t.name, specialty: t.role, avatar: t.avatar }))
+                : [
+                    { name: "Jordan Blake", specialty: "Residential Sales", avatar: null },
+                    { name: "Casey Rivera", specialty: "Luxury Properties", avatar: null },
+                    { name: "Morgan Lee", specialty: "First-Time Buyers", avatar: null },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    sections.push({
+      id: "cta",
+      component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+      props: {
+        ...ctaCopy(ctx.pageContent, {
+          headline: "Looking to Buy or Sell?",
+          subheadline: "Talk to one of our agents today",
+          ctaText: "Contact Us",
+        }),
+        ctaLink: "/contact",
+      },
+      order: order++,
+    });
+
+    return sections;
+  }
+
+  private _buildCoursesSections(ctx: {
+    businessName: string; industry: string;
+    userCourses: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+    userWhyChooseUs: Array<{ title: string; description: string }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Courses", `Learn something new with ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["course-grid", "features", "testimonials"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "course-grid":
+          sections.push({
+            id: "course_grid",
+            component: "CourseGrid",
+            props: {
+              title: "Our Courses",
+              subtitle: "Pick the path that's right for you",
+              courses: ctx.userCourses.length > 0
+                ? ctx.userCourses
+                : [
+                    { title: "Getting Started", description: "A foundational course covering everything you need to begin.", price: "$49", category: "Beginner", level: "Beginner", duration: "4 weeks", image: null },
+                    { title: "Level Up", description: "Build on the fundamentals with hands-on projects and feedback.", price: "$99", category: "Intermediate", level: "Intermediate", duration: "6 weeks", image: null },
+                    { title: "Advanced Mastery", description: "Go deep on advanced techniques with expert-led instruction.", price: "$149", category: "Advanced", level: "Advanced", duration: "8 weeks", image: null },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "features":
+          sections.push({
+            id: "features",
+            component: "WhyChooseUs",
+            props: {
+              title: "What's Included",
+              subtitle: "Everything you need to succeed",
+              reasons: ctx.userWhyChooseUs.length > 0
+                ? ctx.userWhyChooseUs
+                : [
+                    { title: "Expert Instructors", description: "Learn directly from experienced practitioners." },
+                    { title: "Lifetime Access", description: "Revisit course materials anytime, at your own pace." },
+                    { title: "Certificate of Completion", description: "Showcase your new skills with a shareable certificate." },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "testimonials":
+          sections.push({
+            id: "testimonials",
+            component: resolveComponent(ctx.componentSelections, "testimonials", "Testimonials1", ctx.themeStyle),
+            props: {
+              title: "Student Success Stories",
+              subtitle: "Hear from people who've taken our courses",
+              testimonials: ctx.userTestimonials.length > 0 ? ctx.userTestimonials : getTestimonials(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    sections.push({
+      id: "cta",
+      component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+      props: {
+        ...ctaCopy(ctx.pageContent, {
+          headline: "Ready to Enroll?",
+          subheadline: "Start learning with us today",
+          ctaText: "Get Started",
+        }),
+        ctaLink: "/contact",
+      },
+      order: order++,
+    });
+
+    return sections;
+  }
+
+  private _buildClassesSections(ctx: {
+    businessName: string; industry: string;
+    userClassSchedule: Array<{ day: string; time: string; className: string }>;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    userPricingPlans: Array<{ name: string; price: string; period?: string; features: string[]; popular?: boolean }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Classes", `Find your next class at ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["class-schedule", "trainers", "pricing"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "class-schedule":
+          sections.push({
+            id: "class_schedule",
+            component: "ClassSchedule",
+            props: {
+              title: "Class Schedule",
+              subtitle: "Find a class that fits your week",
+              schedule: ctx.userClassSchedule.length > 0
+                ? ctx.userClassSchedule
+                : [
+                    { day: "Monday", time: "6:00 AM", className: "Morning Strength" },
+                    { day: "Wednesday", time: "5:30 PM", className: "Evening Cardio" },
+                    { day: "Saturday", time: "9:00 AM", className: "Weekend Bootcamp" },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "trainers":
+          sections.push({
+            id: "trainers",
+            component: "TeamSection",
+            props: {
+              title: "Meet Our Trainers",
+              subtitle: "The coaches who keep you moving",
+              members: ctx.userTeam.length > 0
+                ? ctx.userTeam
+                : [
+                    { name: "Alex Rivera", role: "Head Trainer", avatar: null, bio: "Certified strength coach with 10+ years of experience." },
+                    { name: "Sam Parker", role: "Cardio Specialist", avatar: null, bio: "Loves helping members hit their endurance goals." },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "pricing":
+          sections.push({
+            id: "pricing",
+            component: resolveComponent(ctx.componentSelections, "pricing", "Pricing2", ctx.themeStyle),
+            props: {
+              title: "Membership Plans",
+              subtitle: "Choose the plan that fits your goals",
+              plans: ctx.userPricingPlans.length > 0
+                ? ctx.userPricingPlans
+                : [
+                    { name: "Drop-In", price: "$20", period: "class", features: ["Single class access"] },
+                    { name: "Monthly", price: "$79", period: "mo", features: ["Unlimited classes", "Guest passes"], popular: true },
+                    { name: "Annual", price: "$799", period: "yr", features: ["Unlimited classes", "Guest passes", "2 months free"] },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    sections.push({
+      id: "cta",
+      component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+      props: {
+        ...ctaCopy(ctx.pageContent, {
+          headline: "Ready to Join a Class?",
+          subheadline: "Reserve your spot today",
+          ctaText: "Get Started",
+        }),
+        ctaLink: "/contact",
+      },
+      order: order++,
+    });
+
+    return sections;
+  }
+
+  private _buildDestinationsSections(ctx: {
+    businessName: string; industry: string;
+    userDestinations: Array<{ name: string; price?: string; image?: string | null }>;
+    userDailySpecials: Array<{ name: string; description: string; price: string; tag?: string; originalPrice?: string }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Destinations", `Explore the world with ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["destination-grid", "deals", "testimonials"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "destination-grid":
+          sections.push({
+            id: "destination_grid",
+            component: "DestinationGrid",
+            props: {
+              title: "Popular Destinations",
+              subtitle: "Where our travelers love to go",
+              destinations: ctx.userDestinations.length > 0
+                ? ctx.userDestinations
+                : [
+                    { name: "Coastal Getaway", price: "$899", image: null },
+                    { name: "Mountain Retreat", price: "$1,199", image: null },
+                    { name: "City Escape", price: "$649", image: null },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "deals":
+          sections.push({
+            id: "travel_deals",
+            component: "TravelDeals",
+            props: {
+              title: "Travel Deals",
+              subtitle: "Limited-time offers you won't want to miss",
+              deals: ctx.userDailySpecials.length > 0
+                ? ctx.userDailySpecials.map((d) => ({ title: d.name, description: d.description, price: d.price, originalPrice: d.originalPrice }))
+                : [
+                    { title: "Early Bird Special", description: "Book 60 days ahead and save.", price: "$799", originalPrice: "$999" },
+                    { title: "Last-Minute Deal", description: "Spontaneous getaways at a discount.", price: "$549", originalPrice: "$699" },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "testimonials":
+          sections.push({
+            id: "testimonials",
+            component: resolveComponent(ctx.componentSelections, "testimonials", "Testimonials1", ctx.themeStyle),
+            props: {
+              title: "Traveler Reviews",
+              subtitle: "Real trips, real stories",
+              testimonials: ctx.userTestimonials.length > 0 ? ctx.userTestimonials : getTestimonials(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    sections.push({
+      id: "cta",
+      component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+      props: {
+        ...ctaCopy(ctx.pageContent, {
+          headline: "Ready for Your Next Adventure?",
+          subheadline: "Let's start planning your trip",
+          ctaText: "Plan Your Trip",
+        }),
+        ctaLink: "/contact",
+      },
+      order: order++,
+    });
+
+    return sections;
+  }
+
+  private _buildFeaturesSections(ctx: {
+    businessName: string; industry: string;
+    userServices: Array<{ title: string; description: string; icon: string }>;
+    userWhyChooseUs: Array<{ title: string; description: string }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Features", `Everything ${ctx.businessName} has to offer`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["feature-grid", "benefits", "testimonials"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "feature-grid":
+          sections.push({
+            id: "feature_grid",
+            component: resolveComponent(ctx.componentSelections, "services", "Services1", ctx.themeStyle),
+            props: {
+              title: "Features",
+              subtitle: "Everything you get, built in",
+              services: ctx.userServices.length > 0 ? ctx.userServices : getServices(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        case "benefits":
+          sections.push({
+            id: "benefits",
+            component: "WhyChooseUs",
+            props: {
+              title: "Why Choose Us",
+              subtitle: "What sets us apart",
+              reasons: ctx.userWhyChooseUs.length > 0
+                ? ctx.userWhyChooseUs
+                : [
+                    { title: "Built for Speed", description: "Get up and running in minutes, not weeks." },
+                    { title: "Reliable Support", description: "Our team is here whenever you need help." },
+                    { title: "Room to Grow", description: "Every feature scales with your business." },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "testimonials":
+          sections.push({
+            id: "testimonials",
+            component: resolveComponent(ctx.componentSelections, "testimonials", "Testimonials1", ctx.themeStyle),
+            props: {
+              title: "What Users Say",
+              subtitle: "Trusted by teams like yours",
+              testimonials: ctx.userTestimonials.length > 0 ? ctx.userTestimonials : getTestimonials(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    sections.push({
+      id: "cta",
+      component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+      props: {
+        ...ctaCopy(ctx.pageContent, {
+          headline: "Ready to Get Started?",
+          subheadline: "See it for yourself",
+          ctaText: "Get Started Free",
+        }),
+        ctaLink: "/contact",
+      },
+      order: order++,
+    });
+
+    return sections;
+  }
+
+  private _buildInventorySections(ctx: {
+    businessName: string; industry: string;
+    userPortfolio: Array<{ title: string; description: string; image?: string | null }>;
+    imagePaths: string[];
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Inventory", `Browse what's available at ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["inventory-grid", "testimonials"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "inventory-grid":
+          sections.push({
+            id: "inventory_grid",
+            // Reuses the Portfolio component — same "grid of image + title +
+            // description" shape as inventory items, and already fixed to
+            // take `projects` (not `items`) with a `category` default.
+            component: resolveComponent(ctx.componentSelections, "portfolio", "Portfolio2", ctx.themeStyle),
+            props: {
+              title: "Our Inventory",
+              subtitle: "Browse what's currently available",
+              projects: ctx.userPortfolio.length > 0
+                ? ctx.userPortfolio.map((p) => ({ category: "In Stock", ...p }))
+                : ctx.imagePaths.slice(0, 6).map((url, i) => ({
+                    title: `Item ${i + 1}`,
+                    description: "Available now",
+                    image: url,
+                    category: "In Stock",
+                  })),
+            },
+            order: order++,
+          });
+          break;
+        case "testimonials":
+          sections.push({
+            id: "testimonials",
+            component: resolveComponent(ctx.componentSelections, "testimonials", "Testimonials1", ctx.themeStyle),
+            props: {
+              title: "Customer Reviews",
+              subtitle: "What our customers are saying",
+              testimonials: ctx.userTestimonials.length > 0 ? ctx.userTestimonials : getTestimonials(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    sections.push({
+      id: "cta",
+      component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+      props: {
+        ...ctaCopy(ctx.pageContent, {
+          headline: "Interested in What You See?",
+          subheadline: "Reach out and we'll help you find the right fit",
+          ctaText: "Contact Us",
+        }),
+        ctaLink: "/contact",
+      },
+      order: order++,
+    });
+
+    return sections;
+  }
+
   private _buildGenericSections(ctx: {
     businessName: string; industry: string;
     componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, capitalize(ctx.industry), `Welcome to ${ctx.businessName}`);
     return [
       {
         id: "page_hero",
         component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
         props: {
-          title: capitalize(ctx.industry),
-          subtitle: `Welcome to ${ctx.businessName}`,
+          title: hero.title,
+          subtitle: hero.subtitle,
         },
         order: 0,
       },
@@ -1458,7 +2617,7 @@ class MockAIProvider extends AIProvider {
         props: {
           title: getAboutTitle(ctx.industry),
           subtitle: "Learn More About Us",
-          content: `${ctx.businessName} is dedicated to providing exceptional ${ctx.industry.toLowerCase()} services. We pride ourselves on quality, innovation, and customer satisfaction.`,
+          content: aboutStoryCopy(ctx.pageContent, `${ctx.businessName} is dedicated to providing exceptional ${ctx.industry.toLowerCase()} services. We pride ourselves on quality, innovation, and customer satisfaction.`),
         },
         order: 1,
       },
@@ -1466,9 +2625,11 @@ class MockAIProvider extends AIProvider {
         id: "cta",
         component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
         props: {
-          headline: "Ready to Get Started?",
-          subheadline: "Contact us today",
-          ctaText: "Contact Us",
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Contact us today",
+            ctaText: "Contact Us",
+          }),
           ctaLink: "/contact",
         },
         order: 2,
@@ -1482,7 +2643,7 @@ class MockAIProvider extends AIProvider {
 
   private _buildTheme(ctx: {
     primaryColor: string; secondaryColor: string;
-    fontStyle: string; themeStyle: string;
+    fontStyle: string; themeStyle: string; themeMode?: string; accentStyle?: string;
     config: BusinessTypeConfig;
   }): Record<string, any> {
     const styleKey = ctx.themeStyle.toLowerCase();
@@ -1495,19 +2656,36 @@ class MockAIProvider extends AIProvider {
       minimal:     { font: "Inter", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
       modern:      { font: "Inter", darkMode: false, borderRadius: "8px", buttonStyle: "rounded", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
       premium:     { font: "Playfair Display", darkMode: true, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "2px", backgroundTreatment: "gradient" },
-      corporate:   { font: "Roboto", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+      corporate:   { font: "Source Sans 3", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
       creative:    { font: "Poppins", darkMode: false, borderRadius: "16px", buttonStyle: "pill", spacing: "relaxed", shadow: "md", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "gradient" },
       luxury:      { font: "Playfair Display", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
       friendly:    { font: "Nunito", darkMode: false, borderRadius: "20px", buttonStyle: "pill", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "plain" },
-      professional:{ font: "Roboto", darkMode: false, borderRadius: "6px", buttonStyle: "rounded", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+      professional:{ font: "Lato", darkMode: false, borderRadius: "6px", buttonStyle: "rounded", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
       bold:        { font: "Montserrat", darkMode: true, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "xl", letterSpacing: "tight", borderWidth: "2px", backgroundTreatment: "gradient" },
-      elegant:     { font: "Playfair Display", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
+      elegant:     { font: "Cormorant Garamond", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
       tech:        { font: "Inter", darkMode: true, borderRadius: "8px", buttonStyle: "rounded", spacing: "compact", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
-      editorial:   { font: "Merriweather", darkMode: false, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
+      editorial:   { font: "Playfair Display", darkMode: false, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
     };
 
     const profile = styleProfiles[styleKey] || styleProfiles["modern"];
     const font = ctx.fontStyle || profile.font;
+
+    // The client's Accent Style step (Minimal/Bold/Gradient/Monochrome) used
+    // to never reach here at all — buttonStyle came only from the design
+    // style profile, so every accent choice looked identical. Let an
+    // explicit accent choice override the design style's button shape.
+    const accentOverrides: Record<string, { buttonStyle: string; borderWidth: string; backgroundTreatment: string }> = {
+      minimal: { buttonStyle: "rounded", borderWidth: "1px", backgroundTreatment: "plain" },
+      bold: { buttonStyle: "square", borderWidth: "2px", backgroundTreatment: "gradient" },
+      gradient: { buttonStyle: "pill", borderWidth: "0px", backgroundTreatment: "gradient" },
+      monochrome: { buttonStyle: "sharp", borderWidth: "1px", backgroundTreatment: "plain" },
+    };
+    const accentOverride = accentOverrides[(ctx.accentStyle || "").toLowerCase()];
+
+    // Respect the client's explicit Light/Dark choice; "auto" (or unset)
+    // falls back to whatever the design style normally uses.
+    const mode = (ctx.themeMode || "auto").toLowerCase();
+    const darkMode = mode === "dark" ? true : mode === "light" ? false : profile.darkMode;
 
     const shadowMap: Record<string, string> = {
       none: "none",
@@ -1517,25 +2695,34 @@ class MockAIProvider extends AIProvider {
       xl: "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
     };
 
+    // Light mode gets a subtle tint of the chosen primary color instead of
+    // flat white, so the brand color is visible across the whole page, not
+    // just on buttons.
+    const backgroundColor = darkMode ? "#0F0F0F" : mixWithWhite(ctx.primaryColor, 0.94);
+    const mutedColor = darkMode ? "#262626" : mixWithWhite(ctx.primaryColor, 0.88);
+    const borderColor = darkMode ? "#333333" : mixWithWhite(ctx.primaryColor, 0.8);
+
     return {
       primaryColor: ctx.primaryColor,
       secondaryColor: ctx.secondaryColor,
-      backgroundColor: profile.darkMode ? "#0F0F0F" : "#FFFFFF",
-      foregroundColor: profile.darkMode ? "#F5F5F5" : "#1A1A1A",
-      background: profile.darkMode ? "#0F0F0F" : "#FFFFFF",
-      textColor: profile.darkMode ? "#F5F5F5" : "#1A1A1A",
-      mutedColor: profile.darkMode ? "#262626" : "#F5F5F5",
-      borderColor: profile.darkMode ? "#333333" : "#E5E7EB",
+      backgroundColor,
+      foregroundColor: darkMode ? "#F5F5F5" : "#1A1A1A",
+      background: backgroundColor,
+      textColor: darkMode ? "#F5F5F5" : "#1A1A1A",
+      mutedColor,
+      borderColor,
       fontStyle: font,
       fontFamily: font,
-      darkMode: profile.darkMode,
+      darkMode,
       borderRadius: ctx.config.designStyle.borderRadius || profile.borderRadius,
-      buttonStyle: ctx.config.designStyle.buttonStyle || profile.buttonStyle,
+      // An explicit accent choice wins over both the business-type preset
+      // and the design style's default button shape.
+      buttonStyle: accentOverride?.buttonStyle || ctx.config.designStyle.buttonStyle || profile.buttonStyle,
       spacing: profile.spacing,
       shadow: shadowMap[profile.shadow],
       letterSpacing: profile.letterSpacing,
-      borderWidth: profile.borderWidth,
-      backgroundTreatment: profile.backgroundTreatment,
+      borderWidth: accentOverride?.borderWidth || profile.borderWidth,
+      backgroundTreatment: accentOverride?.backgroundTreatment || profile.backgroundTreatment,
     };
   }
 }

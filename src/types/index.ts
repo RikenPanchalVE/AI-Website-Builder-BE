@@ -6,7 +6,9 @@ export interface IEnquiry {
   email: string;
   phone?: string;
   businessName: string;
-  businessType: string;
+  // Chosen in the questionnaire's Business step, not on the landing page —
+  // may be absent at project-creation time.
+  businessType?: string;
 }
 
 export interface IProject extends Document {
