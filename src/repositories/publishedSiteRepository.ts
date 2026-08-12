@@ -25,6 +25,7 @@ interface ThemeData {
 interface SiteSpec {
   name?: string;
   description?: string;
+  logo?: string | null;
   theme?: ThemeData;
   pages?: Array<{
     slug: string;
@@ -114,7 +115,8 @@ const renderMobileNav = (
 
 const renderNavigation = (
   siteName: string,
-  navItems: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }>
+  navItems: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }>,
+  logo?: string | null
 ): string => {
   const items = navItems.map(item => {
     if (item.children && item.children.length > 0)
@@ -122,17 +124,23 @@ const renderNavigation = (
     return `<a href="${esc(item.href)}" class="nav-k">${esc(item.label)}</a>`;
   }).join("");
 
+  const logoHtml = logo
+    ? `<img src="${esc(logo)}" alt="${esc(siteName)}" style="height:32px;width:auto" />`
+    : esc(siteName);
+
   return `
   <input type="checkbox" id="mtog" class="mtog" />
   <nav class="nav" id="main-nav">
     <div class="nav-in">
-      <a href="/" class="nav-l">${esc(siteName)}</a>
+      <a href="/" class="nav-l">${logoHtml}</a>
       <div class="nav-ks">${items}</div>
       <div class="nav-a">
         <button class="nav-ab" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
         <button class="nav-ab" aria-label="Account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
-        <a href="/cart" class="nav-ab" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><span class="cc" style="display:none">0</span></a>
-        <a href="/wishlist" class="nav-ab hid md:flex" aria-label="Wishlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="cc wish-h" style="display:none;background:var(--err);top:2px">0</span></a>
+        <!-- TODO: Uncomment cart icon when eCommerce is implemented -->
+        <!-- <a href="/cart" class="nav-ab" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><span class="cc" style="display:none">0</span></a> -->
+        <!-- TODO: Uncomment wishlist icon when eCommerce is implemented -->
+        <!-- <a href="/wishlist" class="nav-ab hid md:flex" aria-label="Wishlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span class="cc wish-h" style="display:none;background:var(--err);top:2px">0</span></a> -->
         <label for="mtog" class="ham" aria-label="Menu"><span></span><span></span><span></span></label>
       </div>
     </div>
@@ -159,7 +167,7 @@ const renderFooter = (
         ${socialMedia.linkedin ? `<a href="${esc(socialMedia.linkedin)}" aria-label="LinkedIn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>` : ""}
       </div>
     </div>
-    <div><div class="fth">Quick Links</div><ul class="ftl">${ql.length > 0 ? ql.map(l => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join("") : `<li><a href="/">Home</a></li><li><a href="/shop">Shop</a></li><li><a href="/about_us">About</a></li><li><a href="/contact_us">Contact</a></li>`}</ul></div>
+    <div><div class="fth">Quick Links</div><ul class="ftl">${ql.length > 0 ? ql.map(l => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join("") : `<li><a href="/">Home</a></li><li><a href="/about_us">About</a></li><li><a href="/contact_us">Contact</a></li>`}</ul></div>
     <div><div class="fth">Customer Service</div><ul class="ftl">${sl.length > 0 ? sl.map(l => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join("") : `<li><a href="/contact_us">Contact Us</a></li><li><a href="/faq">FAQ</a></li><li><a href="/shipping">Shipping &amp; Returns</a></li><li><a href="/privacy_policy">Privacy Policy</a></li>`}</ul></div>
     <div><div class="fth">Contact Info</div><ul class="ftl">
       <li style="margin-bottom:14px"><a href="/contact_us" style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Get in Touch</a></li>
@@ -182,77 +190,105 @@ const renderComponent = (component: string, props: Record<string, any>, theme?: 
 
   switch (component) {
 
-    case "HeroEcommerce":
-      return `<section class="hero" style="background:${p.backgroundImage ? `url('${esc(p.backgroundImage)}') center/cover no-repeat` : `linear-gradient(135deg,${pri},${sec})`}">
-        <div class="hero-ov"></div>
-        <div class="hero-c">
-          ${p.badge ? `<div class="hero-b">${esc(p.badge)}</div>` : ""}
-          <h1 class="hero-t">${esc(p.headline)}</h1>
-          <p class="hero-s">${esc(p.subheadline)}</p>
-          <div class="hero-a">
-            ${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bp blg ${b}">${esc(p.ctaText)}</a>` : ""}
-            ${p.ctaText2 ? `<a href="${esc(p.ctaLink2 || "#")}" class="btn bs2 blg ${b}" style="border-color:#fff;color:#fff">${esc(p.ctaText2)}</a>` : ""}
-          </div>
-        </div>
-      </section>`;
+    // TODO: Uncomment HeroEcommerce when eCommerce is implemented
+    // case "HeroEcommerce":
+    //   return `<section class="hero" style="background:${p.backgroundImage ? `url('${esc(p.backgroundImage)}') center/cover no-repeat` : `linear-gradient(135deg,${pri},${sec})`}">
+    //     <div class="hero-ov"></div>
+    //     <div class="hero-c">
+    //       ${p.badge ? `<div class="hero-b">${esc(p.badge)}</div>` : ""}
+    //       <h1 class="hero-t">${esc(p.headline)}</h1>
+    //       <p class="hero-s">${esc(p.subheadline)}</p>
+    //       <div class="hero-a">
+    //         ${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bp blg ${b}">${esc(p.ctaText)}</a>` : ""}
+    //         ${p.ctaText2 ? `<a href="${esc(p.ctaLink2 || "#")}" class="btn bs2 blg ${b}" style="border-color:#fff;color:#fff">${esc(p.ctaText2)}</a>` : ""}
+    //       </div>
+    //     </div>
+    //   </section>`;
 
-    case "FeaturedCategories":
-      return `<section class="py16"><div class="ct">
-        <div class="sh"><div><div class="sh-sub">Browse</div><h2 class="sh-t">${esc(p.title || "Shop by Category")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
-        <div class="gr gc2 md:gc4 g6">
-          ${(p.categories || []).map((c: any) => `<a href="${esc(c.href || "#")}" class="pc" data-category-filter="${esc(c.slug || c.name || '')}" style="text-decoration:none"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(c.image || ph(c.name || "Category", 400, 300))}" alt="${esc(c.name)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">Shop Now</span></div></div><div class="pcbd tc"><div class="pcbn" style="white-space:normal">${esc(c.name)}</div>${c.count ? `<div class="pcbc">${esc(c.count)} items</div>` : ""}</div></a>`).join("")}
-        </div>
-      </div></section>`;
+    case "Hero1":
+    case "Hero2":
+    case "Hero3":
+      return `<section class="hero" style="background:${p.backgroundImage ? `url('${esc(p.backgroundImage)}') center/cover no-repeat` : `linear-gradient(135deg,${pri},${sec})`}"><div class="hero-ov"></div><div class="hero-c">${p.badge ? `<div class="hero-b">${esc(p.badge)}</div>` : ""}<h1 class="hero-t">${esc(p.headline || p.title || "")}</h1><p class="hero-s">${esc(p.subheadline || p.description || "")}</p><div class="hero-a">${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bp blg ${b}" style="padding:18px 40px;font-size:1.05rem">${esc(p.ctaText)}</a>` : ""}${p.secondaryCtaText ? `<a href="${esc(p.secondaryCtaLink || "#")}" class="btn bs2 blg ${b}" style="border-color:#fff;color:#fff;padding:18px 40px;font-size:1.05rem">${esc(p.secondaryCtaText)}</a>` : ""}</div></div></section>`;
 
-    case "BestSellers":
-    case "FeaturedProducts":
-      return `<section class="py16 bga"><div class="ct">
-        <div class="sh"><div><div class="sh-sub">Top Picks</div><h2 class="sh-t">${esc(p.title || (component === "BestSellers" ? "Best Sellers" : "Featured Products"))}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
-        <div class="gr gc2 md:gc4 g6">
-          ${(p.products || []).map((pr: any) => {
-        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
-        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
-        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.isNew ? '<span class="badge bdg-n">New</span>' : ""}${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd">${pr.category ? `<div class="pcbc">${esc(pr.category)}</div>` : ""}<div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
-      }).join("")}
-        </div>
-      </div></section>`;
+    // TODO: Uncomment FeaturedCategories when eCommerce is implemented
+    // case "FeaturedCategories":
+    //   return `<section class="py16"><div class="ct">
+    //     <div class="sh"><div><div class="sh-sub">Browse</div><h2 class="sh-t">${esc(p.title || "Shop by Category")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+    //     <div class="gr gc2 md:gc4 g6">
+    //       ${(p.categories || []).map((c: any) => `<a href="${esc(c.href || "#")}" class="pc" data-category-filter="${esc(c.slug || c.name || '')}" style="text-decoration:none"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(c.image || ph(c.name || "Category", 400, 300))}" alt="${esc(c.name)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">Shop Now</span></div></div><div class="pcbd tc"><div class="pcbn" style="white-space:normal">${esc(c.name)}</div>${c.count ? `<div class="pcbc">${esc(c.count)} items</div>` : ""}</div></a>`).join("")}
+    //     </div>
+    //   </div></section>`;
 
-    case "NewArrivals":
-      return `<section class="py16"><div class="ct">
-        <div class="sh"><div><div class="sh-sub">Just In</div><h2 class="sh-t">${esc(p.title || "New Arrivals")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
-        <div class="gr gc2 md:gc4 g6">
-          ${(p.products || []).map((pr: any) => {
-        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
-        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
-        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb"><span class="badge bdg-n">New</span></div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
-      }).join("")}
-        </div>
-      </div></section>`;
+    // TODO: Uncomment BestSellers/FeaturedProducts when eCommerce is implemented
+    // case "BestSellers":
+    // case "FeaturedProducts":
+    //   return `<section class="py16 bga"><div class="ct">
+    //     <div class="sh"><div><div class="sh-sub">Top Picks</div><h2 class="sh-t">${esc(p.title || (component === "BestSellers" ? "Best Sellers" : "Featured Products"))}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+    //     <div class="gr gc2 md:gc4 g6">
+    //       ${(p.products || []).map((pr: any) => {
+    //     const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+    //     const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+    //     return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.isNew ? '<span class="badge bdg-n">New</span>' : ""}${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd">${pr.category ? `<div class="pcbc">${esc(pr.category)}</div>` : ""}<div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+    //   }).join("")}
+    //     </div>
+    //   </div></section>`;
 
-    case "FlashSale":
-      return `<section class="py16" style="background:linear-gradient(135deg,#fef2f2,#fff1f2)"><div class="ct">
-        <div class="d dc md:d jcsb mb10 g6">
-          <div><div class="sh-sub" style="color:var(--err)">Limited Time</div><h2 class="sh-t" style="text-align:left;margin-bottom:0">${esc(p.title || "Flash Sale")}</h2></div>
-          <div class="d g3">
-            <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.hours || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Hours</div></div>
-            <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.minutes || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Mins</div></div>
-            <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.seconds || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Secs</div></div>
-          </div>
-        </div>
-        <div class="gr gc2 md:gc4 g6">
-          ${(p.products || []).map((pr: any) => {
-        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
-        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Sale"), category: pr.category || '' });
-        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Sale"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn br bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div><div class="pcbp"><span class="cur tr5">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn br bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
-      }).join("")}
-        </div>
-      </div></section>`;
+    // TODO: Uncomment NewArrivals when eCommerce is implemented
+    // case "NewArrivals":
+    //   return `<section class="py16"><div class="ct">
+    //     <div class="sh"><div><div class="sh-sub">Just In</div><h2 class="sh-t">${esc(p.title || "New Arrivals")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+    //     <div class="gr gc2 md:gc4 g6">
+    //       ${(p.products || []).map((pr: any) => {
+    //     const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+    //     const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+    //     return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb"><span class="badge bdg-n">New</span></div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+    //   }).join("")}
+    //     </div>
+    //   </div></section>`;
+
+    // TODO: Uncomment FlashSale when eCommerce is implemented
+    // case "FlashSale":
+    //   return `<section class="py16" style="background:linear-gradient(135deg,#fef2f2,#fff1f2)"><div class="ct">
+    //     <div class="d dc md:d jcsb mb10 g6">
+    //       <div><div class="sh-sub" style="color:var(--err)">Limited Time</div><h2 class="sh-t" style="text-align:left;margin-bottom:0">${esc(p.title || "Flash Sale")}</h2></div>
+    //       <div class="d g3">
+    //         <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.hours || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Hours</div></div>
+    //         <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.minutes || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Mins</div></div>
+    //         <div class="tc" style="background:#111827;color:#fff;width:64px;height:64px;border-radius:var(--rmd);display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.25rem;font-weight:700">${esc(p.countdown?.seconds || "00")}</div><div style="font-size:.625rem;text-transform:uppercase;opacity:.7">Secs</div></div>
+    //       </div>
+    //     </div>
+    //     <div class="gr gc2 md:gc4 g6">
+    //       ${(p.products || []).map((pr: any) => {
+    //     const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+    //     const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Sale"), category: pr.category || '' });
+    //     return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Sale"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn br bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div><div class="pcbp"><span class="cur tr5">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn br bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+    //   }).join("")}
+    //     </div>
+    //   </div></section>`;
 
     case "WhyChooseUs":
       return `<section class="py16 bga"><div class="ct">
         <div class="sh"><div><div class="sh-sub">Our Promise</div><h2 class="sh-t">${esc(p.title || "Why Choose Us")}</h2></div></div>
         <div class="gr gc2 md:gc4 g8">
-          ${(p.features || []).map((f: any) => `<div class="tc p6"><div style="width:64px;height:64px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.5rem">${esc(f.icon || "\u2605")}</div><h3 class="fs mb2">${esc(f.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.6">${esc(f.description)}</p></div>`).join("")}
+          ${(p.features || []).map((f: any) => `<div class="tc p6" style="background:var(--bgc);border-radius:var(--rlg);border:1px solid var(--bdr);transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.transform='translateY(-8px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.transform='none'"><div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--c1l),var(--c2l));color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.75rem">${esc(f.icon || "\u2605")}</div><h3 class="fs mb3" style="font-size:1.125rem">${esc(f.title)}</h3><p class="ts" style="color:var(--ctxl);line-height:1.7">${esc(f.description)}</p></div>`).join("")}
+        </div>
+      </div></section>`;
+
+    case "Portfolio1":
+    case "Portfolio2":
+      return `<section class="py16"><div class="ct">
+        <div class="sh"><div><div class="sh-sub">Portfolio</div><h2 class="sh-t">${esc(p.title || "Our Portfolio")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+        <div class="gr gc1 md:gc3 g8">
+          ${(p.projects || []).map((item: any) => `<div class="pc" style="text-decoration:none;display:block"><div class="pci" style="aspect-ratio:16/9"><img src="${esc(item.image || ph(item.title || "Project", 600, 400))}" alt="${esc(item.title)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">View Project</span></div></div><div class="pcbd" style="padding:24px">${item.category ? `<div class="pcbc" style="color:${pri};font-size:.75rem;font-weight:700;letter-spacing:.05em">${esc(item.category)}</div>` : ""}<h3 class="fs mb2" style="font-size:1.125rem">${esc(item.title)}</h3>${item.description ? `<p style="color:var(--ctxl);font-size:.9375rem;line-height:1.7;margin-bottom:16px">${esc(item.description)}</p>` : ""}<a href="${esc(item.href || "#" + (item.slug || ""))}" class="btn bs2 bsm ${b}" style="margin-top:8px">View Project \u2192</a></div></div>`).join("")}
+        </div>
+      </div></section>`;
+
+    case "Pricing1":
+    case "Pricing2":
+      return `<section class="py16 bga"><div class="ct">
+        <div class="sh tc"><div><div class="sh-sub">Pricing</div><h2 class="sh-t">${esc(p.title || "Our Pricing")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
+        <div class="gr gc1 md:gc3 g8">
+          ${(p.plans || []).map((plan: any) => `<div style="background:var(--bgc);border:2px solid ${plan.popular ? pri : 'var(--bdr)'};border-radius:var(--rlg);padding:40px 32px;text-align:center;position:relative;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.transform='translateY(-8px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.transform='none'">${plan.popular ? `<div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;padding:6px 20px;border-radius:var(--rpl);font-size:.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 4px 12px var(--c1d)">Most Popular</div>` : ""}<h3 class="txl fb mb4" style="font-size:1.25rem">${esc(plan.name)}</h3><div class="d jcc aic g1 mb4"><span class="tx3 fb" style="color:${pri};letter-spacing:-.03em">${esc(plan.price)}</span>${plan.period ? `<span style="color:var(--ctxlr);font-size:.875rem">/${esc(plan.period)}</span>` : ""}</div>${plan.description ? `<p style="color:var(--ctxl);font-size:.9375rem;margin-bottom:28px;line-height:1.6">${esc(plan.description)}</p>` : ""}<div style="text-align:left;margin-bottom:28px">${(plan.features || []).map((f: any) => `<div class="d aic g3 mb3" style="font-size:.9375rem"><span style="color:var(--c1);font-weight:700;font-size:1rem">\u2713</span><span style="color:var(--ctxl)">${esc(f)}</span></div>`).join("")}</div><a href="${esc(plan.ctaLink || "#")}" class="btn ${plan.popular ? 'bp blg' : 'bw blg'} bbl ${b}" style="width:100%">${esc(plan.ctaText || "Get Started")}</a></div>`).join("")}
         </div>
       </div></section>`;
 
@@ -267,24 +303,24 @@ const renderComponent = (component: string, props: Record<string, any>, theme?: 
     case "BrandShowcase":
       return `<section class="py16 bga"><div class="ct tc">
         <div class="sh"><div><h2 class="sh-t">${esc(p.title || "Our Brands")}</h2></div></div>
-        <div class="d dw jcc aic g12">
-          ${(p.brands || []).map((brd: any) => `<div style="opacity:.5;transition:opacity .25s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.5'">${brd.logo ? `<img src="${esc(brd.logo)}" alt="${esc(brd.name)}" style="height:40px" />` : `<div class="txl fb tgr4">${esc(brd.name)}</div>`}</div>`).join("")}
+        <div class="d dw jcc aic g12" style="gap:48px">
+          ${(p.brands || []).map((brd: any) => `<div style="opacity:.4;transition:all .3s ease;cursor:default" onmouseover="this.style.opacity='1';this.style.transform='scale(1.05)'" onmouseout="this.style.opacity='.4';this.style.transform='scale(1)'">${brd.logo ? `<img src="${esc(brd.logo)}" alt="${esc(brd.name)}" style="height:44px" />` : `<div class="txl fb tgr4" style="font-size:1.5rem;letter-spacing:-.02em">${esc(brd.name)}</div>`}</div>`).join("")}
         </div>
       </div></section>`;
 
     case "NewsletterSignup":
-      return `<section class="nlb" style="background:linear-gradient(135deg,${pri},${sec})"><div class="csm">
-        <h2 class="tx3 fb mb3" style="color:#fff">${esc(p.title || "Subscribe to Our Newsletter")}</h2>
-        <p class="tl mb8" style="opacity:.9">${esc(p.subtitle || "Get the latest updates on new products and upcoming sales")}</p>
-        <div class="nlf"><input type="email" placeholder="${esc(p.placeholder || "Enter your email address")}" class="inp" style="font-size:1rem" /><button class="btn bw blg ${b}">${esc(p.buttonText || "Subscribe")}</button></div>
-        <p class="tx mt4" style="opacity:.7">We respect your privacy. Unsubscribe at any time.</p>
+      return `<section class="nlb" style="background:linear-gradient(135deg,${pri},${sec})"><div class="csm" style="position:relative;z-index:1">
+        <h2 class="tx3 fb mb3" style="color:#fff;letter-spacing:-.02em">${esc(p.title || "Subscribe to Our Newsletter")}</h2>
+        <p class="tl mb8" style="opacity:.9;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.7">${esc(p.subtitle || "Get the latest updates on new products and upcoming sales")}</p>
+        <div class="nlf"><input type="email" placeholder="${esc(p.placeholder || "Enter your email address")}" class="inp" style="font-size:1rem;padding:16px 20px" /><button class="btn bw blg ${b}">${esc(p.buttonText || "Subscribe")}</button></div>
+        <p class="tx mt4" style="opacity:.6">We respect your privacy. Unsubscribe at any time.</p>
       </div></section>`;
 
     case "InstagramFeed":
       return `<section class="py16"><div class="ct tc">
         <div class="sh"><div><div class="sh-sub">Social</div><h2 class="sh-t">${esc(p.title || "Follow Us on Instagram")}</h2>${p.handle ? `<p class="sh-d">@${esc(p.handle)}</p>` : ""}</div></div>
         <div class="gr gc2 md:gc6 g3">
-          ${(p.images || []).map((img: string) => `<div style="position:relative;overflow:hidden;border-radius:var(--rmd);aspect-ratio:1;cursor:pointer"><img src="${esc(img || ph("Instagram", 300, 300))}" alt="Instagram post" style="width:100%;height:100%;object-fit:cover;transition:transform .5s ease" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" /><div style="position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div>`).join("")}
+          ${(p.images || []).map((img: string) => `<div style="position:relative;overflow:hidden;border-radius:var(--rlg);aspect-ratio:1;cursor:pointer"><img src="${esc(img || ph("Instagram", 300, 300))}" alt="Instagram post" style="width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.4,0,.2,1)" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" /><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.5) 100%);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s ease" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div>`).join("")}
         </div>
       </div></section>`;
 
@@ -326,110 +362,117 @@ const renderComponent = (component: string, props: Record<string, any>, theme?: 
     case "PageHero":
       return `<section class="ph"><div class="phi">${p.subtitle ? `<div class="ts fs mb3" style="color:${pri}">${esc(p.subtitle)}</div>` : ""}<h1 class="tx4 md:tx5 fb" style="letter-spacing:-.02em">${esc(p.title || "Page")}</h1>${p.description ? `<p class="tl mt3" style="opacity:.8">${esc(p.description)}</p>` : ""}</div></section>`;
 
-    case "ShopHero":
-      return `<section class="ph"><div class="phi"><nav class="brd" style="color:#9ca3af"><a href="/" style="color:#d1d5db">Home</a><span class="brd-s">/</span><span class="brd-c" style="color:#fff">${esc(p.title || "Shop")}</span></nav><h1 class="tx4 md:tx5 fb">${esc(p.title || "Shop")}</h1>${p.description ? `<p class="tl mt3" style="opacity:.8">${esc(p.description)}</p>` : ""}</div></section>`;
+    // TODO: Uncomment ShopHero when eCommerce is implemented
+    // case "ShopHero":
+    //   return `<section class="ph"><div class="phi"><nav class="brd" style="color:#9ca3af"><a href="/" style="color:#d1d5db">Home</a><span class="brd-s">/</span><span class="brd-c" style="color:#fff">${esc(p.title || "Shop")}</span></nav><h1 class="tx4 md:tx5 fb">${esc(p.title || "Shop")}</h1>${p.description ? `<p class="tl mt3" style="opacity:.8">${esc(p.description)}</p>` : ""}</div></section>`;
 
-    case "ProductFilters":
-      return `<aside style="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><h3 class="fb txl mb6">Filters</h3>
-        ${(p.categories || []).length > 0 ? `<div class="mb6"><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Category</h4><div style="display:flex;flex-wrap:wrap;gap:8px"><button data-category-filter="all" class="btn bs2 bsm ${b}" style="background:var(--c1);color:#fff">All</button>${p.categories.map((c: any) => `<button data-category-filter="${esc(c.slug || c.name || c)}" class="btn bs2 bsm ${b}">${esc(c.name || c)}</button>`).join("")}</div></div>` : ""}
-        ${(p.priceRange || p.priceRanges) ? `<div class="mb6"><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Price</h4><div style="display:flex;flex-direction:column;gap:10px">${(p.priceRange || p.priceRanges || []).map((r: any) => `<label style="display:flex;align-items:center;gap:10px;font-size:.9375rem;color:var(--ctxl);cursor:pointer"><input type="checkbox" style="width:18px;height:18px;border-radius:4px;border:1.5px solid var(--bdr);accent-color:var(--c1)" /> ${esc(typeof r === "string" ? r : r.label || `${r.min} - ${r.max}`)}</label>`).join("")}</div></div>` : ""}
-        ${(p.sortOptions || []).length > 0 ? `<div><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Sort By</h4><select data-sort-select class="inp sel">${p.sortOptions.map((o: any) => `<option value="${esc(o.value || o)}">${esc(o.label || o)}</option>`).join("")}</select></div>` : ""}
-      </aside>`;
+    // TODO: Uncomment ProductFilters when eCommerce is implemented
+    // case "ProductFilters":
+    //   return `<aside style="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><h3 class="fb txl mb6">Filters</h3>
+    //     ${(p.categories || []).length > 0 ? `<div class="mb6"><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Category</h4><div style="display:flex;flex-wrap:wrap;gap:8px"><button data-category-filter="all" class="btn bs2 bsm ${b}" style="background:var(--c1);color:#fff">All</button>${p.categories.map((c: any) => `<button data-category-filter="${esc(c.slug || c.name || c)}" class="btn bs2 bsm ${b}">${esc(c.name || c)}</button>`).join("")}</div></div>` : ""}
+    //     ${(p.priceRange || p.priceRanges) ? `<div class="mb6"><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Price</h4><div style="display:flex;flex-direction:column;gap:10px">${(p.priceRange || p.priceRanges || []).map((r: any) => `<label style="display:flex;align-items:center;gap:10px;font-size:.9375rem;color:var(--ctxl);cursor:pointer"><input type="checkbox" style="width:18px;height:18px;border-radius:4px;border:1.5px solid var(--bdr);accent-color:var(--c1)" /> ${esc(typeof r === "string" ? r : r.label || `${r.min} - ${r.max}`)}</label>`).join("")}</div></div>` : ""}
+    //     ${(p.sortOptions || []).length > 0 ? `<div><h4 class="fs ts mb3" style="text-transform:uppercase;letter-spacing:.05em;color:var(--ctxl)">Sort By</h4><select data-sort-select class="inp sel">${p.sortOptions.map((o: any) => `<option value="${esc(o.value || o)}">${esc(o.label || o)}</option>`).join("")}</select></div>` : ""}
+    //   </aside>`;
 
-    case "ProductGrid":
-      return `<section class="py16"><div class="ct"><div style="display:flex;flex-direction:row;gap:32px"><div style="width:280px;flex-shrink:0" class="hid md:block">${renderComponent("ProductFilters", p.filters || {}, theme)}</div><div style="flex:1">
-        <div class="d aic jcsb mb6" style="flex-wrap:wrap;gap:12px">
-          <span data-result-count style="color:var(--ctxl);font-size:.9375rem">${esc(p.totalProducts || (p.products || []).length)} products</span>
-          <div class="d aic g3">
-            <input type="text" placeholder="Search products..." data-search-input class="inp" style="width:200px;padding:8px 12px;font-size:.875rem" />
-            <select data-sort-select class="inp sel" style="width:160px;padding:8px 12px;font-size:.875rem">
-              <option value="">Sort by</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="name">Name: A-Z</option>
-              <option value="rating">Top Rated</option>
-            </select>
-          </div>
-        </div>
-        <div class="gr gc2 lg:gc3 g6" data-product-grid>
-          ${(p.products || []).map((pr: any) => {
-        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
-        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
-        return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.isNew ? '<span class="badge bdg-n">New</span>' : ""}${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd">${pr.category ? `<div class="pcbc">${esc(pr.category)}</div>` : ""}<div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
-      }).join("")}
-        </div>
-        <div data-pagination-container></div>
-      </div></div></div></section>`;
+    // TODO: Uncomment ProductGrid when eCommerce is implemented
+    // case "ProductGrid":
+    //   return `<section class="py16"><div class="ct"><div style="display:flex;flex-direction:row;gap:32px"><div style="width:280px;flex-shrink:0" class="hid md:block">${renderComponent("ProductFilters", p.filters || {}, theme)}</div><div style="flex:1">
+    //     <div class="d aic jcsb mb6" style="flex-wrap:wrap;gap:12px">
+    //       <span data-result-count style="color:var(--ctxl);font-size:.9375rem">${esc(p.totalProducts || (p.products || []).length)} products</span>
+    //       <div class="d aic g3">
+    //         <input type="text" placeholder="Search products..." data-search-input class="inp" style="width:200px;padding:8px 12px;font-size:.875rem" />
+    //         <select data-sort-select class="inp sel" style="width:160px;padding:8px 12px;font-size:.875rem">
+    //           <option value="">Sort by</option>
+    //           <option value="price_asc">Price: Low to High</option>
+    //           <option value="price_desc">Price: High to Low</option>
+    //           <option value="name">Name: A-Z</option>
+    //           <option value="rating">Top Rated</option>
+    //         </select>
+    //       </div>
+    //     </div>
+    //     <div class="gr gc2 lg:gc3 g6" data-product-grid>
+    //       ${(p.products || []).map((pr: any) => {
+    //     const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+    //     const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+    //     return `<div class="pc" data-product-card data-searchable data-search-name="${esc(pr.name || '')}" data-search-category="${esc(pr.category || '')}" data-price="${esc(pr.price || '0')}" data-rating="${esc(pr.rating || '0')}"><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pcb">${pr.isNew ? '<span class="badge bdg-n">New</span>' : ""}${pr.discount ? `<span class="badge bdg-s">-${esc(pr.discount)}%</span>` : ""}</div><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd">${pr.category ? `<div class="pcbc">${esc(pr.category)}</div>` : ""}<div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+    //   }).join("")}
+    //     </div>
+    //     <div data-pagination-container></div>
+    //   </div></div></div></section>`;
 
     // ─── PRODUCT DETAILS ───────────────────────────────
 
     case "Breadcrumbs":
       return `<nav class="brd ct">${(p.items || []).map((item: any, i: number, arr: any[]) => `${i > 0 ? '<span class="brd-s">/</span>' : ""}${i < arr.length - 1 ? `<a href="${esc(item.href || "#")}">${esc(item.label)}</a>` : `<span class="brd-c">${esc(item.label)}</span>`}`).join("")}</nav>`;
 
-    case "ProductDetails": {
-      const pd = p.product ? { ...p.product, hasWishlist: p.hasWishlist, shareLinks: p.shareLinks } : p;
-      return `<section class="py16"><div class="ct"><div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start" data-product-card data-searchable data-search-name="${esc(pd.name || '')}" data-search-category="${esc(pd.category || '')}" data-price="${esc(pd.price || '0')}" data-rating="${esc(pd.rating || '0')}">
-        <div><div style="border-radius:var(--rlg);overflow:hidden;border:1px solid var(--bdr)"><img src="${esc(pd.image || ph(pd.name || "Product", 600, 600))}" alt="${esc(pd.name)}" style="width:100%;aspect-ratio:1;object-fit:cover" /></div>
-          ${pd.gallery && pd.gallery.length > 0 ? `<div class="d g3 mt4"><img src="${esc(pd.image || ph("Product"))}" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:var(--rsm);border:2px solid ${pri};cursor:pointer" />${pd.gallery.map((img: string) => `<img src="${esc(img)}" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:var(--rsm);border:1.5px solid var(--bdr);cursor:pointer;transition:border-color .25s" onmouseover="this.style.borderColor='${pri}'" onmouseout="this.style.borderColor='var(--bdr)'" />`).join("")}</div>` : ""}
-        </div>
-        <div>${pd.brand ? `<div style="font-size:.8125rem;font-weight:500;color:var(--ctxlr);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">${esc(pd.brand)}</div>` : ""}<h1 style="font-size:2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:12px">${esc(pd.name)}</h1>
-          ${pd.rating ? `<div class="d aic g2 mb4">${starsHtml(pd.rating)} <span style="color:var(--ctxl);font-size:.9375rem">(${esc(pd.reviewCount || 0)} reviews)</span></div>` : ""}
-          <div class="d aic g3 mb6"><span style="font-size:1.75rem;font-weight:700;color:${pri}">$${esc(pd.price || "0")}</span>${pd.originalPrice ? `<span style="font-size:1.125rem;color:var(--ctxlr);text-decoration:line-through">$${esc(pd.originalPrice)}</span>` : ""}${pd.discount ? `<span class="badge bdg-s">-${esc(pd.discount)}% OFF</span>` : ""}</div>
-          ${pd.shortDescription ? `<p style="color:var(--ctxl);line-height:1.7;margin-bottom:24px">${esc(pd.shortDescription)}</p>` : ""}
-          ${pd.variants && pd.variants.length > 0 ? `<div class="mb6"><div class="fs ts mb3">${esc(pd.variantLabel || "Options")}</div><div class="d dw g2" data-color-group>${pd.variants.map((v: any) => `<button class="btn bs2 bsm ${b}" data-color-select="${esc(v.name || v)}">${esc(v.name || v)}</button>`).join("")}</div></div>` : ""}
-          ${pd.sizes && pd.sizes.length > 0 ? `<div class="mb6"><div class="fs ts mb3">Size</div><div class="d dw g2" data-size-group>${pd.sizes.map((s: any) => `<button class="btn bs2 bsm ${b}" data-size-select="${esc(s.name || s)}" style="min-width:48px;height:48px;padding:0">${esc(s.name || s)}</button>`).join("")}</div></div>` : ""}
-          ${pd.colors && pd.colors.length > 0 ? `<div class="mb6"><div class="fs ts mb3">Color</div><div class="d dw g3" data-color-group>${pd.colors.map((c: any) => `<div data-color-select="${esc(c.hex || c.color || c)}" style="width:32px;height:32px;border-radius:50%;border:2px solid var(--bdr);cursor:pointer;transition:all .2s;background:${esc(c.hex || c.color || c)}" title="${esc(c.name || c)}"></div>`).join("")}</div></div>` : ""}
-          <div class="d aic g4 mb6"><div class="qty"><button class="qb" data-qty-minus>\u2212</button><div class="qv" data-qty>1</div><button class="qb" data-qty-plus>+</button></div>
-          ${(() => {
-          const pid = `p_${esc(pd.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
-          const prodData = JSON.stringify({ id: pid, name: pd.name, price: pd.price, image: pd.image || ph(pd.name || "Product"), category: pd.category || '' });
-          return `<button class="btn bp blg ${b}" style="flex:1" data-add-to-cart='${prodData}'>Add to Cart</button>`;
-        })()}
-          </div>
-          ${pd.description ? `<div style="border-top:1px solid var(--bdr);padding-top:24px;margin-top:24px"><h3 class="fs mb3">Description</h3><div style="color:var(--ctxl);line-height:1.7;font-size:.9375rem">${esc(pd.description)}</div></div>` : ""}
-        </div>
-      </div></div></section>`;
-    }
+    // TODO: Uncomment ProductDetails when eCommerce is implemented
+    // case "ProductDetails": {
+    //   const pd = p.product ? { ...p.product, hasWishlist: p.hasWishlist, shareLinks: p.shareLinks } : p;
+    //   return `<section class="py16"><div class="ct"><div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start" data-product-card data-searchable data-search-name="${esc(pd.name || '')}" data-search-category="${esc(pd.category || '')}" data-price="${esc(pd.price || '0')}" data-rating="${esc(pd.rating || '0')}">
+    //     <div><div style="border-radius:var(--rlg);overflow:hidden;border:1px solid var(--bdr)"><img src="${esc(pd.image || ph(pd.name || "Product", 600, 600))}" alt="${esc(pd.name)}" style="width:100%;aspect-ratio:1;object-fit:cover" /></div>
+    //       ${pd.gallery && pd.gallery.length > 0 ? `<div class="d g3 mt4"><img src="${esc(pd.image || ph("Product"))}" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:var(--rsm);border:2px solid ${pri};cursor:pointer" />${pd.gallery.map((img: string) => `<img src="${esc(img)}" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:var(--rsm);border:1.5px solid var(--bdr);cursor:pointer;transition:border-color .25s" onmouseover="this.style.borderColor='${pri}'" onmouseout="this.style.borderColor='var(--bdr)'" />`).join("")}</div>` : ""}
+    //     </div>
+    //     <div>${pd.brand ? `<div style="font-size:.8125rem;font-weight:500;color:var(--ctxlr);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">${esc(pd.brand)}</div>` : ""}<h1 style="font-size:2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:12px">${esc(pd.name)}</h1>
+    //       ${pd.rating ? `<div class="d aic g2 mb4">${starsHtml(pd.rating)} <span style="color:var(--ctxl);font-size:.9375rem">(${esc(pd.reviewCount || 0)} reviews)</span></div>` : ""}
+    //       <div class="d aic g3 mb6"><span style="font-size:1.75rem;font-weight:700;color:${pri}">$${esc(pd.price || "0")}</span>${pd.originalPrice ? `<span style="font-size:1.125rem;color:var(--ctxlr);text-decoration:line-through">$${esc(pd.originalPrice)}</span>` : ""}${pd.discount ? `<span class="badge bdg-s">-${esc(pd.discount)}% OFF</span>` : ""}</div>
+    //       ${pd.shortDescription ? `<p style="color:var(--ctxl);line-height:1.7;margin-bottom:24px">${esc(pd.shortDescription)}</p>` : ""}
+    //       ${pd.variants && pd.variants.length > 0 ? `<div class="mb6"><div class="fs ts mb3">${esc(pd.variantLabel || "Options")}</div><div class="d dw g2" data-color-group>${pd.variants.map((v: any) => `<button class="btn bs2 bsm ${b}" data-color-select="${esc(v.name || v)}">${esc(v.name || v)}</button>`).join("")}</div></div>` : ""}
+    //       ${pd.sizes && pd.sizes.length > 0 ? `<div class="mb6"><div class="fs ts mb3">Size</div><div class="d dw g2" data-size-group>${pd.sizes.map((s: any) => `<button class="btn bs2 bsm ${b}" data-size-select="${esc(s.name || s)}" style="min-width:48px;height:48px;padding:0">${esc(s.name || s)}</button>`).join("")}</div></div>` : ""}
+    //       ${pd.colors && pd.colors.length > 0 ? `<div class="mb6"><div class="fs ts mb3">Color</div><div class="d dw g3" data-color-group>${pd.colors.map((c: any) => `<div data-color-select="${esc(c.hex || c.color || c)}" style="width:32px;height:32px;border-radius:50%;border:2px solid var(--bdr);cursor:pointer;transition:all .2s;background:${esc(c.hex || c.color || c)}" title="${esc(c.name || c)}"></div>`).join("")}</div></div>` : ""}
+    //       <div class="d aic g4 mb6"><div class="qty"><button class="qb" data-qty-minus>\u2212</button><div class="qv" data-qty>1</div><button class="qb" data-qty-plus>+</button></div>
+    //       ${(() => {
+    //       const pid = `p_${esc(pd.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+    //       const prodData = JSON.stringify({ id: pid, name: pd.name, price: pd.price, image: pd.image || ph(pd.name || "Product"), category: pd.category || '' });
+    //       return `<button class="btn bp blg ${b}" style="flex:1" data-add-to-cart='${prodData}'>Add to Cart</button>`;
+    //     })()}
+    //       </div>
+    //       ${pd.description ? `<div style="border-top:1px solid var(--bdr);padding-top:24px;margin-top:24px"><h3 class="fs mb3">Description</h3><div style="color:var(--ctxl);line-height:1.7;font-size:.9375rem">${esc(pd.description)}</div></div>` : ""}
+    //     </div>
+    //   </div></div></section>`;
+    // }
 
-    case "ProductReviews":
-      return `<section class="py16 bga"><div class="cxs"><div class="sh"><div><h2 class="sh-t" style="text-align:left">Customer Reviews</h2></div></div>
-        <div style="display:flex;flex-direction:column;gap:24px">${(p.reviews || []).map((r: any) => `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><div class="d aic g4 mb3"><img src="${esc(r.avatar || ph(r.author || "User", 48, 48))}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover" /><div><div class="fs">${esc(r.author || r.name)}</div>${r.date ? `<div style="font-size:.8125rem;color:var(--ctxlr)">${esc(r.date)}</div>` : ""}</div><div class="mla">${starsHtml(r.rating)}</div></div>${r.title ? `<div class="fs mb2">${esc(r.title)}</div>` : ""}<p style="color:var(--ctxl);font-size:.9375rem;line-height:1.7">${esc(r.content || r.comment)}</p></div>`).join("")}</div></div></section>`;
+    // TODO: Uncomment ProductReviews when eCommerce is implemented
+    // case "ProductReviews":
+    //   return `<section class="py16 bga"><div class="cxs"><div class="sh"><div><h2 class="sh-t" style="text-align:left">Customer Reviews</h2></div></div>
+    //     <div style="display:flex;flex-direction:column;gap:24px">${(p.reviews || []).map((r: any) => `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><div class="d aic g4 mb3"><img src="${esc(r.avatar || ph(r.author || "User", 48, 48))}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover" /><div><div class="fs">${esc(r.author || r.name)}</div>${r.date ? `<div style="font-size:.8125rem;color:var(--ctxlr)">${esc(r.date)}</div>` : ""}</div><div class="mla">${starsHtml(r.rating)}</div></div>${r.title ? `<div class="fs mb2">${esc(r.title)}</div>` : ""}<p style="color:var(--ctxl);font-size:.9375rem;line-height:1.7">${esc(r.content || r.comment)}</p></div>`).join("")}</div></div></section>`;
 
-    case "RelatedProducts":
-    case "RecentlyViewed":
-      return `<section class="py16"><div class="ct"><div class="sh"><div><h2 class="sh-t" style="text-align:left">${esc(p.title || (component === "RelatedProducts" ? "Related Products" : "Recently Viewed"))}</h2></div></div>
-        <div class="gr gc2 md:gc4 g6">${(p.products || []).map((pr: any) => {
-        const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
-        const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
-        return `<div class="pc" data-product-card><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
-      }).join("")}</div></div></section>`;
+    // TODO: Uncomment RelatedProducts/RecentlyViewed when eCommerce is implemented
+    // case "RelatedProducts":
+    // case "RecentlyViewed":
+    //   return `<section class="py16"><div class="ct"><div class="sh"><div><h2 class="sh-t" style="text-align:left">${esc(p.title || (component === "RelatedProducts" ? "Related Products" : "Recently Viewed"))}</h2></div></div>
+    //     <div class="gr gc2 md:gc4 g6">${(p.products || []).map((pr: any) => {
+    //     const pid = `p_${esc(pr.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+    //     const prodData = JSON.stringify({ id: pid, name: pr.name, price: pr.price, image: pr.image || ph(pr.name || "Product"), category: pr.category || '' });
+    //     return `<div class="pc" data-product-card><div class="pci"><img src="${esc(pr.image || ph(pr.name || "Product"))}" alt="${esc(pr.name)}" class="pcimg" /><div class="pco"><button class="btn bw bsm ${b}">Quick View</button><button class="btn bp bsm ${b}" data-add-to-cart='${prodData}'>Add to Cart</button></div></div><div class="pcbd"><div class="pcbn">${esc(pr.name)}</div>${pr.rating ? `<div class="mb1">${starsHtml(pr.rating)}</div>` : ""}<div class="pcbp"><span class="cur" style="color:${pri}">$${esc(pr.price || "0")}</span>${pr.originalPrice ? `<span class="org">$${esc(pr.originalPrice)}</span>` : ""}</div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+    //   }).join("")}</div></div></section>`;
 
     // ─── OTHER PAGES ───────────────────────────────────
 
-    case "CategoryGrid":
-      return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Categories</div><h2 class="sh-t">${esc(p.title || "Browse Categories")}</h2></div></div>
-        <div class="gr gc2 md:gc3 lg:gc4 g6">${(p.categories || []).map((c: any) => `<a href="${esc(c.href || "#")}" class="pc" data-category-filter="${esc(c.slug || c.name || '')}" style="text-decoration:none"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(c.image || ph(c.name || "Category", 400, 300))}" alt="${esc(c.name)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">Explore</span></div></div><div class="pcbd tc"><div class="pcbn" style="white-space:normal">${esc(c.name)}</div>${c.count ? `<div class="pcbc">${esc(c.count)} items</div>` : ""}</div></a>`).join("")}</div></div></section>`;
+    // TODO: Uncomment CategoryGrid when eCommerce is implemented
+    // case "CategoryGrid":
+    //   return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Categories</div><h2 class="sh-t">${esc(p.title || "Browse Categories")}</h2></div></div>
+    //     <div class="gr gc2 md:gc3 lg:gc4 g6">${(p.categories || []).map((c: any) => `<a href="${esc(c.href || "#")}" class="pc" data-category-filter="${esc(c.slug || c.name || '')}" style="text-decoration:none"><div class="pci" style="aspect-ratio:4/3"><img src="${esc(c.image || ph(c.name || "Category", 400, 300))}" alt="${esc(c.name)}" class="pcimg" /><div class="pco" style="border-radius:inherit"><span class="btn bw bsm ${b}">Explore</span></div></div><div class="pcbd tc"><div class="pcbn" style="white-space:normal">${esc(c.name)}</div>${c.count ? `<div class="pcbc">${esc(c.count)} items</div>` : ""}</div></a>`).join("")}</div></div></section>`;
 
     case "AboutStory":
-      return `<section class="py16"><div class="ct"><div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
-        <div>${p.subtitle ? `<div class="sh-sub" style="text-align:left;margin-bottom:8px">${esc(p.subtitle)}</div>` : ""}<h2 class="sh-t" style="text-align:left">${esc(p.title || "Our Story")}</h2><p style="color:var(--ctxl);line-height:1.75;margin-bottom:16px">${esc(p.paragraph1 || p.description || "")}</p>${p.paragraph2 ? `<p style="color:var(--ctxl);line-height:1.75">${esc(p.paragraph2)}</p>` : ""}${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bp ${b} mt6">${esc(p.ctaText)}</a>` : ""}</div>
-        <div><img src="${esc(p.image || ph("Our Story", 600, 400))}" alt="Our Story" style="width:100%;border-radius:var(--rlg);object-fit:cover;box-shadow:var(--shx)" /></div>
+      return `<section class="py16"><div class="ct"><div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center">
+        <div>${p.subtitle ? `<div class="sh-sub" style="text-align:left;margin-bottom:12px">${esc(p.subtitle)}</div>` : ""}<h2 class="sh-t" style="text-align:left;margin-bottom:20px">${esc(p.title || "Our Story")}</h2><p style="color:var(--ctxl);line-height:1.85;margin-bottom:20px;font-size:1.05rem">${esc(p.paragraph1 || p.description || "")}</p>${p.paragraph2 ? `<p style="color:var(--ctxl);line-height:1.85;font-size:1.05rem">${esc(p.paragraph2)}</p>` : ""}${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bp ${b} mt6" style="padding:16px 36px">${esc(p.ctaText)}</a>` : ""}</div>
+        <div style="position:relative"><img src="${esc(p.image || ph("Our Story", 600, 400))}" alt="Our Story" style="width:100%;border-radius:var(--rlg);object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,.12)" /><div style="position:absolute;bottom:-20px;right:-20px;width:120px;height:120px;background:linear-gradient(135deg,var(--c1),var(--c2));border-radius:var(--rlg);z-index:-1;opacity:.3"></div></div>
       </div></div></section>`;
 
     case "AboutValues":
       return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Values</div><h2 class="sh-t">${esc(p.title || "Our Values")}</h2></div></div>
-        <div class="gr gc1 md:gc3 g8">${(p.values || []).map((v: any) => `<div style="background:var(--bgc);border-radius:var(--rlg);padding:32px;text-align:center;border:1px solid var(--bdr);transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:64px;height:64px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.5rem">${esc(v.icon || "\ud83d\udc8e")}</div><h3 class="fs txl mb3">${esc(v.title)}</h3><p style="color:var(--ctxl);font-size:.9375rem;line-height:1.7">${esc(v.description)}</p></div>`).join("")}</div></div></section>`;
+        <div class="gr gc1 md:gc3 g8">${(p.values || []).map((v: any) => `<div style="background:var(--bgc);border-radius:var(--rlg);padding:40px 32px;text-align:center;border:1px solid var(--bdr);transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.transform='translateY(-8px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.transform='none'"><div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--c1l),var(--c2l));color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.75rem">${esc(v.icon || "\ud83d\udc8e")}</div><h3 class="fs txl mb3">${esc(v.title)}</h3><p style="color:var(--ctxl);font-size:.9375rem;line-height:1.8">${esc(v.description)}</p></div>`).join("")}</div></div></section>`;
 
     case "TeamSection":
       return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Team</div><h2 class="sh-t">${esc(p.title || "Meet Our Team")}</h2></div></div>
-        <div class="gr gc2 md:gc4 g8">${(p.members || []).map((m: any) => `<div class="tc"><div style="width:120px;height:120px;border-radius:50%;margin:0 auto 16px;overflow:hidden;border:3px solid ${pri}20"><img src="${esc(m.avatar || ph(m.name || "Team", 300, 300))}" alt="${esc(m.name)}" style="width:100%;height:100%;object-fit:cover" /></div><div class="fs">${esc(m.name)}</div>${m.role ? `<div style="color:var(--ctxl);font-size:.9375rem;margin-top:2px">${esc(m.role)}</div>` : ""}${m.social ? `<div class="d jcc g3 mt3">${m.social.linkedin ? `<a href="${esc(m.social.linkedin)}" style="color:var(--ctxlr);transition:color .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxlr)'">LinkedIn</a>` : ""}${m.social.twitter ? `<a href="${esc(m.social.twitter)}" style="color:var(--ctxlr);transition:color .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxlr)'">Twitter</a>` : ""}</div>` : ""}</div>`).join("")}</div></div></section>`;
+        <div class="gr gc2 md:gc4 g8">${(p.members || []).map((m: any) => `<div class="tc" style="background:var(--bgc);border-radius:var(--rlg);padding:32px 24px;border:1px solid var(--bdr);transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.transform='translateY(-8px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.transform='none'"><div style="width:130px;height:130px;border-radius:50%;margin:0 auto 20px;overflow:hidden;border:4px solid var(--c1l);box-shadow:0 8px 24px rgba(0,0,0,.1);transition:all .3s"><img src="${esc(m.avatar || ph(m.name || "Team", 300, 300))}" alt="${esc(m.name)}" style="width:100%;height:100%;object-fit:cover" /></div><div class="fs" style="font-size:1.1rem">${esc(m.name)}</div>${m.role ? `<div style="color:var(--c1);font-size:.875rem;margin-top:4px;font-weight:500">${esc(m.role)}</div>` : ""}${m.social ? `<div class="d jcc g3 mt3">${m.social.linkedin ? `<a href="${esc(m.social.linkedin)}" style="color:var(--ctxlr);transition:all .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxlr)'">LinkedIn</a>` : ""}${m.social.twitter ? `<a href="${esc(m.social.twitter)}" style="color:var(--ctxlr);transition:all .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxlr)'">Twitter</a>` : ""}</div>` : ""}</div>`).join("")}</div></div></section>`;
 
     case "CTABanner":
-      return `<section class="py16 tc" style="background:${p.backgroundImage ? `url('${esc(p.backgroundImage)}') center/cover` : `linear-gradient(135deg,${pri},${sec})`}"><div class="csm" style="color:#fff"><h2 class="tx3 fb mb4">${esc(p.headline || p.title || "Ready to Get Started?")}</h2><p class="tl mb8" style="opacity:.9">${esc(p.subheadline || p.description || "")}</p>${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bw blg ${b}" style="color:${pri}">${esc(p.ctaText)}</a>` : ""}</div></section>`;
+      return `<section class="py20 tc" style="background:${p.backgroundImage ? `url('${esc(p.backgroundImage)}') center/cover no-repeat` : `linear-gradient(135deg,${pri},${sec})`};position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:rgba(0,0,0,.1)"></div><div style="position:absolute;top:-50%;right:-20%;width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none"></div><div style="position:absolute;bottom:-30%;left:-10%;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none"></div><div class="csm" style="color:#fff;position:relative;z-index:1"><h2 class="tx3 fb mb4" style="letter-spacing:-.02em">${esc(p.headline || p.title || "Ready to Get Started?")}</h2><p class="tl mb8" style="opacity:.9;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.7">${esc(p.subheadline || p.description || "")}</p>${p.ctaText ? `<a href="${esc(p.ctaLink || "#")}" class="btn bw blg ${b}" style="color:${pri};padding:18px 40px;font-size:1.05rem;box-shadow:0 8px 30px rgba(0,0,0,.15)">${esc(p.ctaText)}</a>` : ""}</div></section>`;
 
     case "ContactInfo":
       return `<section class="py16 bga"><div class="ct"><div class="sh"><div><div class="sh-sub">Get in Touch</div><h2 class="sh-t">${esc(p.title || "Contact Information")}</h2></div></div>
-        <div class="gr gc1 md:gc3 g8">${p.address ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:56px;height:56px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3 class="fs mb2">Address</h3><p style="color:var(--ctxl);font-size:.9375rem">${esc(p.address)}</p></div>` : ""}${p.phone ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:56px;height:56px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><h3 class="fs mb2">Phone</h3><p style="color:var(--ctxl);font-size:.9375rem">${esc(p.phone)}</p></div>` : ""}${p.email ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all .25s" onmouseover="this.style.boxShadow='var(--shl)';this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'"><div style="width:56px;height:56px;border-radius:50%;background:${pri}15;color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg></div><h3 class="fs mb2">Email</h3><p style="color:var(--ctxl);font-size:.9375rem">${esc(p.email)}</p></div>` : ""}</div></div></section>`;
+        <div class="gr gc1 md:gc3 g8">${p.address ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:40px 32px;text-align:center;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.transform='translateY(-8px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.transform='none'"><div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--c1l),var(--c2l));color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3 class="fs mb2">Address</h3><p style="color:var(--ctxl);font-size:.9375rem;line-height:1.6">${esc(p.address)}</p></div>` : ""}${p.phone ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:40px 32px;text-align:center;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.transform='translateY(-8px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.transform='none'"><div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--c1l),var(--c2l));color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><h3 class="fs mb2">Phone</h3><p style="color:var(--ctxl);font-size:.9375rem;line-height:1.6">${esc(p.phone)}</p></div>` : ""}${p.email ? `<div style="background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:40px 32px;text-align:center;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)" onmouseover="this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.transform='translateY(-8px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,.04)';this.style.transform='none'"><div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--c1l),var(--c2l));color:${pri};display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg></div><h3 class="fs mb2">Email</h3><p style="color:var(--ctxl);font-size:.9375rem;line-height:1.6">${esc(p.email)}</p></div>` : ""}</div></div></section>`;
 
     case "MapEmbed":
       return `<section class="py16"><div class="ct"><div class="mp" style="min-height:400px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><div class="fs">Interactive Map</div>${p.address ? `<div class="ts">${esc(p.address)}</div>` : ""}</div></div></section>`;
@@ -437,28 +480,33 @@ const renderComponent = (component: string, props: Record<string, any>, theme?: 
     case "BlogPreview":
     case "BlogGrid":
       return `<section class="py16"><div class="ct"><div class="sh"><div><div class="sh-sub">Blog</div><h2 class="sh-t">${esc(p.title || "Latest Articles")}</h2>${p.subtitle ? `<p class="sh-d">${esc(p.subtitle)}</p>` : ""}</div></div>
-        <div class="gr gc1 md:gc3 g8">${(p.posts || []).map((post: any) => `<article class="pc" style="text-decoration:none;display:block"><div class="pci" style="aspect-ratio:16/9"><img src="${esc(post.image || ph(post.title || "Blog", 600, 300))}" alt="${esc(post.title)}" class="pcimg" /></div><div class="pcbd">${post.category ? `<div class="pcbc" style="color:${pri}">${esc(post.category)}</div>` : ""}<h3 class="fs txl mb2">${esc(post.title)}</h3>${post.excerpt ? `<p style="color:var(--ctxl);font-size:.9375rem;line-height:1.6;margin-bottom:16px">${esc(post.excerpt)}</p>` : ""}<div class="d aic g4 tx" style="color:var(--ctxlr)">${post.author ? `<span>${esc(post.author)}</span>` : ""}${post.date ? `<span>${esc(post.date)}</span>` : ""}</div><a href="${esc(post.href || "#" + (post.slug || ""))}" class="btn bs2 bsm ${b}" style="margin-top:16px">Read More \u2192</a></div></article>`).join("")}</div></div></section>`;
+        <div class="gr gc1 md:gc3 g8">${(p.posts || []).map((post: any) => `<article class="pc" style="text-decoration:none;display:block"><div class="pci" style="aspect-ratio:16/9"><img src="${esc(post.image || ph(post.title || "Blog", 600, 300))}" alt="${esc(post.title)}" class="pcimg" /></div><div class="pcbd" style="padding:24px">${post.category ? `<div class="pcbc" style="color:${pri};font-size:.75rem;font-weight:700;letter-spacing:.05em">${esc(post.category)}</div>` : ""}<h3 class="fs txl mb2" style="line-height:1.3">${esc(post.title)}</h3>${post.excerpt ? `<p style="color:var(--ctxl);font-size:.9375rem;line-height:1.7;margin-bottom:16px">${esc(post.excerpt)}</p>` : ""}<div class="d aic g4 tx" style="color:var(--ctxlr)">${post.author ? `<span>${esc(post.author)}</span>` : ""}${post.date ? `<span>${esc(post.date)}</span>` : ""}</div><a href="${esc(post.href || "#" + (post.slug || ""))}" class="btn bs2 bsm ${b}" style="margin-top:20px">Read More \u2192</a></div></article>`).join("")}</div></div></section>`;
 
-    case "OrderTracking":
-      return `<section class="py16 bga"><div class="cxs tc"><div class="sh"><div><div class="sh-sub">Track Order</div><h2 class="sh-t">${esc(p.title || "Track Your Order")}</h2></div></div><p style="color:var(--ctxl);margin-bottom:32px">${esc(p.description || "Enter your order number to track its status")}</p><form class="d g3" style="max-width:480px;margin:0 auto"><input type="text" placeholder="Order number" class="inp" style="flex:1" /><button type="submit" class="btn bp ${b}">Track</button></form></div></section>`;
+    // TODO: Uncomment OrderTracking when eCommerce is implemented
+    // case "OrderTracking":
+    //   return `<section class="py16 bga"><div class="cxs tc"><div class="sh"><div><div class="sh-sub">Track Order</div><h2 class="sh-t">${esc(p.title || "Track Your Order")}</h2></div></div><p style="color:var(--ctxl);margin-bottom:32px">${esc(p.description || "Enter your order number to track its status")}</p><form class="d g3" style="max-width:480px;margin:0 auto"><input type="text" placeholder="Order number" class="inp" style="flex:1" /><button type="submit" class="btn bp ${b}">Track</button></form></div></section>`;
 
-    case "WishlistGrid":
-      return `<section class="py16"><div class="ct"><div class="sh"><div><h2 class="sh-t" style="text-align:left">${esc(p.title || "My Wishlist")}</h2></div></div>${(p.items || []).length === 0 ? `<div class="tc py16" style="color:var(--ctxlr)"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px;opacity:.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><p>Your wishlist is empty</p><a href="/shop" class="btn bp ${b} mt4">Browse Products</a></div>` : `<div class="gr gc2 md:gc4 g6">${(p.items || []).map((item: any) => {
-        const pid = `p_${esc(item.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
-        const prodData = JSON.stringify({ id: pid, name: item.name, price: item.price, image: item.image || ph(item.name || "Product"), category: item.category || '' });
-        return `<div class="pc" data-product-card><div class="pci"><img src="${esc(item.image || ph(item.name || "Product"))}" alt="${esc(item.name)}" class="pcimg" /><div class="pco"><button class="btn bw bsm ${b}" data-toggle-wishlist='${prodData}'>Remove</button></div></div><div class="pcbd"><div class="pcbn">${esc(item.name)}</div><div class="pcbp"><span class="cur" style="color:${pri}">$${esc(item.price || "0")}</span></div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
-      }).join("")}</div>`}</div></section>`;
+    // TODO: Uncomment WishlistGrid when eCommerce is implemented
+    // case "WishlistGrid":
+    //   return `<section class="py16"><div class="ct"><div class="sh"><div><h2 class="sh-t" style="text-align:left">${esc(p.title || "My Wishlist")}</h2></div></div>${(p.items || []).length === 0 ? `<div class="tc py16" style="color:var(--ctxlr)"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px;opacity:.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><p>Your wishlist is empty</p><a href="/about" class="btn bp ${b} mt4">Browse</a></div>` : `<div class="gr gc2 md:gc4 g6">${(p.items || []).map((item: any) => {
+    //     const pid = `p_${esc(item.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'item')}`;
+    //     const prodData = JSON.stringify({ id: pid, name: item.name, price: item.price, image: item.image || ph(item.name || "Product"), category: item.category || '' });
+    //     return `<div class="pc" data-product-card><div class="pci"><img src="${esc(item.image || ph(item.name || "Product"))}" alt="${esc(item.name)}" class="pcimg" /><div class="pco"><button class="btn bw bsm ${b}" data-toggle-wishlist='${prodData}'>Remove</button></div></div><div class="pcbd"><div class="pcbn">${esc(item.name)}</div><div class="pcbp"><span class="cur" style="color:${pri}">$${esc(item.price || "0")}</span></div><button class="btn bk bbl bsm ${b} mt4" data-add-to-cart='${prodData}'>Add to Cart</button></div></div>`;
+    //   }).join("")}</div>`}</div></section>`;
 
-    case "CartItems":
-      return `<div style="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden"><div class="tw2"><table class="tbl"><thead><tr><th>Product</th><th class="hid md:blk">Price</th><th>Quantity</th><th class="hid md:blk">Total</th><th>Remove</th></tr></thead><tbody>${(p.items || []).map((item: any) => `<tr data-cart-item data-item-id="${esc(item.id || '')}" data-item-variant="${esc(item.variant || '')}" data-item-size="${esc(item.size || '')}" data-item-price="${esc(item.price || '0')}"><td><div class="d aic g4"><img src="${esc(item.image || ph(item.name || "Product", 80, 80))}" alt="${esc(item.name)}" style="width:64px;height:64px;object-fit:cover;border-radius:var(--rsm)" /><div><div class="fs" style="font-size:.9375rem">${esc(item.name)}</div>${item.variant ? `<div style="font-size:.8125rem;color:var(--ctxlr)">${esc(item.variant)}</div>` : ""}</div></div></td><td class="hid md:blk" style="font-size:.9375rem">$${esc(item.price || "0")}</td><td><div class="qty"><button class="qb" data-qty-minus style="width:28px;height:28px">\u2212</button><div class="qv" data-qty style="width:32px;font-size:.875rem">${esc(item.quantity || 1)}</div><button class="qb" data-qty-plus style="width:28px;height:28px">+</button></div></td><td class="hid md:blk" style="font-weight:600;font-size:.9375rem" data-item-total>$${esc(item.total || item.price || "0")}</td><td><button data-remove-item style="color:var(--ctxlr);cursor:pointer;transition:color .25s;border:none;background:none;font-size:1.125rem" onmouseover="this.style.color='var(--err)'" onmouseout="this.style.color='var(--ctxlr)'">\u2715</button></td></tr>`).join("")}</tbody></table></div></div>`;
+    // TODO: Uncomment CartItems when eCommerce is implemented
+    // case "CartItems":
+    //   return `<div style="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden"><div class="tw2"><table class="tbl"><thead><tr><th>Product</th><th class="hid md:blk">Price</th><th>Quantity</th><th class="hid md:blk">Total</th><th>Remove</th></tr></thead><tbody>${(p.items || []).map((item: any) => `<tr data-cart-item data-item-id="${esc(item.id || '')}" data-item-variant="${esc(item.variant || '')}" data-item-size="${esc(item.size || '')}" data-item-price="${esc(item.price || '0')}"><td><div class="d aic g4"><img src="${esc(item.image || ph(item.name || "Product", 80, 80))}" alt="${esc(item.name)}" style="width:64px;height:64px;object-fit:cover;border-radius:var(--rsm)" /><div><div class="fs" style="font-size:.9375rem">${esc(item.name)}</div>${item.variant ? `<div style="font-size:.8125rem;color:var(--ctxlr)">${esc(item.variant)}</div>` : ""}</div></div></td><td class="hid md:blk" style="font-size:.9375rem">$${esc(item.price || "0")}</td><td><div class="qty"><button class="qb" data-qty-minus style="width:28px;height:28px">\u2212</button><div class="qv" data-qty style="width:32px;font-size:.875rem">${esc(item.quantity || 1)}</div><button class="qb" data-qty-plus style="width:28px;height:28px">+</button></div></td><td class="hid md:blk" style="font-weight:600;font-size:.9375rem" data-item-total>$${esc(item.total || item.price || "0")}</td><td><button data-remove-item style="color:var(--ctxlr);cursor:pointer;transition:color .25s;border:none;background:none;font-size:1.125rem" onmouseover="this.style.color='var(--err)'" onmouseout="this.style.color='var(--ctxlr)'">\u2715</button></td></tr>`).join("")}</tbody></table></div></div>`;
 
-    case "CartSummary":
-      return `<div style="background:var(--bga);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><h3 class="fb txl mb6">Order Summary</h3><div style="display:flex;flex-direction:column;gap:14px;font-size:.9375rem"><div class="d jcsb"><span style="color:var(--ctxl)">Subtotal</span><span class="fs">$${esc(p.subtotal || "0")}</span></div>${p.discount ? `<div class="d jcsb" style="color:var(--ok)"><span>Discount</span><span>-$${esc(p.discount)}</span></div>` : ""}<div class="d jcsb"><span style="color:var(--ctxl)">Shipping</span><span class="fs">${p.shipping === 0 || p.shipping === "0" ? '<span style="color:var(--ok)">Free</span>' : `$${esc(p.shipping || "0")}`}</span></div>${p.tax ? `<div class="d jcsb"><span style="color:var(--ctxl)">Tax</span><span class="fs">$${esc(p.tax)}</span></div>` : ""}<div style="border-top:1px solid var(--bdr);padding-top:14px" class="d jcsb"><span class="fb txl">Total</span><span class="fb txl" style="color:${pri}">$${esc(p.total || "0")}</span></div></div>${p.couponCode !== false && p.promoCode !== false ? `<div class="d g2 mt6"><input type="text" placeholder="${esc(p.couponCode?.placeholder || 'Promo code')}" class="inp" style="flex:1;font-size:.9375rem" /><button class="btn bs2 bsm ${b}" data-coupon-apply>${esc(p.couponCode?.buttonText || 'Apply')}</button></div>` : ""}<button class="btn bp bbl ${b}" style="margin-top:24px">Proceed to Checkout</button><a href="/shop" class="blk tc mt3" style="color:var(--ctxl);font-size:.9375rem;transition:color .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxl)'">\u2190 Continue Shopping</a></div>`;
+    // TODO: Uncomment CartSummary when eCommerce is implemented
+    // case "CartSummary":
+    //   return `<div style="background:var(--bga);border:1px solid var(--bdr);border-radius:var(--rlg);padding:24px"><h3 class="fb txl mb6">Order Summary</h3><div style="display:flex;flex-direction:column;gap:14px;font-size:.9375rem"><div class="d jcsb"><span style="color:var(--ctxl)">Subtotal</span><span class="fs">$${esc(p.subtotal || "0")}</span></div>${p.discount ? `<div class="d jcsb" style="color:var(--ok)"><span>Discount</span><span>-$${esc(p.discount)}</span></div>` : ""}<div class="d jcsb"><span style="color:var(--ctxl)">Shipping</span><span class="fs">${p.shipping === 0 || p.shipping === "0" ? '<span style="color:var(--ok)">Free</span>' : `$${esc(p.shipping || "0")}`}</span></div>${p.tax ? `<div class="d jcsb"><span style="color:var(--ctxl)">Tax</span><span class="fs">$${esc(p.tax)}</span></div>` : ""}<div style="border-top:1px solid var(--bdr);padding-top:14px" class="d jcsb"><span class="fb txl">Total</span><span class="fb txl" style="color:${pri}">$${esc(p.total || "0")}</span></div></div>${p.couponCode !== false && p.promoCode !== false ? `<div class="d g2 mt6"><input type="text" placeholder="${esc(p.couponCode?.placeholder || 'Promo code')}" class="inp" style="flex:1;font-size:.9375rem" /><button class="btn bs2 bsm ${b}" data-coupon-apply>${esc(p.couponCode?.buttonText || 'Apply')}</button></div>` : ""}<button class="btn bp bbl ${b}" style="margin-top:24px">Proceed to Checkout</button><a href="/shop" class="blk tc mt3" style="color:var(--ctxl);font-size:.9375rem;transition:color .25s" onmouseover="this.style.color='${pri}'" onmouseout="this.style.color='var(--ctxl)'">\u2190 Continue Shopping</a></div>`;
 
-    case "CheckoutForm":
-      return `<section class="py16"><div class="csm"><div class="sh"><div><h2 class="sh-t">${esc(p.title || "Checkout")}</h2></div></div>
-        <div class="steps mb10"><div class="stp act"><div class="stpn">1</div><div class="stpl">Information</div></div><div class="stpline"></div><div class="stp"><div class="stpn">2</div><div class="stpl">Shipping</div></div><div class="stpline"></div><div class="stp"><div class="stpn">3</div><div class="stpl">Payment</div></div></div>
-        <form style="display:flex;flex-direction:column;gap:20px"><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>First name</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Last name</label></div></div><div class="fl-wrap"><input type="email" placeholder=" " class="inp" /><label>Email address</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Street address</label></div><div class="gr gc3 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>City</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>State</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>ZIP code</label></div></div><div style="border-top:1px solid var(--bdr);padding-top:24px;margin-top:8px"><div class="fs mb4">Payment Information</div><div class="fl-wrap mb4" style="margin-bottom:16px"><input type="text" placeholder=" " class="inp" /><label>Card number</label></div><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>MM / YY</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>CVC</label></div></div></div><button type="submit" class="btn bp blg bbl ${b}" style="margin-top:16px">${esc(p.submitText || "Place Order")}</button></form></div></section>`;
+    // TODO: Uncomment CheckoutForm when eCommerce is implemented
+    // case "CheckoutForm":
+    //   return `<section class="py16"><div class="csm"><div class="sh"><div><h2 class="sh-t">${esc(p.title || "Checkout")}</h2></div></div>
+    //     <div class="steps mb10"><div class="stp act"><div class="stpn">1</div><div class="stpl">Information</div></div><div class="stpline"></div><div class="stp"><div class="stpn">2</div><div class="stpl">Shipping</div></div><div class="stpline"></div><div class="stp"><div class="stpn">3</div><div class="stpl">Payment</div></div></div>
+    //     <form style="display:flex;flex-direction:column;gap:20px"><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>First name</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Last name</label></div></div><div class="fl-wrap"><input type="email" placeholder=" " class="inp" /><label>Email address</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>Street address</label></div><div class="gr gc3 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>City</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>State</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>ZIP code</label></div></div><div style="border-top:1px solid var(--bdr);padding-top:24px;margin-top:8px"><div class="fs mb4">Payment Information</div><div class="fl-wrap mb4" style="margin-bottom:16px"><input type="text" placeholder=" " class="inp" /><label>Card number</label></div><div class="gr gc2 g5"><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>MM / YY</label></div><div class="fl-wrap"><input type="text" placeholder=" " class="inp" /><label>CVC</label></div></div></div><button type="submit" class="btn bp blg bbl ${b}" style="margin-top:16px">${esc(p.submitText || "Place Order")}</button></form></div></section>`;
 
     case "LegalContent":
       return `<section class="py16"><div class="cxs"><h1 class="tx3 fb mb4">${esc(p.title || "Privacy Policy")}</h1>${p.lastUpdated ? `<p style="color:var(--ctxlr);font-size:.9375rem;margin-bottom:32px">Last updated: ${esc(p.lastUpdated)}</p>` : ""}<div style="line-height:1.8">${(p.sections || p.content ? (p.sections || [{ title: "", content: p.content }]) : []).map((s: any) => `<div style="margin-bottom:24px">${s.title ? `<h2 class="txl fs mb3">${esc(s.title)}</h2>` : ""}<div style="color:var(--ctxl);line-height:1.8">${esc(s.content || s.text || "")}</div></div>`).join("")}</div></div></section>`;
@@ -623,57 +671,113 @@ const generateBaseCSS = (theme?: ThemeData): string => {
     .sn{list-style:none}.o6{opacity:.6}.o8{opacity:.8}.o9{opacity:.9}
     .sy2>*+*{margin-top:8px}.sy3>*+*{margin-top:12px}.sy4>*+*{margin-top:16px}.sy5>*+*{margin-top:20px}.sy6>*+*{margin-top:24px}.sy8>*+*{margin-top:32px}
     .stars{display:inline-flex;gap:1px}.si{width:16px;height:16px}.sf{color:#f59e0b;fill:#f59e0b}.sh{color:#f59e0b}.se{color:#d1d5db;fill:#d1d5db}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:.875rem;line-height:1.5;padding:10px 24px;border:2px solid transparent;cursor:pointer;transition:all var(--tr);text-decoration:none;white-space:nowrap;font-family:var(--fnt)}.btn:active{transform:scale(.97)}
-    .bp{background:var(--c1);color:#fff;border-color:var(--c1)}.bp:hover{filter:brightness(1.1);box-shadow:0 4px 14px var(--c1d)}
-    .bs2{background:transparent;color:var(--c1);border-color:var(--c1)}.bs2:hover{background:var(--c1);color:#fff}
-    .bw{background:var(--bgc);color:var(--c1);border-color:var(--bgc)}.bw:hover{background:var(--bga)}
-    .bk{background:#111827;color:#fff;border-color:#111827}.bk:hover{background:#1f2937;border-color:#1f2937}
-    .br{background:var(--err);color:#fff;border-color:var(--err)}.br:hover{background:#b91c1c}
-    .bsm{padding:6px 16px;font-size:.8125rem}.blg{padding:14px 32px;font-size:1rem}.bbl{width:100%}.b-pill{border-radius:var(--rpl)}.b-sq{border-radius:0}.b-def{border-radius:var(--rmd)}
-    .inp{width:100%;padding:12px 16px;border:1.5px solid var(--bdr);border-radius:var(--rmd);font-size:.9375rem;font-family:var(--fnt);color:var(--ctx);background:var(--bgc);transition:border-color var(--tr),box-shadow var(--tr);outline:none}.inp:focus{border-color:var(--c1);box-shadow:0 0 0 3px var(--c1l)}.inp::placeholder{color:var(--ctxlr)}.txa{min-height:120px;resize:vertical}.sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
-    .fl-wrap{position:relative}.fl-wrap .inp{padding-top:20px;padding-bottom:6px}.fl-wrap label{position:absolute;top:14px;left:16px;font-size:.9375rem;color:var(--ctxlr);transition:all .2s ease;pointer-events:none}.fl-wrap .inp:focus~label,.fl-wrap .inp:not(:placeholder-shown)~label{top:4px;left:16px;font-size:.75rem;color:var(--c1);font-weight:500}
-    .badge{display:inline-flex;align-items:center;padding:3px 10px;font-size:.75rem;font-weight:600;border-radius:var(--rpl);line-height:1.5}.bdgp{background:var(--c1l);color:var(--c1)}.bdgd{background:var(--err);color:#fff}.bdgs{background:var(--ok);color:#fff}.bdgw{background:var(--wrn);color:#fff}.bdg-s{background:var(--err);color:#fff}.bdg-n{background:var(--c1);color:#fff}
-    .pc{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden;transition:all var(--tr)}.pc:hover{box-shadow:var(--shx);transform:translateY(-4px)}
-    .pci{position:relative;overflow:hidden;aspect-ratio:1}.pcimg{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.pc:hover .pcimg{transform:scale(1.08)}
-    .pco{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transition:opacity .3s ease}.pc:hover .pco{opacity:1}.pco .btn{padding:10px 20px;font-size:.8125rem;backdrop-filter:blur(4px)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:.875rem;line-height:1.5;padding:12px 28px;border:2px solid transparent;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);text-decoration:none;white-space:nowrap;font-family:var(--fnt);position:relative;overflow:hidden}
+    .btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .5s ease}
+    .btn:hover::before{left:100%}
+    .btn:active{transform:scale(.96)}
+    .bp{background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;border-color:transparent;box-shadow:0 4px 15px var(--c1d)}
+    .bp:hover{filter:brightness(1.1);box-shadow:0 8px 25px var(--c1d);transform:translateY(-2px)}
+    .bs2{background:transparent;color:var(--c1);border-color:var(--c1)}.bs2:hover{background:var(--c1);color:#fff;box-shadow:0 8px 25px var(--c1d);transform:translateY(-2px)}
+    .bw{background:var(--bgc);color:var(--c1);border-color:var(--bdr)}.bw:hover{background:var(--bga);border-color:var(--c1);transform:translateY(-1px)}
+    .bk{background:#111827;color:#fff;border-color:#111827}.bk:hover{background:#1f2937;border-color:#1f2937;box-shadow:0 8px 25px rgba(0,0,0,.15);transform:translateY(-2px)}
+    .br{background:var(--err);color:#fff;border-color:var(--err)}.br:hover{background:#b91c1c;box-shadow:0 8px 25px rgba(220,38,38,.3);transform:translateY(-2px)}
+    .bsm{padding:8px 20px;font-size:.8125rem}.blg{padding:16px 36px;font-size:1rem;font-weight:700}.bbl{width:100%}.b-pill{border-radius:var(--rpl)}.b-sq{border-radius:0}.b-def{border-radius:var(--rmd)}
+    .inp{width:100%;padding:14px 18px;border:1.5px solid var(--bdr);border-radius:var(--rmd);font-size:.9375rem;font-family:var(--fnt);color:var(--ctx);background:var(--bgc);transition:all .3s cubic-bezier(.4,0,.2,1);outline:none}
+    .inp:focus{border-color:var(--c1);box-shadow:0 0 0 4px var(--c1l);transform:translateY(-1px)}
+    .inp::placeholder{color:var(--ctxlr)}
+    .txa{min-height:140px;resize:vertical}
+    .sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+    .fl-wrap{position:relative}.fl-wrap .inp{padding-top:22px;padding-bottom:8px}.fl-wrap label{position:absolute;top:16px;left:18px;font-size:.9375rem;color:var(--ctxlr);transition:all .25s cubic-bezier(.4,0,.2,1);pointer-events:none}
+    .fl-wrap .inp:focus~label,.fl-wrap .inp:not(:placeholder-shown)~label{top:6px;left:18px;font-size:.75rem;color:var(--c1);font-weight:700;letter-spacing:.02em}
+    .badge{display:inline-flex;align-items:center;padding:4px 12px;font-size:.75rem;font-weight:700;border-radius:var(--rpl);line-height:1.5;letter-spacing:.02em}.bdgp{background:var(--c1l);color:var(--c1);border:1px solid var(--c1l)}.bdgd{background:var(--err);color:#fff;box-shadow:0 2px 8px rgba(220,38,38,.2)}.bdgs{background:var(--ok);color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.2)}.bdgw{background:var(--wrn);color:#fff;box-shadow:0 2px 8px rgba(217,119,6,.2)}.bdg-s{background:var(--err);color:#fff;box-shadow:0 2px 8px rgba(220,38,38,.2)}.bdg-n{background:var(--c1);color:#fff;box-shadow:0 2px 8px var(--c1d)}
+    .pc{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    .pc:hover{box-shadow:0 20px 60px rgba(0,0,0,.1),0 8px 20px rgba(0,0,0,.06);transform:translateY(-8px);border-color:var(--c1l)}
+    .pci{position:relative;overflow:hidden;aspect-ratio:1}.pcimg{width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.4,0,.2,1)}.pc:hover .pcimg{transform:scale(1.1)}
+    .pco{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.5) 100%);display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transition:all .4s ease}.pc:hover .pco{opacity:1}.pco .btn{padding:10px 20px;font-size:.8125rem;backdrop-filter:blur(8px)}
     .pcb{position:absolute;top:12px;left:12px;z-index:2;display:flex;flex-direction:column;gap:6px}
     .pcbd{padding:16px}.pcbc{font-size:.75rem;font-weight:500;color:var(--ctxlr);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}.pcbn{font-size:.9375rem;font-weight:600;color:var(--ctx);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pcbp{display:flex;align-items:center;gap:8px;margin-top:8px}.pcbp .cur{font-size:1.125rem;font-weight:700;color:var(--c1)}.pcbp .org{font-size:.875rem;color:var(--ctxlr);text-decoration:line-through}
-    .hero{position:relative;width:100%;min-height:540px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;overflow:hidden}.hero-ov{position:absolute;inset:0;background:linear-gradient(135deg,${heroOverlay},rgba(0,0,0,.3));z-index:1}.hero-c{position:relative;z-index:2;max-width:720px;padding:80px 24px}
-    .hero-b{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:var(--rpl);font-size:.8125rem;font-weight:600;margin-bottom:20px;letter-spacing:.02em}
-    .hero-t{font-size:3.5rem;font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}.hero-s{font-size:1.25rem;opacity:.9;margin-bottom:32px;line-height:1.6}.hero-a{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .sh{display:flex;align-items:center;justify-content:center;margin-bottom:48px}.sh-sub{display:inline-block;font-size:.8125rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--c1);margin-bottom:8px}.sh-t{font-size:2.25rem;font-weight:700;color:var(--ctx);letter-spacing:-.02em;margin-bottom:12px;text-align:center}.sh-d{font-size:1.0625rem;color:var(--ctxl);max-width:560px;margin:0 auto;line-height:1.6;text-align:center}
-    .tc2{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:32px;text-align:center;transition:all var(--tr)}.tc2:hover{box-shadow:var(--shl);transform:translateY(-4px)}.tca{width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:3px solid var(--c1l)}.tcq{font-size:1rem;color:var(--ctxl);line-height:1.7;margin-bottom:16px;font-style:italic}.tcn{font-weight:600;color:var(--ctx)}.tcr{font-size:.8125rem;color:var(--ctxlr);margin-top:2px}
-    .fi{border:1px solid var(--bdr);border-radius:var(--rmd);overflow:hidden;margin-bottom:12px;transition:all var(--tr)}.fi:hover{border-color:var(--c1)}
-    .ftt{width:100%;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;background:var(--bgc);border:none;cursor:pointer;font-size:1rem;font-weight:600;color:var(--ctx);text-align:left;font-family:var(--fnt);transition:background var(--tr)}.ftt:hover{background:var(--bga)}
-    .fti{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bga);color:var(--ctxl);flex-shrink:0;transition:all var(--tr);font-size:1.125rem;line-height:1}.fi[open] .fti{background:var(--c1);color:#fff;transform:rotate(45deg)}
-    .fc{padding:0 24px 18px;color:var(--ctxl);line-height:1.7}.ftt::-webkit-details-marker{display:none}.ftt::marker{display:none;content:''}
-    .brd{display:flex;align-items:center;gap:8px;font-size:.875rem;color:var(--ctxlr);padding:16px 0;flex-wrap:wrap}.brd a{transition:color var(--tr)}.brd a:hover{color:var(--c1)}.brd-s{color:var(--ctxlr);margin:0 2px}.brd-c{color:var(--ctx);font-weight:500}
-    .tw2{overflow-x:auto}.tbl{width:100%;border-collapse:collapse}.tbl th{padding:14px 20px;font-size:.8125rem;font-weight:600;color:var(--ctxl);text-align:left;text-transform:uppercase;letter-spacing:.05em;background:var(--bga);border-bottom:1px solid var(--bdr)}.tbl td{padding:16px 20px;font-size:.9375rem;border-bottom:1px solid var(--bdr);vertical-align:middle}.tbl tbody tr{transition:background var(--tr)}.tbl tbody tr:hover{background:var(--bga)}
-    .qty{display:inline-flex;align-items:center;border:1.5px solid var(--bdr);border-radius:var(--rmd);overflow:hidden}.qb{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:none;background:transparent;cursor:pointer;font-size:1rem;color:var(--ctx);transition:background var(--tr)}.qb:hover{background:var(--bga)}.qv{width:40px;text-align:center;font-weight:600;font-size:.9375rem;border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);padding:6px 0}
-    .steps{display:flex;align-items:center;justify-content:center;gap:0}.stp{display:flex;align-items:center;gap:10px}.stpn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:700;background:var(--bga);color:var(--ctxlr);border:2px solid var(--bdr);transition:all var(--tr)}.stp.act .stpn{background:var(--c1);color:#fff;border-color:var(--c1)}.stp.dn .stpn{background:var(--ok);color:#fff;border-color:var(--ok)}.stpl{font-size:.875rem;font-weight:500;color:var(--ctxlr)}.stp.act .stpl{color:var(--ctx)}.stpline{width:48px;height:2px;background:var(--bdr);margin:0 12px}
-    .nlb{background:linear-gradient(135deg,var(--c1),var(--c2));padding:64px 24px;text-align:center;color:#fff}.nlf{display:flex;gap:12px;max-width:480px;margin:0 auto}.nlf .inp{flex:1;background:var(--bgc);border:none}@media(max-width:640px){.nlf{flex-direction:column}}
-    .ph{background:var(--bgd);color:#fff;padding:64px 24px}.phi{max-width:1280px;margin:0 auto}
-    .mp{background:var(--bga);border:2px dashed var(--bdr);border-radius:var(--rlg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--ctxlr);min-height:320px}.mp svg{width:48px;height:48px;opacity:.5}
-    .nav{position:sticky;top:0;z-index:1000;background:${navBg};backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr);transition:box-shadow var(--tr)}.nav.sc{box-shadow:0 2px 20px rgba(0,0,0,.08)}
-    .nav-in{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:72px;max-width:1280px;margin:0 auto}
-    .nav-l{font-size:1.375rem;font-weight:700;color:var(--c1);letter-spacing:-.02em;display:flex;align-items:center;gap:10px;flex-shrink:0}
-    .nav-ks{display:flex;align-items:center;gap:32px}
-    .nav-k{font-size:.9375rem;font-weight:500;color:var(--ctx);transition:color var(--tr);position:relative;padding:4px 0}.nav-k:hover{color:var(--c1)}.nav-k::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:var(--c1);transition:width var(--tr)}.nav-k:hover::after{width:100%}
-    .nav-dd{position:relative}    .nav-dd-m{position:absolute;top:100%;left:-16px;margin-top:12px;background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rmd);box-shadow:var(--shl);min-width:200px;padding:8px 0;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .2s ease;z-index:100}.nav-dd:hover .nav-dd-m{opacity:1;visibility:visible;transform:translateY(0)}
-    .nav-dd-i{display:block;padding:10px 20px;font-size:.875rem;color:var(--ctx);transition:background var(--tr)}.nav-dd-i:hover{background:var(--bga);color:var(--c1)}
+    .hero{position:relative;width:100%;min-height:600px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;overflow:hidden;background-attachment:fixed}
+    .hero::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);z-index:0;animation:floatOrb 20s ease-in-out infinite}
+    .hero::after{content:'';position:absolute;bottom:-30%;left:-30%;width:80%;height:80%;background:radial-gradient(circle,rgba(255,255,255,.05) 0%,transparent 70%);z-index:0;animation:floatOrb 15s ease-in-out infinite reverse}
+    @keyframes floatOrb{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-40px)}}
+    .hero-ov{position:absolute;inset:0;background:linear-gradient(135deg,${heroOverlay} 0%,rgba(0,0,0,.15) 50%,${heroOverlay} 100%);z-index:1}
+    .hero-c{position:relative;z-index:2;max-width:780px;padding:100px 24px}
+    .hero-b{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:rgba(255,255,255,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.18);border-radius:var(--rpl);font-size:.8125rem;font-weight:600;margin-bottom:24px;letter-spacing:.06em;text-transform:uppercase;animation:fadeInDown .8s ease-out both}
+    .hero-t{font-size:4rem;font-weight:800;line-height:1.05;letter-spacing:-.04em;margin-bottom:20px;text-shadow:0 2px 20px rgba(0,0,0,.2);animation:fadeInUp .8s ease-out .1s both}
+    .hero-s{font-size:1.3rem;opacity:.92;margin-bottom:40px;line-height:1.7;max-width:600px;margin-left:auto;margin-right:auto;text-shadow:0 1px 8px rgba(0,0,0,.1);animation:fadeInUp .8s ease-out .25s both}
+    .hero-a{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeInUp .8s ease-out .4s both}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+    .sh{display:flex;align-items:center;justify-content:center;margin-bottom:56px;flex-direction:column}
+    .sh-sub{display:inline-block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--c1);margin-bottom:12px;padding:6px 16px;background:var(--c1l);border-radius:var(--rpl);border:1px solid var(--c1l)}
+    .sh-t{font-size:2.5rem;font-weight:800;color:var(--ctx);letter-spacing:-.03em;margin-bottom:16px;text-align:center;position:relative;line-height:1.2}
+    .sh-t::after{content:'';display:block;width:60px;height:4px;background:linear-gradient(90deg,var(--c1),var(--c2));border-radius:2px;margin:16px auto 0}
+    .sh-d{font-size:1.1rem;color:var(--ctxl);max-width:560px;margin:0 auto;line-height:1.7;text-align:center}
+    .tc2{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rlg);padding:36px;text-align:center;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.04);position:relative;overflow:hidden}
+    .tc2::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--c1),var(--c2));opacity:0;transition:opacity .3s}
+    .tc2:hover{box-shadow:0 20px 60px rgba(0,0,0,.1);transform:translateY(-8px);border-color:var(--c1l)}
+    .tc2:hover::before{opacity:1}
+    .tca{width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 20px;border:3px solid var(--c1l);box-shadow:0 4px 12px rgba(0,0,0,.08);transition:all .3s}
+    .tc2:hover .tca{border-color:var(--c1);transform:scale(1.05)}
+    .tcq{font-size:1.05rem;color:var(--ctxl);line-height:1.8;margin-bottom:20px;font-style:italic;position:relative}
+    .tcn{font-weight:700;color:var(--ctx);font-size:1rem}.tcr{font-size:.8125rem;color:var(--ctxlr);margin-top:4px}
+    .fi{border:1px solid var(--bdr);border-radius:var(--rmd);overflow:hidden;margin-bottom:12px;transition:all .3s ease;background:var(--bgc)}
+    .fi:hover{border-color:var(--c1);box-shadow:0 4px 12px rgba(0,0,0,.04)}
+    .ftt{width:100%;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;cursor:pointer;font-size:1rem;font-weight:600;color:var(--ctx);text-align:left;font-family:var(--fnt);transition:all .25s ease}
+    .ftt:hover{color:var(--c1)}
+    .fti{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--c1l);color:var(--c1);flex-shrink:0;transition:all .35s cubic-bezier(.4,0,.2,1);font-size:1.125rem;line-height:1}
+    .fi[open] .fti{background:var(--c1);color:#fff;transform:rotate(45deg)}
+    .fc{padding:0 24px 20px;color:var(--ctxl);line-height:1.8}.ftt::-webkit-details-marker{display:none}.ftt::marker{display:none;content:''}
+    .brd{display:flex;align-items:center;gap:10px;font-size:.875rem;color:var(--ctxlr);padding:20px 0;flex-wrap:wrap}.brd a{transition:all .25s ease;font-weight:500}.brd a:hover{color:var(--c1);transform:translateX(2px)}.brd-s{color:var(--ctxlr);margin:0 2px;opacity:.5}.brd-c{color:var(--ctx);font-weight:600}
+    .tw2{overflow-x:auto;border-radius:var(--rlg);border:1px solid var(--bdr)}.tbl{width:100%;border-collapse:collapse}.tbl th{padding:16px 24px;font-size:.8125rem;font-weight:700;color:var(--ctxl);text-align:left;text-transform:uppercase;letter-spacing:.06em;background:var(--bga);border-bottom:1px solid var(--bdr)}.tbl td{padding:18px 24px;font-size:.9375rem;border-bottom:1px solid var(--bdr);vertical-align:middle}.tbl tbody tr{transition:background .25s ease}.tbl tbody tr:hover{background:var(--bga)}
+    .qty{display:inline-flex;align-items:center;border:1.5px solid var(--bdr);border-radius:var(--rmd);overflow:hidden;background:var(--bgc)}.qb{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:none;background:transparent;cursor:pointer;font-size:1.125rem;color:var(--ctx);transition:all .25s ease}.qb:hover{background:var(--c1l);color:var(--c1)}.qv{width:48px;text-align:center;font-weight:700;font-size:.9375rem;border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);padding:6px 0}
+    .steps{display:flex;align-items:center;justify-content:center;gap:0}.stp{display:flex;align-items:center;gap:10px}.stpn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:700;background:var(--bga);color:var(--ctxlr);border:2px solid var(--bdr);transition:all .3s ease}.stp.act .stpn{background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;border-color:transparent;box-shadow:0 4px 12px var(--c1d)}.stp.dn .stpn{background:var(--ok);color:#fff;border-color:transparent}.stpl{font-size:.875rem;font-weight:600;color:var(--ctxlr)}.stp.act .stpl{color:var(--ctx)}.stpline{width:56px;height:2px;background:var(--bdr);margin:0 12px}
+    .nlb{background:linear-gradient(135deg,var(--c1) 0%,var(--c2) 100%);padding:80px 24px;text-align:center;color:#fff;position:relative;overflow:hidden}
+    .nlb::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none}
+    .nlb::after{content:'';position:absolute;bottom:-30%;left:-10%;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none}
+    .nlf{display:flex;gap:12px;max-width:520px;margin:0 auto}
+    .nlf .inp{flex:1;background:var(--bgc);border:none;box-shadow:0 4px 20px rgba(0,0,0,.1)}@media(max-width:640px){.nlf{flex-direction:column}}
+    .ph{background:var(--bgd);color:#fff;padding:80px 24px;position:relative;overflow:hidden}
+    .ph::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none}
+    .ph::after{content:'';position:absolute;bottom:-30%;left:-10%;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none}
+    .phi{max-width:1280px;margin:0 auto;position:relative;z-index:1}
+    .mp{background:var(--bga);border:2px dashed var(--bdr);border-radius:var(--rlg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--ctxlr);min-height:320px;transition:all .3s}.mp:hover{border-color:var(--c1)}
+    .mp svg{width:48px;height:48px;opacity:.4;transition:all .3s}.mp:hover svg{opacity:.7;transform:scale(1.1)}
+    .nav{position:sticky;top:0;z-index:1000;background:${navBg};backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.05);transition:all .3s ease;box-shadow:none}
+    .nav.sc{box-shadow:0 4px 30px rgba(0,0,0,.08);backdrop-filter:blur(24px)}
+    .nav-in{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:76px;max-width:1280px;margin:0 auto}
+    .nav-l{font-size:1.5rem;font-weight:800;color:var(--c1);letter-spacing:-.03em;display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .nav-ks{display:flex;align-items:center;gap:36px}
+    .nav-k{font-size:.9375rem;font-weight:500;color:var(--ctx);transition:color .25s;position:relative;padding:4px 0}.nav-k:hover{color:var(--c1)}
+    .nav-k::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2.5px;background:linear-gradient(90deg,var(--c1),var(--c2));border-radius:2px;transition:width .3s cubic-bezier(.4,0,.2,1)}.nav-k:hover::after{width:100%}
+    .nav-dd{position:relative}.nav-dd-m{position:absolute;top:100%;left:-16px;margin-top:14px;background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rmd);box-shadow:0 10px 40px rgba(0,0,0,.1);min-width:220px;padding:8px 0;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .25s ease;z-index:100}.nav-dd:hover .nav-dd-m{opacity:1;visibility:visible;transform:translateY(0)}
+    .nav-dd-i{display:block;padding:10px 20px;font-size:.875rem;color:var(--ctx);transition:all .2s ease;border-radius:var(--rsm);margin:2px 8px}.nav-dd-i:hover{background:var(--c1l);color:var(--c1)}
     .nav-a{display:flex;align-items:center;gap:16px}
     .nav-ab{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--ctx);cursor:pointer;transition:all var(--tr);position:relative}.nav-ab:hover{background:var(--bga);color:var(--c1)}.nav-ab svg{width:20px;height:20px}
     .cc{position:absolute;top:2px;right:0;width:18px;height:18px;background:var(--err);color:#fff;font-size:.6875rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1}
-    .mtog{display:none}.ham{display:none;flex-direction:column;justify-content:center;gap:5px;width:28px;height:28px;cursor:pointer;background:none;border:none;padding:0}.ham span{display:block;width:100%;height:2px;background:var(--ctx);border-radius:2px;transition:all .3s ease}
-    .mnav{display:none;position:fixed;top:72px;left:0;right:0;bottom:0;background:var(--bg);z-index:999;padding:24px;overflow-y:auto;transform:translateX(-100%);transition:transform .3s ease}.mnav.op{transform:translateX(0)}.mnav-k{display:block;padding:14px 0;font-size:1.0625rem;font-weight:500;color:var(--ctx);border-bottom:1px solid var(--bdr)}.mnav-s{padding-left:16px}.mnav-s a{display:block;padding:10px 0;font-size:.9375rem;color:var(--ctxl)}
-    @media(max-width:768px){.nav-ks{display:none}.ham{display:flex}.mtog:checked~.mnav{display:block}.mtog:checked~label .ham span:nth-child(1){transform:translateY(7px) rotate(45deg)}.mtog:checked~label .ham span:nth-child(2){opacity:0}.mtog:checked~label .ham span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}.gc2,.gc3,.gc4,.gc6{grid-template-columns:repeat(2,1fr)}}
+    .mtog{display:none}.ham{display:none;flex-direction:column;justify-content:center;gap:5px;width:32px;height:32px;cursor:pointer;background:none;border:none;padding:0}.ham span{display:block;width:100%;height:2.5px;background:var(--ctx);border-radius:2px;transition:all .35s cubic-bezier(.4,0,.2,1)}
+    .mnav{display:none;position:fixed;top:76px;left:0;right:0;bottom:0;background:var(--bg);z-index:999;padding:24px;overflow-y:auto;transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 20px rgba(0,0,0,.05)}
+    .mnav.op{transform:translateX(0)}
+    .mnav-k{display:block;padding:16px 0;font-size:1.125rem;font-weight:600;color:var(--ctx);border-bottom:1px solid var(--bdr);transition:all .25s}.mnav-k:hover{color:var(--c1);padding-left:8px}
+    .mnav-s{padding-left:16px}.mnav-s a{display:block;padding:12px 0;font-size:.9375rem;color:var(--ctxl);transition:all .25s}.mnav-s a:hover{color:var(--c1);padding-left:8px}
+    @media(max-width:768px){.nav-ks{display:none}.ham{display:flex}.mtog:checked~.mnav{display:block}.mtog:checked~label .ham span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}.mtog:checked~label .ham span:nth-child(2){opacity:0;transform:translateX(-8px)}.mtog:checked~label .ham span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}.gc2,.gc3,.gc4,.gc6{grid-template-columns:repeat(2,1fr)}.hero-t{font-size:2.5rem}.hero{min-height:480px}.hero-c{padding:80px 20px}.sh-t{font-size:2rem}.tx5{font-size:2.25rem}.tx3{font-size:1.5rem}}
     @media(min-width:769px){.mnav{display:none!important}}
-    .footer{background:var(--bgd);color:var(--ctxl);padding:64px 24px 32px}.ftg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1280px;margin:0 auto}.ftb{max-width:320px}.ftbn{font-size:1.375rem;font-weight:700;color:#fff;margin-bottom:12px}.ftbd{font-size:.875rem;line-height:1.7;color:var(--ctxlr)}.fth{font-size:.9375rem;font-weight:600;color:#fff;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}.ftl{list-style:none}.ftl li{margin-bottom:10px}.ftl a{font-size:.875rem;color:var(--ctxlr);transition:color var(--tr)}.ftl a:hover{color:#fff}
-    .fts{display:flex;gap:12px;margin-top:20px}.fts a{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);color:var(--ctxlr);transition:all var(--tr)}.fts a:hover{background:var(--c1);color:#fff;transform:translateY(-2px)}.fts svg{width:16px;height:16px}
-    .ftbt{max-width:1280px;margin:40px auto 0;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}.ftc{font-size:.8125rem;color:var(--ctxlr)}.ftp{display:flex;gap:8px}.ftpb{display:inline-flex;align-items:center;justify-content:center;padding:4px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rsm);font-size:.75rem;font-weight:500;color:var(--ctxlr)}
+    .footer{background:var(--bgd);color:var(--ctxl);padding:80px 24px 32px;position:relative;overflow:hidden}
+    .footer::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c1))}
+    .ftg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;max-width:1280px;margin:0 auto}
+    .ftb{max-width:340px}.ftbn{font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:16px;letter-spacing:-.02em}.ftbd{font-size:.875rem;line-height:1.8;color:var(--ctxlr)}
+    .fth{font-size:.875rem;font-weight:700;color:#fff;margin-bottom:20px;text-transform:uppercase;letter-spacing:.08em}
+    .ftl{list-style:none}.ftl li{margin-bottom:12px}.ftl a{font-size:.875rem;color:var(--ctxlr);transition:all .25s ease;display:inline-block}.ftl a:hover{color:#fff;transform:translateX(4px)}
+    .fts{display:flex;gap:12px;margin-top:24px}.fts a{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.06);color:var(--ctxlr);transition:all .3s ease;border:1px solid rgba(255,255,255,.08)}.fts a:hover{background:var(--c1);color:#fff;transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.2)}.fts svg{width:18px;height:18px}
+    .ftbt{max-width:1280px;margin:48px auto 0;padding-top:28px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .ftc{font-size:.8125rem;color:var(--ctxlr)}
+    .ftp{display:flex;gap:8px}.ftpb{display:inline-flex;align-items:center;justify-content:center;padding:6px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--rsm);font-size:.75rem;font-weight:600;color:var(--ctxlr);transition:all .25s}
+    .ftpb:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)}
     @media(max-width:768px){.ftg{grid-template-columns:1fr 1fr}.ftb{grid-column:1/-1}}@media(max-width:480px){.ftg{grid-template-columns:1fr}}
-    @keyframes fiu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-    ${theme?.animations ? (theme.animations === true ? `section{animation:fiu .6s ease-out both}` : theme.animations === "subtle" ? `section{animation:fiu .8s ease-out both}` : theme.animations === "full" ? `section{animation:fiu .4s cubic-bezier(.22,1,.36,1) both}` : `section{animation:fiu .6s ease-out both}`) : ""}
+    @keyframes fiu{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    ${theme?.animations ? (theme.animations === true ? `section{animation:fiu .7s cubic-bezier(.4,0,.2,1) both}` : theme.animations === "subtle" ? `section{animation:fiu .9s ease-out both}` : theme.animations === "full" ? `section{animation:fiu .5s cubic-bezier(.22,1,.36,1) both}` : `section{animation:fiu .7s cubic-bezier(.4,0,.2,1) both}`) : ""}
   </style>`;
 };
 
@@ -683,7 +787,8 @@ const generatePageHtml = (
   navigation: { items?: Array<{ label: string; href: string; children?: Array<{ label: string; href: string }> }> } | undefined,
   footer: { copyright?: string; links?: Array<{ label: string; href: string }>; socialMedia?: Record<string, string> } | undefined,
   theme?: ThemeData,
-  seo?: { metaTitle?: string; metaDescription?: string; keywords?: string[] }
+  seo?: { metaTitle?: string; metaDescription?: string; keywords?: string[] },
+  logo?: string | null
 ): string => {
   const fontName = theme?.fontFamily || "Inter";
   const sections = [...page.sections]
@@ -694,7 +799,7 @@ const generatePageHtml = (
   const navItems = navigation?.items || [];
   const brandedNav = navItems.length > 0
     ? navItems
-    : [{ label: "Home", href: "/" }, { label: "Shop", href: "/shop" }, { label: "About", href: "/about_us" }, { label: "Contact", href: "/contact_us" }];
+    : [{ label: "Home", href: "/" }, { label: "About", href: "/about_us" }, { label: "Contact", href: "/contact_us" }];
 
   const metaTitle = seo?.metaTitle || `${page.title} | ${siteName}`;
   const metaDescription = seo?.metaDescription || page.title;
@@ -717,69 +822,69 @@ const generatePageHtml = (
   ${generateBaseCSS(theme)}
 </head>
 <body>
-  ${renderNavigation(siteName, brandedNav)}
+  ${renderNavigation(siteName, brandedNav, logo)}
   <main>
     ${sections}
   </main>
   ${renderFooter(footer || {}, siteName)}
   <script>
-    // ── Store State ──
-    var Store = {
-      _key: 'site_store',
-      _data: { cart: [], wishlist: [], recentlyViewed: [] },
-      init: function() {
-        try { var s = localStorage.getItem(this._key); if (s) this._data = JSON.parse(s); } catch(e) {}
-      },
-      save: function() { try { localStorage.setItem(this._key, JSON.stringify(this._data)); } catch(e) {} },
-      getCart: function() { return this._data.cart; },
-      getWishlist: function() { return this._data.wishlist; },
-      addToCart: function(product) {
-        var existing = this._data.cart.find(function(i){ return i.id === product.id && i.variant === product.variant && i.size === product.size; });
-        if (existing) { existing.quantity += (product.quantity || 1); }
-        else { product.quantity = product.quantity || 1; this._data.cart.push(product); }
-        this.save(); this._updateUI(); this._showToast(product.name + ' added to cart');
-      },
-      removeFromCart: function(id, variant, size) {
-        this._data.cart = this._data.cart.filter(function(i){ return !(i.id === id && i.variant === variant && i.size === size); });
-        this.save(); this._updateUI();
-      },
-      updateCartQty: function(id, variant, size, qty) {
-        var item = this._data.cart.find(function(i){ return i.id === id && i.variant === variant && i.size === size; });
-        if (item) { item.quantity = Math.max(1, qty); this.save(); this._updateUI(); }
-      },
-      getCartTotal: function() {
-        return this._data.cart.reduce(function(sum, i){ return sum + (parseFloat(i.price) || 0) * i.quantity; }, 0);
-      },
-      getCartCount: function() {
-        return this._data.cart.reduce(function(sum, i){ return sum + i.quantity; }, 0);
-      },
-      toggleWishlist: function(product) {
-        var idx = this._data.wishlist.findIndex(function(i){ return i.id === product.id; });
-        if (idx >= 0) { this._data.wishlist.splice(idx, 1); this._showToast('Removed from wishlist'); }
-        else { this._data.wishlist.push(product); this._showToast(product.name + ' added to wishlist'); }
-        this.save(); this._updateUI();
-      },
-      isInWishlist: function(id) {
-        return this._data.wishlist.some(function(i){ return i.id === id; });
-      },
-      moveToCart: function(id) {
-        var item = this._data.wishlist.find(function(i){ return i.id === id; });
-        if (item) { this.addToCart(item); this._data.wishlist = this._data.wishlist.filter(function(i){ return i.id !== id; }); this.save(); this._updateUI(); }
-      },
-      _updateUI: function() {
-        var count = this.getCartCount();
-        document.querySelectorAll('.cc').forEach(function(el){ el.textContent = count; el.style.display = count > 0 ? 'flex' : 'none'; });
-        document.querySelectorAll('.wish-h').forEach(function(el){ el.textContent = Store.getWishlist().length; });
-      },
-      _showToast: function(msg) {
-        var t = document.createElement('div');
-        t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:14px 24px;border-radius:12px;font-size:.875rem;font-weight:500;z-index:10000;box-shadow:0 10px 25px rgba(0,0,0,.15);animation:toastIn .3s ease;max-width:320px';
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(function(){ t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 2500);
-      }
-    };
-    Store.init();
+    // TODO: Uncomment Store when eCommerce is implemented
+    // var Store = {
+    //   _key: 'site_store',
+    //   _data: { cart: [], wishlist: [], recentlyViewed: [] },
+    //   init: function() {
+    //     try { var s = localStorage.getItem(this._key); if (s) this._data = JSON.parse(s); } catch(e) {}
+    //   },
+    //   save: function() { try { localStorage.setItem(this._key, JSON.stringify(this._data)); } catch(e) {} },
+    //   getCart: function() { return this._data.cart; },
+    //   getWishlist: function() { return this._data.wishlist; },
+    //   addToCart: function(product) {
+    //     var existing = this._data.cart.find(function(i){ return i.id === product.id && i.variant === product.variant && i.size === product.size; });
+    //     if (existing) { existing.quantity += (product.quantity || 1); }
+    //     else { product.quantity = product.quantity || 1; this._data.cart.push(product); }
+    //     this.save(); this._updateUI(); this._showToast(product.name + ' added to cart');
+    //   },
+    //   removeFromCart: function(id, variant, size) {
+    //     this._data.cart = this._data.cart.filter(function(i){ return !(i.id === id && i.variant === variant && i.size === size); });
+    //     this.save(); this._updateUI();
+    //   },
+    //   updateCartQty: function(id, variant, size, qty) {
+    //     var item = this._data.cart.find(function(i){ return i.id === id && i.variant === variant && i.size === size; });
+    //     if (item) { item.quantity = Math.max(1, qty); this.save(); this._updateUI(); }
+    //   },
+    //   getCartTotal: function() {
+    //     return this._data.cart.reduce(function(sum, i){ return sum + (parseFloat(i.price) || 0) * i.quantity; }, 0);
+    //   },
+    //   getCartCount: function() {
+    //     return this._data.cart.reduce(function(sum, i){ return sum + i.quantity; }, 0);
+    //   },
+    //   toggleWishlist: function(product) {
+    //     var idx = this._data.wishlist.findIndex(function(i){ return i.id === product.id; });
+    //     if (idx >= 0) { this._data.wishlist.splice(idx, 1); this._showToast('Removed from wishlist'); }
+    //     else { this._data.wishlist.push(product); this._showToast(product.name + ' added to wishlist'); }
+    //     this.save(); this._updateUI();
+    //   },
+    //   isInWishlist: function(id) {
+    //     return this._data.wishlist.some(function(i){ return i.id === id; });
+    //   },
+    //   moveToCart: function(id) {
+    //     var item = this._data.wishlist.find(function(i){ return i.id === id; });
+    //     if (item) { this.addToCart(item); this._data.wishlist = this._data.wishlist.filter(function(i){ return i.id !== id; }); this.save(); this._updateUI(); }
+    //   },
+    //   _updateUI: function() {
+    //     var count = this.getCartCount();
+    //     document.querySelectorAll('.cc').forEach(function(el){ el.textContent = count; el.style.display = count > 0 ? 'flex' : 'none'; });
+    //     document.querySelectorAll('.wish-h').forEach(function(el){ el.textContent = Store.getWishlist().length; });
+    //   },
+    //   _showToast: function(msg) {
+    //     var t = document.createElement('div');
+    //     t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:14px 24px;border-radius:12px;font-size:.875rem;font-weight:500;z-index:10000;box-shadow:0 10px 25px rgba(0,0,0,.15);animation:toastIn .3s ease;max-width:320px';
+    //     t.textContent = msg;
+    //     document.body.appendChild(t);
+    //     setTimeout(function(){ t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 2500);
+    //   }
+    // };
+    // Store.init();
 
     // ── Product Data ──
     var Products = {
@@ -877,78 +982,81 @@ const generatePageHtml = (
       }
       // Init products
       Products.init();
-      Store._updateUI();
+      // Store._updateUI(); // TODO: Uncomment when eCommerce is implemented
       // Add to Cart buttons
-      document.querySelectorAll('[data-add-to-cart]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          var data = this.getAttribute('data-add-to-cart');
-          try {
-            var product = JSON.parse(data);
-            var card = this.closest('.pc, .pcbd, [data-product-card]');
-            if (card) {
-              var colorEl = card.querySelector('[data-selected-color]');
-              var sizeEl = card.querySelector('[data-selected-size]');
-              var qtyEl = card.querySelector('[data-qty]');
-              if (colorEl) product.variant = colorEl.getAttribute('data-selected-color');
-              if (sizeEl) product.size = sizeEl.getAttribute('data-selected-size');
-              if (qtyEl) product.quantity = parseInt(qtyEl.textContent) || 1;
-            }
-            Store.addToCart(product);
-          } catch(err) { console.error('Add to cart error:', err); }
-        });
-      });
+      // TODO: Uncomment when eCommerce is implemented
+      // document.querySelectorAll('[data-add-to-cart]').forEach(function(btn) {
+      //   btn.addEventListener('click', function(e) {
+      //     e.preventDefault();
+      //     var data = this.getAttribute('data-add-to-cart');
+      //     try {
+      //       var product = JSON.parse(data);
+      //       var card = this.closest('.pc, .pcbd, [data-product-card]');
+      //       if (card) {
+      //         var colorEl = card.querySelector('[data-selected-color]');
+      //         var sizeEl = card.querySelector('[data-selected-size]');
+      //         var qtyEl = card.querySelector('[data-qty]');
+      //         if (colorEl) product.variant = colorEl.getAttribute('data-selected-color');
+      //         if (sizeEl) product.size = sizeEl.getAttribute('data-selected-size');
+      //         if (qtyEl) product.quantity = parseInt(qtyEl.textContent) || 1;
+      //       }
+      //       Store.addToCart(product);
+      //     } catch(err) { console.error('Add to cart error:', err); }
+      //   });
+      // });
       // Wishlist buttons
-      document.querySelectorAll('[data-toggle-wishlist]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          try {
-            var product = JSON.parse(this.getAttribute('data-toggle-wishlist'));
-            Store.toggleWishlist(product);
-            this.classList.toggle('wish-active');
-          } catch(err) {}
-        });
-      });
+      // TODO: Uncomment when eCommerce is implemented
+      // document.querySelectorAll('[data-toggle-wishlist]').forEach(function(btn) {
+      //   btn.addEventListener('click', function(e) {
+      //     e.preventDefault();
+      //     try {
+      //       var product = JSON.parse(this.getAttribute('data-toggle-wishlist'));
+      //       Store.toggleWishlist(product);
+      //       this.classList.toggle('wish-active');
+      //     } catch(err) {}
+      //   });
+      // });
       // Quantity buttons
-      document.querySelectorAll('[data-qty-plus]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var el = this.parentElement.querySelector('[data-qty]');
-          if (el) el.textContent = Math.max(1, parseInt(el.textContent) + 1);
-        });
-      });
-      document.querySelectorAll('[data-qty-minus]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var el = this.parentElement.querySelector('[data-qty]');
-          if (el) el.textContent = Math.max(1, parseInt(el.textContent) - 1);
-        });
-      });
-      // Color selectors
-      document.querySelectorAll('[data-color-select]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var group = this.closest('[data-color-group]');
-          if (group) {
-            group.querySelectorAll('[data-color-select]').forEach(function(b){ b.style.outline = 'none'; b.style.outlineOffset = '0'; });
-            this.style.outline = '2px solid var(--c1)';
-            this.style.outlineOffset = '2px';
-            var card = this.closest('[data-product-card]');
-            if (card) card.setAttribute('data-selected-color', this.getAttribute('data-color-select'));
-          }
-        });
-      });
-      // Size selectors
-      document.querySelectorAll('[data-size-select]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var group = this.closest('[data-size-group]');
-          if (group) {
-            group.querySelectorAll('[data-size-select]').forEach(function(b){ b.style.background = 'var(--bgc)'; b.style.color = 'var(--ctx)'; b.style.borderColor = 'var(--bdr)'; });
-            this.style.background = 'var(--c1)';
-            this.style.color = '#fff';
-            this.style.borderColor = 'var(--c1)';
-            var card = this.closest('[data-product-card]');
-            if (card) card.setAttribute('data-selected-size', this.getAttribute('data-size-select'));
-          }
-        });
-      });
+      // TODO: Uncomment when eCommerce is implemented
+      // document.querySelectorAll('[data-qty-plus]').forEach(function(btn) {
+      //   btn.addEventListener('click', function() {
+      //     var el = this.parentElement.querySelector('[data-qty]');
+      //     if (el) el.textContent = Math.max(1, parseInt(el.textContent) + 1);
+      //   });
+      // });
+      // document.querySelectorAll('[data-qty-minus]').forEach(function(btn) {
+      //   btn.addEventListener('click', function() {
+      //     var el = this.parentElement.querySelector('[data-qty]');
+      //     if (el) el.textContent = Math.max(1, parseInt(el.textContent) - 1);
+      //   });
+      // });
+      // TODO: Uncomment color selectors when eCommerce is implemented
+      // document.querySelectorAll('[data-color-select]').forEach(function(btn) {
+      //   btn.addEventListener('click', function() {
+      //     var group = this.closest('[data-color-group]');
+      //     if (group) {
+      //       group.querySelectorAll('[data-color-select]').forEach(function(b){ b.style.outline = 'none'; b.style.outlineOffset = '0'; });
+      //       this.style.outline = '2px solid var(--c1)';
+      //       this.style.outlineOffset = '2px';
+      //       var card = this.closest('[data-product-card]');
+      //       if (card) card.setAttribute('data-selected-color', this.getAttribute('data-color-select'));
+      //     }
+      //   });
+      // });
+      // TODO: Uncomment size selectors when eCommerce is implemented
+      // document.querySelectorAll('[data-size-select]').forEach(function(btn) {
+      //   btn.addEventListener('click', function() {
+      //     var group = this.closest('[data-size-group]');
+      //     if (group) {
+      //       group.querySelectorAll('[data-size-select]').forEach(function(b){ b.style.background = 'var(--bgc)'; b.style.color = 'var(--ctx)'; b.style.borderColor = 'var(--bdr)'; });
+      //       this.style.background = 'var(--c1)';
+      //       this.style.color = '#fff';
+      //       this.style.borderColor = 'var(--c1)';
+      //       var card = this.closest('[data-product-card]');
+      //       if (card) card.setAttribute('data-selected-size', this.getAttribute('data-size-select'));
+      //     }
+      //   });
+      // });
       // Search
       document.querySelectorAll('[data-search-input]').forEach(function(input) {
         var debounce;
@@ -1007,36 +1115,37 @@ const generatePageHtml = (
           });
         });
       });
-      // Coupon apply
-      document.querySelectorAll('[data-coupon-apply]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var input = this.previousElementSibling;
-          if (input && input.value) {
-            this.textContent = '✓ Applied';
-            this.style.background = 'var(--ok)';
-            this.style.color = '#fff';
-            this.style.borderColor = 'var(--ok)';
-          }
-        });
-      });
-      // Initialize wishlist active state
-      document.querySelectorAll('[data-toggle-wishlist]').forEach(function(btn) {
-        try {
-          var product = JSON.parse(btn.getAttribute('data-toggle-wishlist'));
-          if (Store.isInWishlist(product.id)) btn.classList.add('wish-active');
-        } catch(e) {}
-      });
+      // TODO: Uncomment coupon apply when eCommerce is implemented
+      // document.querySelectorAll('[data-coupon-apply]').forEach(function(btn) {
+      //   btn.addEventListener('click', function() {
+      //     var input = this.previousElementSibling;
+      //     if (input && input.value) {
+      //       this.textContent = '✓ Applied';
+      //       this.style.background = 'var(--ok)';
+      //       this.style.color = '#fff';
+      //       this.style.borderColor = 'var(--ok)';
+      //     }
+      //   });
+      // });
+      // TODO: Uncomment wishlist init when eCommerce is implemented
+      // document.querySelectorAll('[data-toggle-wishlist]').forEach(function(btn) {
+      //   try {
+      //     var product = JSON.parse(btn.getAttribute('data-toggle-wishlist'));
+      //     if (Store.isInWishlist(product.id)) btn.classList.add('wish-active');
+      //   } catch(e) {}
+      // });
     });
   </script>
   <style>
-    @keyframes toastIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    /* TODO: Uncomment eCommerce CSS when eCommerce is implemented */
+    /* @keyframes toastIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
     [data-add-to-cart]:active { transform: scale(0.95); }
     .wish-active svg { fill: #ef4444 !important; color: #ef4444 !important; }
     [data-color-select]:hover { transform: scale(1.15); }
     [data-size-select]:hover { border-color: var(--c1) !important; }
     [data-category-filter] { cursor:pointer; transition:all var(--tr); }
     [data-qty-plus],[data-qty-minus] { cursor:pointer; user-select:none; }
-    [data-qty-plus]:hover,[data-qty-minus]:hover { background:var(--bga); }
+    [data-qty-plus]:hover,[data-qty-minus]:hover { background:var(--bga); } */
   </style>
 </body>
 </html>`;
@@ -1092,6 +1201,7 @@ const generateShellHtml = (
 
   const siteDataForClient: Record<string, any> = {
     name: siteName,
+    logo: siteSpec.logo || null,
     pages: siteSpec.pages || [],
     theme: siteSpec.theme,
     navigation: siteSpec.navigation,

@@ -7,6 +7,8 @@ export interface IWebsiteSpecification extends Document {
   version: number;
   name: string;
   description: string;
+  logo?: string | null;
+  seo?: Record<string, any>;
   pages: IPage[];
   theme: Record<string, any>;
   navigation: Record<string, any>;
@@ -41,6 +43,8 @@ const websiteSpecificationSchema = new Schema<IWebsiteSpecification>(
     version: { type: Number, default: 1 },
     name: { type: String, default: "" },
     description: { type: String, default: "" },
+    logo: { type: String, default: null },
+    seo: { type: Schema.Types.Mixed, default: {} },
     pages: [pageSchema],
     theme: { type: Schema.Types.Mixed, default: {} },
     navigation: { type: Schema.Types.Mixed, default: {} },

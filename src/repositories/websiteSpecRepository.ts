@@ -6,6 +6,8 @@ import { IPage } from "../types";
 interface SpecData {
   name?: string;
   description?: string;
+  logo?: string | null;
+  seo?: Record<string, any>;
   pages: IPage[];
   theme?: Record<string, any>;
   navigation?: Record<string, any>;

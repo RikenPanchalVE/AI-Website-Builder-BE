@@ -11,7 +11,7 @@ const FEATURE_PRICES: Record<string, number> = {
   newsletter: 15,
   gallery: 20,
   testimonials: 10,
-  ecommerce: 50,
+  // ecommerce: 50, // TODO: Uncomment when eCommerce is implemented
 };
 
 export const calculate = async (projectId: string): Promise<IPricing> => {
@@ -35,7 +35,8 @@ export const calculate = async (projectId: string): Promise<IPricing> => {
   const allComponents = (spec.pages || []).flatMap((p: any) =>
     (p.sections || []).map((s: any) => s.component)
   );
-  const premiumNames = ["Booking", "Ecommerce"];
+  const premiumNames = ["Booking"];
+  // TODO: Add "Ecommerce" back when eCommerce is implemented: ["Booking", "Ecommerce"]
   const premiumCount = allComponents.filter((c: string) =>
     premiumNames.some((p) => c.includes(p))
   ).length;

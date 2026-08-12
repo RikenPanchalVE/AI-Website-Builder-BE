@@ -14,13 +14,16 @@ export const generateWebsite = async (projectId: string): Promise<IWebsiteSpecif
   const ai = createAIProvider();
   const specData = await ai.generateWebsiteSpec(
     questionnaire.toObject() as Record<string, unknown>,
-    assets.map((a) => a.toObject() as Record<string, unknown>)
+    assets.map((a) => a.toObject() as Record<string, unknown>),
+    projectId
   );
 
   const pages = (specData.pages as any[]) || [];
   const spec = await websiteSpecRepo.create(projectId, {
     name: specData.name as string || "",
     description: specData.description as string || "",
+    logo: specData.logo as string || null,
+    seo: specData.seo as Record<string, any> || {},
     pages,
     theme: specData.theme as Record<string, any> || {},
     navigation: specData.navigation as Record<string, any> || {},

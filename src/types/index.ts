@@ -43,10 +43,15 @@ export type PageSlug =
   | "home"
   | "about"
   | "services"
+  | "service_details"
   | "portfolio"
-  | "contact"
+  | "portfolio_details"
+  | "pricing"
   | "blog"
-  | "faq";
+  | "blog_details"
+  | "contact"
+  | "faq"
+  | "testimonials";
 
 export type Feature =
   | "booking"
@@ -54,8 +59,8 @@ export type Feature =
   | "live_chat"
   | "newsletter"
   | "gallery"
-  | "testimonials"
-  | "ecommerce";
+  | "testimonials";
+  // | "ecommerce"; // TODO: Uncomment when eCommerce is implemented
 
 export type ThemeStyle = "modern" | "corporate" | "minimal" | "luxury" | "creative";
 

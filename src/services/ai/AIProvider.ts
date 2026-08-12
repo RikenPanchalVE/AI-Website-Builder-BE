@@ -1,7 +1,8 @@
 abstract class AIProvider {
   abstract generateWebsiteSpec(
     questionnaire: Record<string, unknown>,
-    assets: Record<string, unknown>[]
+    assets: Record<string, unknown>[],
+    projectId?: string
   ): Promise<Record<string, unknown>>;
 
   abstract processRevision(
