@@ -293,6 +293,12 @@ const DESIGN_STYLE_DEFAULTS: Record<string, Record<string, string>> = {
 /*                       Component Map & Resolver                             */
 /* -------------------------------------------------------------------------- */
 
+// Of the five hero layouts, only Hero1 (Full-Screen Statement) and Hero4
+// (Image-Focused) are actually built around a photo — Hero2/3/5 are
+// text-first and shouldn't be handed a background image even if one was
+// uploaded while a different hero style was selected.
+const IMAGE_HERO_COMPONENTS = new Set(["Hero1", "Hero4"]);
+
 const COMPONENT_MAP: Record<string, string> = {
   navbar1: "Navbar1", navbar2: "Navbar2", navbar3: "Navbar3",
   hero1: "Hero1", hero2: "Hero2", hero3: "Hero3", hero4: "Hero4", hero5: "Hero5",
@@ -306,6 +312,32 @@ const COMPONENT_MAP: Record<string, string> = {
   gallery1: "Gallery1", gallery2: "Gallery2",
   footer1: "Footer1", footer2: "Footer2", footer3: "Footer3",
   about1: "About1", about2: "About2",
+  // The About page's own sections (Company Story, Values, Team, Statistics,
+  // Timeline) never had a layout choice at all, unlike every Home page
+  // section — picking a design style changed colors/fonts but these five
+  // always rendered the exact same fixed layout.
+  about_story1: "AboutStory", about_story2: "AboutStory2",
+  about_values1: "AboutValues", about_values2: "AboutValues2",
+  team1: "TeamSection", team2: "TeamSection2",
+  stats1: "Stats", stats2: "Stats2",
+  timeline1: "Timeline", timeline2: "Timeline2",
+  // Same gap: Why Choose Us, Business Hours, Contact Info, and Map never
+  // had a layout choice either.
+  why_choose_us1: "WhyChooseUs", why_choose_us2: "WhyChooseUs2",
+  business_hours1: "BusinessHours", business_hours2: "BusinessHours2",
+  contact_info1: "ContactInfo", contact_info2: "ContactInfo2",
+  map1: "MapEmbed", map2: "MapEmbed2",
+  // Course Grid / Rooms & Suites / Travel Packages / Programs all share
+  // this same card-grid component family (one category covers all four).
+  course_grid1: "CourseGrid", course_grid2: "CourseGrid2",
+  process1: "LearningPaths", process2: "LearningPaths2",
+  daily_specials1: "DailySpecials", daily_specials2: "DailySpecials2",
+  agents1: "AgentProfiles", agents2: "AgentProfiles2",
+  destination_grid1: "DestinationGrid", destination_grid2: "DestinationGrid2",
+  travel_deals1: "TravelDeals", travel_deals2: "TravelDeals2",
+  doctors1: "DoctorProfiles", doctors2: "DoctorProfiles2",
+  instructors1: "InstructorProfiles", instructors2: "InstructorProfiles2",
+  menu_items1: "MenuHighlights", menu_items2: "MenuHighlights2",
 };
 
 function resolveComponent(
@@ -443,6 +475,8 @@ const BLOG_POSTS: Record<string, Array<{ title: string; excerpt: string; author:
 // through to the generic "default" bucket for almost everyone.
 const INDUSTRY_ALIASES: Record<string, string> = {
   restaurant: "Restaurant",
+  cafe: "Restaurant",
+  "cafe / coffee shop": "Restaurant",
   agency: "Agency",
   consulting: "Consulting",
   "real-estate": "Real Estate",
@@ -452,6 +486,12 @@ const INDUSTRY_ALIASES: Record<string, string> = {
   fitness: "Fitness",
   travel: "Travel",
   technology: "Technology",
+  "corporate-it": "Technology",
+  "corporate it": "Technology",
+  hotel: "Hotel",
+  photography: "Portfolio",
+  "interior-design": "Agency",
+  "interior design": "Agency",
   finance: "Finance",
   beauty: "Beauty",
   portfolio: "Portfolio",
@@ -616,10 +656,15 @@ function aboutStoryCopy(pageContent: PageContentOverride | undefined, fallbackCo
   return pageContent?.about_story?.content?.trim() || fallbackContent;
 }
 
-// Mixes a hex color toward white (amount 0 = pure color, 1 = pure white).
-// Used to give light-mode backgrounds a subtle brand tint instead of flat
-// white, so the chosen primary color is visible beyond just buttons.
-function mixWithWhite(hex: string, amount: number): string {
+// Mixes a hex color toward white or black (amount 0 = pure color, 1 = pure
+// white/black). Used to give backgrounds a subtle brand tint instead of a
+// flat neutral, so the chosen primary color is visible beyond just buttons —
+// including in dark mode, which used to ignore primaryColor entirely and
+// hardcode the exact same "#0F0F0F" for every dark-mode design style. That's
+// why Premium and Luxury (both dark-mode by default) looked like the same
+// color theme: same flat black page, same greys, only a small accent color
+// differed.
+function mixWithWhite(hex: string, amount: number, towards: "white" | "black" = "white"): string {
   const normalized = hex.replace("#", "");
   const full = normalized.length === 3
     ? normalized.split("").map((c) => c + c).join("")
@@ -629,7 +674,8 @@ function mixWithWhite(hex: string, amount: number): string {
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
   const b = num & 255;
-  const mix = (channel: number) => Math.round(channel + (255 - channel) * amount);
+  const target = towards === "white" ? 255 : 0;
+  const mix = (channel: number) => Math.round(channel + (target - channel) * amount);
   const toHex = (channel: number) => channel.toString(16).padStart(2, "0");
   return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
 }
@@ -655,6 +701,7 @@ class MockAIProvider extends AIProvider {
     const fontStyle = getFontFamily(answers.fontStyle || "");
     const accentStyle = answers.accentStyle || "";
     const logo = answers.logo || null;
+    const heroImage = answers.heroImage || null;
 
     const selectedPages = answers.selectedPages || answers.pages || ["home"];
     const homepageSections = answers.homepageSections || [];
@@ -687,6 +734,17 @@ class MockAIProvider extends AIProvider {
     const userClassSchedule = answers.classSchedule || [];
     const userCourses = answers.courses || [];
     const userDestinations = answers.destinations || [];
+    const userSolutions = answers.solutions || [];
+    const userIndustries = answers.industries || [];
+    const userCaseStudies = answers.caseStudies || [];
+    const userRooms = answers.rooms || [];
+    const userAmenities = answers.amenities || [];
+    const userExperiences = answers.experiences || [];
+    const userTravelPackages = answers.travelPackages || [];
+    const userProcess = answers.process || [];
+    const userPrograms = answers.programs || [];
+    const userFacilities = answers.facilities || [];
+    const userSkills = answers.skills || [];
 
     // Custom Hero / About-story / CTA text the client typed in per page
     // (see StepPageDetail on the client). Keyed by page slug.
@@ -715,7 +773,7 @@ class MockAIProvider extends AIProvider {
             title: "Home",
             sections: this._buildHomePageSections({
               businessName, businessDescription, industry, config,
-              logoPath: logo, imagePaths, homepageSections: pageSections["home"] || homepageSections, socialMedia,
+              logoPath: logo, heroImage, imagePaths, homepageSections: pageSections["home"] || homepageSections, socialMedia,
               userServices, userTestimonials, userFaq,
               userPortfolio, userGalleryImages, userTeam, userWhyChooseUs, userPricingPlans,
               userBlogPosts,
@@ -915,6 +973,202 @@ class MockAIProvider extends AIProvider {
             }),
           });
           break;
+        case "solutions":
+          pages.push({
+            slug: "solutions",
+            title: "Solutions",
+            sections: this._buildSolutionsSections({
+              businessName, industry, userSolutions, componentSelections, themeStyle,
+              pageContent: pageContentMap["solutions"],
+            }),
+          });
+          break;
+        case "case-studies":
+          pages.push({
+            slug: "case-studies",
+            title: "Case Studies",
+            sections: this._buildCaseStudiesSections({
+              businessName, industry, userCaseStudies, userTestimonials, componentSelections, themeStyle,
+              pageSections: pageSections["case-studies"] || [],
+              pageContent: pageContentMap["case-studies"],
+            }),
+          });
+          break;
+        case "industries":
+          pages.push({
+            slug: "industries",
+            title: "Industries",
+            sections: this._buildIndustriesSections({
+              businessName, industry, userIndustries, componentSelections, themeStyle,
+              pageContent: pageContentMap["industries"],
+            }),
+          });
+          break;
+        case "agents":
+          pages.push({
+            slug: "agents",
+            title: "Agents",
+            sections: this._buildAgentsSections({
+              businessName, industry, userTeam, componentSelections, themeStyle,
+              pageContent: pageContentMap["agents"],
+            }),
+          });
+          break;
+        case "location":
+          pages.push({
+            slug: "location",
+            title: "Location",
+            sections: this._buildLocationSections({
+              businessName, industry, userBusinessHours, componentSelections, themeStyle,
+              contactPhone, contactEmail, contactAddress,
+              pageSections: pageSections["location"] || [],
+              pageContent: pageContentMap["location"],
+            }),
+          });
+          break;
+        case "our-story":
+          pages.push({
+            slug: "our-story",
+            title: "Our Story",
+            sections: this._buildOurStorySections({
+              businessName, businessDescription, industry, userTimeline, componentSelections, themeStyle,
+              pageSections: pageSections["our-story"] || [],
+              pageContent: pageContentMap["our-story"],
+            }),
+          });
+          break;
+        case "rooms":
+          pages.push({
+            slug: "rooms",
+            title: "Rooms",
+            sections: this._buildRoomsSections({
+              businessName, industry, userRooms, componentSelections, themeStyle,
+              pageContent: pageContentMap["rooms"],
+            }),
+          });
+          break;
+        case "amenities":
+          pages.push({
+            slug: "amenities",
+            title: "Amenities",
+            sections: this._buildAmenitiesSections({
+              businessName, industry, userAmenities, componentSelections, themeStyle,
+              pageContent: pageContentMap["amenities"],
+            }),
+          });
+          break;
+        case "experiences":
+          pages.push({
+            slug: "experiences",
+            title: "Experiences",
+            sections: this._buildExperiencesSections({
+              businessName, industry, userExperiences, userTestimonials, componentSelections, themeStyle,
+              pageSections: pageSections["experiences"] || [],
+              pageContent: pageContentMap["experiences"],
+            }),
+          });
+          break;
+        case "travel-packages":
+          pages.push({
+            slug: "travel-packages",
+            title: "Travel Packages",
+            sections: this._buildTravelPackagesSections({
+              businessName, industry, userTravelPackages, componentSelections, themeStyle,
+              pageContent: pageContentMap["travel-packages"],
+            }),
+          });
+          break;
+        case "process":
+          pages.push({
+            slug: "process",
+            title: "Process",
+            sections: this._buildProcessSections({
+              businessName, industry, userProcess, componentSelections, themeStyle,
+              pageContent: pageContentMap["process"],
+            }),
+          });
+          break;
+        case "programs":
+          pages.push({
+            slug: "programs",
+            title: "Programs",
+            sections: this._buildProgramsSections({
+              businessName, industry, userPrograms, userTestimonials, componentSelections, themeStyle,
+              pageSections: pageSections["programs"] || [],
+              pageContent: pageContentMap["programs"],
+            }),
+          });
+          break;
+        case "trainers":
+          pages.push({
+            slug: "trainers",
+            title: "Trainers",
+            sections: this._buildTrainersSections({
+              businessName, industry, userTeam, componentSelections, themeStyle,
+              pageContent: pageContentMap["trainers"],
+            }),
+          });
+          break;
+        case "doctors":
+          pages.push({
+            slug: "doctors",
+            title: "Doctors",
+            sections: this._buildDoctorsSections({
+              businessName, industry, userTeam, componentSelections, themeStyle,
+              pageContent: pageContentMap["doctors"],
+            }),
+          });
+          break;
+        case "facilities":
+          pages.push({
+            slug: "facilities",
+            title: "Facilities",
+            sections: this._buildFacilitiesSections({
+              businessName, industry, userFacilities, componentSelections, themeStyle,
+              pageContent: pageContentMap["facilities"],
+            }),
+          });
+          break;
+        case "instructors":
+          pages.push({
+            slug: "instructors",
+            title: "Instructors",
+            sections: this._buildInstructorsSections({
+              businessName, industry, userTeam, componentSelections, themeStyle,
+              pageContent: pageContentMap["instructors"],
+            }),
+          });
+          break;
+        case "skills":
+          pages.push({
+            slug: "skills",
+            title: "Skills",
+            sections: this._buildSkillsSections({
+              businessName, industry, userSkills, componentSelections, themeStyle,
+              pageContent: pageContentMap["skills"],
+            }),
+          });
+          break;
+        case "projects":
+          pages.push({
+            slug: "projects",
+            title: "Projects",
+            sections: this._buildPortfolioSections({
+              businessName, industry, imagePaths, userPortfolio, componentSelections, themeStyle,
+              pageContent: pageContentMap["projects"],
+            }),
+          });
+          break;
+        case "experience":
+          pages.push({
+            slug: "experience",
+            title: "Experience",
+            sections: this._buildExperienceSections({
+              businessName, industry, userTimeline, componentSelections, themeStyle,
+              pageContent: pageContentMap["experience"],
+            }),
+          });
+          break;
         default:
           pages.push({
             slug,
@@ -1030,7 +1284,7 @@ class MockAIProvider extends AIProvider {
 
   private _buildHeroSection(ctx: {
     businessName: string; businessDescription: string; industry: string;
-    imagePaths: string[]; logoPath: string | null;
+    imagePaths: string[]; logoPath: string | null; heroImage?: string | null;
     componentSelections: Record<string, string>; themeStyle: string;
     selectedPages: string[];
     pageContent?: PageContentOverride;
@@ -1058,7 +1312,14 @@ class MockAIProvider extends AIProvider {
         ctaText,
         ctaLink: resolveCtaLink(ctaText, ctx.selectedPages),
         badge: content.badge,
-        image: ctx.imagePaths[0] || null,
+        // Hero1-5 all read `backgroundImage`, not `image` — this used to be
+        // the wrong prop key entirely, so an uploaded hero image was silently
+        // dropped and every image-based hero style just fell back to its
+        // default gradient. Only Hero1 (Full-Screen Statement) and Hero4
+        // (Image-Focused) are actually built around a photo — the other
+        // layouts are text-first, so don't hand them an image even if one
+        // was uploaded while a different hero style was selected.
+        backgroundImage: IMAGE_HERO_COMPONENTS.has(heroComp) ? ctx.heroImage || ctx.imagePaths[0] || null : null,
         logo: ctx.logoPath || null,
       },
       order: 0,
@@ -1067,7 +1328,7 @@ class MockAIProvider extends AIProvider {
 
   private _buildHomePageSections(ctx: {
     businessName: string; businessDescription: string; industry: string;
-    config: BusinessTypeConfig; logoPath: string | null; imagePaths: string[];
+    config: BusinessTypeConfig; logoPath: string | null; heroImage?: string | null; imagePaths: string[];
     homepageSections: string[]; socialMedia: Record<string, string>;
     userServices: Array<{ title: string; description: string; icon: string }>;
     userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
@@ -1156,7 +1417,10 @@ class MockAIProvider extends AIProvider {
             props: {
               title: "Frequently Asked Questions",
               subtitle: "Find answers to common questions",
-              faq,
+              // FAQ1/FAQ2 both destructure `faqs` (plural) — the old key
+              // meant this prop was always undefined and faqs.map() threw,
+              // crashing the section entirely.
+              faqs: faq,
             },
             order: order++,
           });
@@ -1253,7 +1517,7 @@ class MockAIProvider extends AIProvider {
         case "why_choose_us":
           sections.push({
             id: "why_choose_us",
-            component: "WhyChooseUs",
+            component: resolveComponent(ctx.componentSelections, "why_choose_us", "WhyChooseUs", ctx.themeStyle),
             props: {
               title: "Why Choose Us",
               subtitle: "What sets us apart",
@@ -1272,12 +1536,14 @@ class MockAIProvider extends AIProvider {
         case "about_story":
           sections.push({
             id: "about_story",
-            component: "AboutStory",
+            component: resolveComponent(ctx.componentSelections, "about_story", "AboutStory", ctx.themeStyle),
             props: {
               title: getAboutTitle(ctx.industry),
               subtitle: "Learn about our journey",
               content: aboutStoryCopy(ctx.pageContent, `${ctx.businessName} was founded with a vision to deliver exceptional ${ctx.industry.toLowerCase()} services. Over the years, we've built a reputation for quality, innovation, and customer satisfaction. Our team of dedicated professionals works tirelessly to exceed expectations and deliver results that make a difference.`),
-              backgroundImage: ctx.imagePaths[0] || null,
+              // AboutStory reads `image`, not `backgroundImage` — this was
+              // silently dropped, so an uploaded photo never showed here.
+              image: ctx.imagePaths[0] || null,
             },
             order: order++,
           });
@@ -1285,7 +1551,7 @@ class MockAIProvider extends AIProvider {
         case "team":
           sections.push({
             id: "team",
-            component: "TeamSection",
+            component: resolveComponent(ctx.componentSelections, "team", "TeamSection", ctx.themeStyle),
             props: {
               title: "Meet Our Team",
               subtitle: "The people behind our success",
@@ -1386,11 +1652,15 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
-          image: ctx.imagePaths[0] || null,
         },
         order: 0,
       },
@@ -1408,7 +1678,7 @@ class MockAIProvider extends AIProvider {
         case "story":
           sections.push({
             id: "about_story",
-            component: "AboutStory",
+            component: resolveComponent(ctx.componentSelections, "about_story", "AboutStory", ctx.themeStyle),
             props: {
               title: getAboutTitle(ctx.industry),
               subtitle: "Our Journey",
@@ -1421,7 +1691,7 @@ class MockAIProvider extends AIProvider {
         case "values":
           sections.push({
             id: "about_values",
-            component: "AboutValues",
+            component: resolveComponent(ctx.componentSelections, "about_values", "AboutValues", ctx.themeStyle),
             props: {
               title: "Our Values",
               subtitle: "What drives us every day",
@@ -1438,7 +1708,7 @@ class MockAIProvider extends AIProvider {
         case "team":
           sections.push({
             id: "team",
-            component: "TeamSection",
+            component: resolveComponent(ctx.componentSelections, "team", "TeamSection", ctx.themeStyle),
             props: {
               title: "Meet Our Team",
               subtitle: "The talented people behind our success",
@@ -1456,7 +1726,7 @@ class MockAIProvider extends AIProvider {
         case "stats":
           sections.push({
             id: "stats",
-            component: "Stats",
+            component: resolveComponent(ctx.componentSelections, "stats", "Stats", ctx.themeStyle),
             props: {
               title: "By the Numbers",
               stats: ctx.userStats.length > 0
@@ -1474,7 +1744,7 @@ class MockAIProvider extends AIProvider {
         case "timeline":
           sections.push({
             id: "timeline",
-            component: "Timeline",
+            component: resolveComponent(ctx.componentSelections, "timeline", "Timeline", ctx.themeStyle),
             props: {
               title: "Our Journey",
               milestones: ctx.userTimeline.length > 0
@@ -1529,7 +1799,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1548,7 +1823,7 @@ class MockAIProvider extends AIProvider {
       },
       {
         id: "why_choose_us",
-        component: "WhyChooseUs",
+        component: resolveComponent(ctx.componentSelections, "why_choose_us", "WhyChooseUs", ctx.themeStyle),
         props: {
           title: "Why Choose Us",
           subtitle: "What sets us apart from the competition",
@@ -1599,7 +1874,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1658,7 +1938,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1687,7 +1972,7 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Pricing FAQs",
           subtitle: "Common questions about our pricing",
-          faq: getFaq(ctx.industry),
+          faqs: getFaq(ctx.industry),
         },
         order: 2,
       },
@@ -1708,7 +1993,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1749,7 +2039,12 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1784,7 +2079,7 @@ class MockAIProvider extends AIProvider {
         case "map":
           sections.push({
             id: "map",
-            component: "MapEmbed",
+            component: resolveComponent(ctx.componentSelections, "map", "MapEmbed", ctx.themeStyle),
             props: {
               title: "Find Us",
               address: ctx.contactAddress,
@@ -1795,7 +2090,7 @@ class MockAIProvider extends AIProvider {
         case "info":
           sections.push({
             id: "contact_info",
-            component: "ContactInfo",
+            component: resolveComponent(ctx.componentSelections, "contact_info", "ContactInfo", ctx.themeStyle),
             props: {
               methods: [
                 { title: "Phone", value: ctx.contactPhone, description: "Call us directly" },
@@ -1809,7 +2104,7 @@ class MockAIProvider extends AIProvider {
         case "hours":
           sections.push({
             id: "business_hours",
-            component: "BusinessHours",
+            component: resolveComponent(ctx.componentSelections, "business_hours", "BusinessHours", ctx.themeStyle),
             props: {
               title: "Business Hours",
               hours: ctx.userBusinessHours.length > 0
@@ -1843,7 +2138,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1856,7 +2156,7 @@ class MockAIProvider extends AIProvider {
         props: {
           title: "Frequently Asked Questions",
           subtitle: "Find answers to common questions",
-          faq,
+          faqs: faq,
         },
         order: 1,
       },
@@ -1890,7 +2190,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1939,7 +2244,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -1996,7 +2306,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -2005,7 +2320,7 @@ class MockAIProvider extends AIProvider {
       },
       {
         id: "menu_highlights",
-        component: "MenuHighlights",
+        component: resolveComponent(ctx.componentSelections, "menu_items", "MenuHighlights", ctx.themeStyle),
         props: {
           title: "Our Menu",
           subtitle: "Carefully crafted selections",
@@ -2015,7 +2330,7 @@ class MockAIProvider extends AIProvider {
       },
       {
         id: "daily_specials",
-        component: "DailySpecials",
+        component: resolveComponent(ctx.componentSelections, "daily_specials", "DailySpecials", ctx.themeStyle),
         props: {
           title: "Today's Specials",
           subtitle: "Chef's picks for today",
@@ -2046,7 +2361,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -2055,7 +2375,7 @@ class MockAIProvider extends AIProvider {
       },
       {
         id: "team",
-        component: "TeamSection",
+        component: resolveComponent(ctx.componentSelections, "team", "TeamSection", ctx.themeStyle),
         props: {
           title: "Meet the Team",
           subtitle: "Dedicated professionals committed to excellence",
@@ -2096,7 +2416,12 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: { title: hero.title, subtitle: hero.subtitle },
         order: 0,
       },
@@ -2109,7 +2434,7 @@ class MockAIProvider extends AIProvider {
         case "agents":
           sections.push({
             id: "agents",
-            component: "AgentProfiles",
+            component: resolveComponent(ctx.componentSelections, "agents", "AgentProfiles", ctx.themeStyle),
             props: {
               title: "Meet Our Agents",
               subtitle: "Local experts ready to help you buy or sell",
@@ -2159,7 +2484,12 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: { title: hero.title, subtitle: hero.subtitle },
         order: 0,
       },
@@ -2172,7 +2502,7 @@ class MockAIProvider extends AIProvider {
         case "course-grid":
           sections.push({
             id: "course_grid",
-            component: "CourseGrid",
+            component: resolveComponent(ctx.componentSelections, "course_grid", "CourseGrid", ctx.themeStyle),
             props: {
               title: "Our Courses",
               subtitle: "Pick the path that's right for you",
@@ -2190,7 +2520,7 @@ class MockAIProvider extends AIProvider {
         case "features":
           sections.push({
             id: "features",
-            component: "WhyChooseUs",
+            component: resolveComponent(ctx.componentSelections, "why_choose_us", "WhyChooseUs", ctx.themeStyle),
             props: {
               title: "What's Included",
               subtitle: "Everything you need to succeed",
@@ -2252,7 +2582,12 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: { title: hero.title, subtitle: hero.subtitle },
         order: 0,
       },
@@ -2283,7 +2618,7 @@ class MockAIProvider extends AIProvider {
         case "trainers":
           sections.push({
             id: "trainers",
-            component: "TeamSection",
+            component: resolveComponent(ctx.componentSelections, "team", "TeamSection", ctx.themeStyle),
             props: {
               title: "Meet Our Trainers",
               subtitle: "The coaches who keep you moving",
@@ -2350,7 +2685,12 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: { title: hero.title, subtitle: hero.subtitle },
         order: 0,
       },
@@ -2363,7 +2703,7 @@ class MockAIProvider extends AIProvider {
         case "destination-grid":
           sections.push({
             id: "destination_grid",
-            component: "DestinationGrid",
+            component: resolveComponent(ctx.componentSelections, "destination_grid", "DestinationGrid", ctx.themeStyle),
             props: {
               title: "Popular Destinations",
               subtitle: "Where our travelers love to go",
@@ -2381,7 +2721,7 @@ class MockAIProvider extends AIProvider {
         case "deals":
           sections.push({
             id: "travel_deals",
-            component: "TravelDeals",
+            component: resolveComponent(ctx.componentSelections, "travel_deals", "TravelDeals", ctx.themeStyle),
             props: {
               title: "Travel Deals",
               subtitle: "Limited-time offers you won't want to miss",
@@ -2442,7 +2782,12 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: { title: hero.title, subtitle: hero.subtitle },
         order: 0,
       },
@@ -2467,7 +2812,7 @@ class MockAIProvider extends AIProvider {
         case "benefits":
           sections.push({
             id: "benefits",
-            component: "WhyChooseUs",
+            component: resolveComponent(ctx.componentSelections, "why_choose_us", "WhyChooseUs", ctx.themeStyle),
             props: {
               title: "Why Choose Us",
               subtitle: "What sets us apart",
@@ -2529,7 +2874,12 @@ class MockAIProvider extends AIProvider {
     const sections: Array<Record<string, unknown>> = [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: { title: hero.title, subtitle: hero.subtitle },
         order: 0,
       },
@@ -2595,6 +2945,981 @@ class MockAIProvider extends AIProvider {
     return sections;
   }
 
+  private _buildSolutionsSections(ctx: {
+    businessName: string; industry: string;
+    userSolutions: Array<{ title: string; description: string; icon: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Solutions", `How ${ctx.businessName} solves problems for businesses like yours`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "solutions",
+        component: resolveComponent(ctx.componentSelections, "services", "Services1", ctx.themeStyle),
+        props: {
+          title: "Our Solutions",
+          subtitle: "How we solve problems for businesses like yours",
+          services: ctx.userSolutions.length > 0
+            ? ctx.userSolutions
+            : [
+                { title: "Cloud Infrastructure", description: "Scalable, secure infrastructure tailored to your business needs.", icon: "settings" },
+                { title: "Custom Software", description: "Purpose-built software that solves your specific challenges.", icon: "star" },
+                { title: "IT Consulting", description: "Strategic guidance to help you make the right technology decisions.", icon: "heart" },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Let's find the right solution for you",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildCaseStudiesSections(ctx: {
+    businessName: string; industry: string;
+    userCaseStudies: Array<{ title: string; description: string; image?: string | null }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Case Studies", `Real results for real clients of ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["case-studies-grid", "testimonials"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "case-studies-grid":
+          sections.push({
+            id: "case_studies",
+            component: resolveComponent(ctx.componentSelections, "portfolio", "Portfolio2", ctx.themeStyle),
+            props: {
+              title: "Case Studies",
+              projects: (ctx.userCaseStudies.length > 0
+                ? ctx.userCaseStudies
+                : [
+                    { title: "Doubling Conversion Rates", description: "How we helped a growing brand double its online conversion rate in three months.", image: null },
+                    { title: "A Full Brand Refresh", description: "From dated to distinctive — a complete visual identity overhaul.", image: null },
+                    { title: "Scaling to 10x Traffic", description: "The strategy behind a tenfold increase in organic traffic.", image: null },
+                  ]
+              ).map((c) => ({ category: "Case Study", ...c })),
+            },
+            order: order++,
+          });
+          break;
+        case "testimonials":
+          sections.push({
+            id: "testimonials",
+            component: resolveComponent(ctx.componentSelections, "testimonials", "Testimonials1", ctx.themeStyle),
+            props: {
+              title: "Client Feedback",
+              testimonials: ctx.userTestimonials.length > 0 ? ctx.userTestimonials : getTestimonials(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    return sections;
+  }
+
+  private _buildIndustriesSections(ctx: {
+    businessName: string; industry: string;
+    userIndustries: Array<{ title: string; description: string; icon: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Industries We Serve", `Specialized expertise across sectors at ${ctx.businessName}`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "industries",
+        component: resolveComponent(ctx.componentSelections, "services", "Services1", ctx.themeStyle),
+        props: {
+          title: "Industries We Serve",
+          subtitle: "Specialized expertise across sectors",
+          services: ctx.userIndustries.length > 0
+            ? ctx.userIndustries
+            : [
+                { title: "Healthcare", description: "Solutions tailored to the unique needs of healthcare organizations.", icon: "heart" },
+                { title: "Finance", description: "Secure, compliant solutions for financial institutions.", icon: "star" },
+                { title: "Retail", description: "Tools that help retailers compete and grow.", icon: "settings" },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Let's talk about your industry",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildAgentsSections(ctx: {
+    businessName: string; industry: string;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Meet Our Agents", `Local experts ready to help at ${ctx.businessName}`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "agents",
+        component: resolveComponent(ctx.componentSelections, "agents", "AgentProfiles", ctx.themeStyle),
+        props: {
+          title: "Meet Our Agents",
+          subtitle: "Local experts ready to help you buy or sell",
+          agents: ctx.userTeam.length > 0
+            ? ctx.userTeam.map((t) => ({ name: t.name, specialty: t.role, avatar: t.avatar }))
+            : [
+                { name: "Jordan Blake", specialty: "Residential Sales", avatar: null },
+                { name: "Casey Rivera", specialty: "Luxury Properties", avatar: null },
+                { name: "Morgan Lee", specialty: "First-Time Buyers", avatar: null },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Looking to Buy or Sell?",
+            subheadline: "Talk to one of our agents today",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildLocationSections(ctx: {
+    businessName: string; industry: string;
+    userBusinessHours: Array<{ day: string; hours: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    contactPhone: string; contactEmail: string; contactAddress: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Find Us", `Come say hello at ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["map", "info", "hours"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "map":
+          sections.push({
+            id: "map",
+            component: resolveComponent(ctx.componentSelections, "map", "MapEmbed", ctx.themeStyle),
+            props: { title: "Find Us", address: ctx.contactAddress },
+            order: order++,
+          });
+          break;
+        case "info":
+          sections.push({
+            id: "contact_info",
+            component: resolveComponent(ctx.componentSelections, "contact_info", "ContactInfo", ctx.themeStyle),
+            props: {
+              methods: [
+                { title: "Phone", value: ctx.contactPhone, description: "Call us directly" },
+                { title: "Email", value: ctx.contactEmail, description: "Send us a message" },
+                { title: "Address", value: ctx.contactAddress, description: "" },
+              ],
+            },
+            order: order++,
+          });
+          break;
+        case "hours":
+          sections.push({
+            id: "business_hours",
+            component: resolveComponent(ctx.componentSelections, "business_hours", "BusinessHours", ctx.themeStyle),
+            props: {
+              title: "Business Hours",
+              hours: ctx.userBusinessHours.length > 0
+                ? ctx.userBusinessHours
+                : [
+                    { day: "Monday - Friday", hours: "9:00 AM - 6:00 PM" },
+                    { day: "Saturday", hours: "10:00 AM - 4:00 PM" },
+                    { day: "Sunday", hours: "Closed" },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    return sections;
+  }
+
+  private _buildOurStorySections(ctx: {
+    businessName: string; businessDescription: string; industry: string;
+    userTimeline: Array<{ year: string; title: string; description?: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Story", `How it all began at ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["story", "timeline"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "story":
+          sections.push({
+            id: "about_story",
+            component: resolveComponent(ctx.componentSelections, "about_story", "AboutStory", ctx.themeStyle),
+            props: {
+              title: "Our Story",
+              subtitle: "How it all started",
+              content: aboutStoryCopy(ctx.pageContent, `${ctx.businessName} started with a simple idea. ${ctx.businessDescription || "We set out to do things differently, and that mindset still shapes everything we do today."}`),
+              image: null,
+            },
+            order: order++,
+          });
+          break;
+        case "timeline":
+          sections.push({
+            id: "timeline",
+            component: resolveComponent(ctx.componentSelections, "timeline", "Timeline", ctx.themeStyle),
+            props: {
+              title: "Our Journey",
+              milestones: ctx.userTimeline.length > 0
+                ? ctx.userTimeline
+                : [
+                    { year: "Year One", title: "Founded", description: "Started with a simple idea and a small team." },
+                    { year: "Today", title: "Where We Are Now", description: `${ctx.businessName} has grown into a place people love to visit.` },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    return sections;
+  }
+
+  private _buildRoomsSections(ctx: {
+    businessName: string; industry: string;
+    userRooms: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Rooms & Suites", `Comfort designed around you at ${ctx.businessName}`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "rooms",
+        component: resolveComponent(ctx.componentSelections, "course_grid", "CourseGrid", ctx.themeStyle),
+        props: {
+          title: "Rooms & Suites",
+          subtitle: "Comfort designed around you",
+          courses: ctx.userRooms.length > 0
+            ? ctx.userRooms
+            : [
+                { title: "Deluxe Room", description: "Spacious comfort with a king bed and city views.", price: "$189/night", category: "Deluxe", image: null },
+                { title: "Executive Suite", description: "A separate living area and premium amenities.", price: "$289/night", category: "Suite", image: null },
+                { title: "Presidential Suite", description: "Our most luxurious accommodations, with panoramic views.", price: "$549/night", category: "Suite", image: null },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Book Your Stay?",
+            subheadline: "Reserve your room today",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildAmenitiesSections(ctx: {
+    businessName: string; industry: string;
+    userAmenities: Array<{ title: string; description: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Amenities", `Everything you need for a great stay at ${ctx.businessName}`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "amenities",
+        component: resolveComponent(ctx.componentSelections, "why_choose_us", "WhyChooseUs", ctx.themeStyle),
+        props: {
+          title: "Amenities",
+          subtitle: "Everything you need for a great stay",
+          reasons: ctx.userAmenities.length > 0
+            ? ctx.userAmenities
+            : [
+                { title: "Pool & Spa", description: "Unwind in our resort-style pool and full-service spa." },
+                { title: "Fitness Center", description: "State-of-the-art equipment, open 24 hours." },
+                { title: "Free Wi-Fi", description: "High-speed internet throughout the property." },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Book your stay today",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildExperiencesSections(ctx: {
+    businessName: string; industry: string;
+    userExperiences: Array<{ title: string; description: string; image?: string | null }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Experiences", `Curated moments you won't forget at ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["experiences-grid", "testimonials"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "experiences-grid":
+          sections.push({
+            id: "experiences",
+            component: resolveComponent(ctx.componentSelections, "portfolio", "Portfolio2", ctx.themeStyle),
+            props: {
+              title: "Experiences",
+              projects: (ctx.userExperiences.length > 0
+                ? ctx.userExperiences
+                : [
+                    { title: "Sunset Wine Tasting", description: "An evening of curated wines paired with local bites.", image: null },
+                    { title: "Guided City Tour", description: "Explore the highlights with a local expert guide.", image: null },
+                    { title: "Private Chef's Table", description: "An intimate multi-course dinner prepared just for you.", image: null },
+                  ]
+              ).map((e) => ({ category: "Featured", ...e })),
+            },
+            order: order++,
+          });
+          break;
+        case "testimonials":
+          sections.push({
+            id: "testimonials",
+            component: resolveComponent(ctx.componentSelections, "testimonials", "Testimonials1", ctx.themeStyle),
+            props: {
+              title: "Guest Reviews",
+              testimonials: ctx.userTestimonials.length > 0 ? ctx.userTestimonials : getTestimonials(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    return sections;
+  }
+
+  private _buildTravelPackagesSections(ctx: {
+    businessName: string; industry: string;
+    userTravelPackages: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Travel Packages", `Thoughtfully planned trips from ${ctx.businessName}, ready to book`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "travel_packages",
+        component: resolveComponent(ctx.componentSelections, "course_grid", "CourseGrid", ctx.themeStyle),
+        props: {
+          title: "Travel Packages",
+          subtitle: "Thoughtfully planned trips, ready to book",
+          courses: ctx.userTravelPackages.length > 0
+            ? ctx.userTravelPackages
+            : [
+                { title: "Weekend Getaway", description: "A quick escape to recharge, all-inclusive.", price: "$599", category: "Short Trip", duration: "3 days", image: null },
+                { title: "Classic Adventure", description: "Our most popular week-long itinerary.", price: "$1,299", category: "Adventure", duration: "7 days", image: null },
+                { title: "Luxury Escape", description: "Premium accommodations and exclusive experiences.", price: "$2,499", category: "Luxury", duration: "10 days", image: null },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready for Your Next Adventure?",
+            subheadline: "Let's start planning your trip",
+            ctaText: "Plan Your Trip",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildProcessSections(ctx: {
+    businessName: string; industry: string;
+    userProcess: Array<{ title: string; description: string; icon?: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Process", `How ${ctx.businessName} brings your vision to life`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "process",
+        component: resolveComponent(ctx.componentSelections, "process", "LearningPaths", ctx.themeStyle),
+        props: {
+          title: "Our Process",
+          subtitle: "How we bring your vision to life",
+          steps: ctx.userProcess.length > 0
+            ? ctx.userProcess
+            : [
+                { title: "Discover", description: "We start by understanding your goals, space, and style.", icon: "1" },
+                { title: "Design", description: "We create a tailored plan and bring it to life in concept form.", icon: "2" },
+                { title: "Deliver", description: "We execute the plan and hand over a finished space you'll love.", icon: "3" },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Let's start your project",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildProgramsSections(ctx: {
+    businessName: string; industry: string;
+    userPrograms: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+    userTestimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageSections?: string[];
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Programs", `Find the program that's right for you at ${ctx.businessName}`);
+    const sections: Array<Record<string, unknown>> = [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+    ];
+    let order = 1;
+    const selected = ctx.pageSections && ctx.pageSections.length > 0 ? ctx.pageSections : ["programs-grid", "testimonials"];
+
+    for (const sectionId of selected) {
+      switch (sectionId) {
+        case "programs-grid":
+          sections.push({
+            id: "programs",
+            component: resolveComponent(ctx.componentSelections, "course_grid", "CourseGrid", ctx.themeStyle),
+            props: {
+              title: "Our Programs",
+              subtitle: "Find the program that's right for you",
+              courses: ctx.userPrograms.length > 0
+                ? ctx.userPrograms
+                : [
+                    { title: "Beginner Program", description: "A gentle introduction built for lasting habits.", price: "$49/mo", category: "Beginner", level: "Beginner", duration: "4 weeks", image: null },
+                    { title: "Performance Program", description: "Structured training to hit your next milestone.", price: "$89/mo", category: "Intermediate", level: "Intermediate", duration: "8 weeks", image: null },
+                    { title: "Elite Program", description: "Advanced coaching for serious, dedicated athletes.", price: "$149/mo", category: "Advanced", level: "Advanced", duration: "12 weeks", image: null },
+                  ],
+            },
+            order: order++,
+          });
+          break;
+        case "testimonials":
+          sections.push({
+            id: "testimonials",
+            component: resolveComponent(ctx.componentSelections, "testimonials", "Testimonials1", ctx.themeStyle),
+            props: {
+              title: "Member Reviews",
+              testimonials: ctx.userTestimonials.length > 0 ? ctx.userTestimonials : getTestimonials(ctx.industry),
+            },
+            order: order++,
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
+    return sections;
+  }
+
+  private _buildTrainersSections(ctx: {
+    businessName: string; industry: string;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Meet Our Trainers", `The coaches who keep ${ctx.businessName} moving`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "trainers",
+        component: resolveComponent(ctx.componentSelections, "team", "TeamSection", ctx.themeStyle),
+        props: {
+          title: "Meet Our Trainers",
+          subtitle: "The coaches who keep you moving",
+          members: ctx.userTeam.length > 0
+            ? ctx.userTeam
+            : [
+                { name: "Alex Rivera", role: "Head Trainer", avatar: null, bio: "Certified strength coach with 10+ years of experience." },
+                { name: "Sam Parker", role: "Cardio Specialist", avatar: null, bio: "Loves helping members hit their endurance goals." },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Book a session with one of our trainers",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildDoctorsSections(ctx: {
+    businessName: string; industry: string;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Meet Our Doctors", `Experienced, compassionate care at ${ctx.businessName}`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "doctors",
+        component: resolveComponent(ctx.componentSelections, "doctors", "DoctorProfiles", ctx.themeStyle),
+        props: {
+          title: "Meet Our Doctors",
+          subtitle: "Experienced, compassionate care",
+          doctors: ctx.userTeam.length > 0
+            ? ctx.userTeam.map((t) => ({ name: t.name, specialty: t.role, image: t.avatar, description: t.bio }))
+            : [
+                { name: "Dr. Sarah Chen", specialty: "Family Medicine", image: null, description: "Over 12 years of experience in primary care." },
+                { name: "Dr. James Patel", specialty: "Internal Medicine", image: null, description: "Focused on preventive care and long-term wellness." },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Book an Appointment?",
+            subheadline: "We're accepting new patients",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildFacilitiesSections(ctx: {
+    businessName: string; industry: string;
+    userFacilities: Array<{ title: string; description: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Our Facilities", `A comfortable, modern space for your care at ${ctx.businessName}`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "facilities",
+        component: resolveComponent(ctx.componentSelections, "why_choose_us", "WhyChooseUs", ctx.themeStyle),
+        props: {
+          title: "Our Facilities",
+          subtitle: "A comfortable, modern space for your care",
+          reasons: ctx.userFacilities.length > 0
+            ? ctx.userFacilities
+            : [
+                { title: "Modern Exam Rooms", description: "Comfortable, private spaces equipped with the latest technology." },
+                { title: "On-Site Lab", description: "Fast, accurate testing without the extra trip." },
+                { title: "Accessible Facility", description: "Fully accessible for patients of all mobility levels." },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Schedule your visit today",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildInstructorsSections(ctx: {
+    businessName: string; industry: string;
+    userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Meet Your Instructors", `Learn from experienced professionals at ${ctx.businessName}`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "instructors",
+        component: resolveComponent(ctx.componentSelections, "instructors", "InstructorProfiles", ctx.themeStyle),
+        props: {
+          title: "Meet Your Instructors",
+          subtitle: "Learn from experienced professionals",
+          instructors: ctx.userTeam.length > 0
+            ? ctx.userTeam.map((t) => ({ name: t.name, specialty: t.role, avatar: t.avatar }))
+            : [
+                { name: "Dr. Amara Osei", specialty: "Lead Instructor", avatar: null },
+                { name: "Marcus Webb", specialty: "Curriculum Director", avatar: null },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Ready to Get Started?",
+            subheadline: "Enroll in a course today",
+            ctaText: "Get Started",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildSkillsSections(ctx: {
+    businessName: string; industry: string;
+    userSkills: Array<{ title: string; description: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Skills & Expertise", `What ${ctx.businessName} brings to every project`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "skills",
+        component: resolveComponent(ctx.componentSelections, "why_choose_us", "WhyChooseUs", ctx.themeStyle),
+        props: {
+          title: "Skills & Expertise",
+          subtitle: "What I bring to every project",
+          reasons: ctx.userSkills.length > 0
+            ? ctx.userSkills
+            : [
+                { title: "Brand Strategy", description: "Defining a clear, compelling identity for growing businesses." },
+                { title: "Visual Design", description: "Crafting polished, on-brand visuals across every touchpoint." },
+                { title: "Web Development", description: "Building fast, accessible, well-crafted websites." },
+              ],
+        },
+        order: 1,
+      },
+      {
+        id: "cta",
+        component: resolveComponent(ctx.componentSelections, "cta", "CTA2", ctx.themeStyle),
+        props: {
+          ...ctaCopy(ctx.pageContent, {
+            headline: "Let's Work Together",
+            subheadline: "Get in touch to start your project",
+            ctaText: "Contact Us",
+          }),
+          ctaLink: "/contact",
+        },
+        order: 2,
+      },
+    ];
+  }
+
+  private _buildExperienceSections(ctx: {
+    businessName: string; industry: string;
+    userTimeline: Array<{ year: string; title: string; description?: string }>;
+    componentSelections: Record<string, string>; themeStyle: string;
+    pageContent?: PageContentOverride;
+  }): Array<Record<string, unknown>> {
+    const hero = heroCopy(ctx.pageContent, "Experience", `Where ${ctx.businessName} has been and what I've learned`);
+    return [
+      {
+        id: "page_hero",
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
+        props: { title: hero.title, subtitle: hero.subtitle },
+        order: 0,
+      },
+      {
+        id: "experience",
+        component: resolveComponent(ctx.componentSelections, "timeline", "Timeline", ctx.themeStyle),
+        props: {
+          title: "Experience",
+          milestones: ctx.userTimeline.length > 0
+            ? ctx.userTimeline
+            : [
+                { year: "2018", title: "Started Freelancing", description: "Began taking on independent client projects." },
+                { year: "2021", title: "Grew a Client Roster", description: "Built long-term relationships with returning clients." },
+                { year: "2024", title: "Where I Am Today", description: "Focused on delivering great work for a small set of clients." },
+              ],
+        },
+        order: 1,
+      },
+    ];
+  }
+
   private _buildGenericSections(ctx: {
     businessName: string; industry: string;
     componentSelections: Record<string, string>; themeStyle: string;
@@ -2604,7 +3929,12 @@ class MockAIProvider extends AIProvider {
     return [
       {
         id: "page_hero",
-        component: resolveComponent(ctx.componentSelections, "hero", "PageHero", ctx.themeStyle),
+        // Always the compact page-title bar, never the Home hero variant —
+        // resolveComponent would otherwise resolve "hero" to whatever
+        // Hero1-5 the client picked for the Home page, since both share
+        // the same "hero" component-selection category. That meant every
+        // single page in the site rendered the exact same full hero.
+        component: "PageHero",
         props: {
           title: hero.title,
           subtitle: hero.subtitle,
@@ -2613,7 +3943,7 @@ class MockAIProvider extends AIProvider {
       },
       {
         id: "about_story",
-        component: "AboutStory",
+        component: resolveComponent(ctx.componentSelections, "about_story", "AboutStory", ctx.themeStyle),
         props: {
           title: getAboutTitle(ctx.industry),
           subtitle: "Learn More About Us",
@@ -2674,11 +4004,26 @@ class MockAIProvider extends AIProvider {
     // to never reach here at all — buttonStyle came only from the design
     // style profile, so every accent choice looked identical. Let an
     // explicit accent choice override the design style's button shape.
-    const accentOverrides: Record<string, { buttonStyle: string; borderWidth: string; backgroundTreatment: string }> = {
-      minimal: { buttonStyle: "rounded", borderWidth: "1px", backgroundTreatment: "plain" },
-      bold: { buttonStyle: "square", borderWidth: "2px", backgroundTreatment: "gradient" },
-      gradient: { buttonStyle: "pill", borderWidth: "0px", backgroundTreatment: "gradient" },
-      monochrome: { buttonStyle: "sharp", borderWidth: "1px", backgroundTreatment: "plain" },
+    //
+    // The button treatment used to only reach a handful of `bg-primary`
+    // buttons — most hero CTAs actually use bg-foreground or bg-background,
+    // so the accent choice barely showed up anywhere. WebsiteRenderer now
+    // targets every CTA button pattern in the library, and each accent has
+    // its own fill AND shadow treatment (not just corner radius/border), so
+    // the difference reads clearly at a glance instead of needing a
+    // side-by-side close-up to spot:
+    //   Minimal    — soft round, solid fill, no shadow: quiet and clean.
+    //   Bold       — square, solid fill, hard offset "brutalist" shadow that
+    //                shifts on hover: loud and graphic.
+    //   Gradient   — pill, the button itself is gradient-filled (not just
+    //                the page background) with a soft colored glow: vivid.
+    //   Monochrome — square, transparent/outlined, fills in on hover, no
+    //                shadow: understated and refined.
+    const accentOverrides: Record<string, { buttonStyle: string; borderWidth: string; backgroundTreatment: string; buttonFill: string; buttonShadow: string }> = {
+      minimal: { buttonStyle: "rounded", borderWidth: "1px", backgroundTreatment: "plain", buttonFill: "solid", buttonShadow: "none" },
+      bold: { buttonStyle: "square", borderWidth: "3px", backgroundTreatment: "plain", buttonFill: "solid", buttonShadow: "offset" },
+      gradient: { buttonStyle: "pill", borderWidth: "0px", backgroundTreatment: "gradient", buttonFill: "gradient", buttonShadow: "glow" },
+      monochrome: { buttonStyle: "sharp", borderWidth: "2px", backgroundTreatment: "plain", buttonFill: "outline", buttonShadow: "none" },
     };
     const accentOverride = accentOverrides[(ctx.accentStyle || "").toLowerCase()];
 
@@ -2695,12 +4040,17 @@ class MockAIProvider extends AIProvider {
       xl: "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
     };
 
-    // Light mode gets a subtle tint of the chosen primary color instead of
-    // flat white, so the brand color is visible across the whole page, not
-    // just on buttons.
-    const backgroundColor = darkMode ? "#0F0F0F" : mixWithWhite(ctx.primaryColor, 0.94);
-    const mutedColor = darkMode ? "#262626" : mixWithWhite(ctx.primaryColor, 0.88);
-    const borderColor = darkMode ? "#333333" : mixWithWhite(ctx.primaryColor, 0.8);
+    // Both light AND dark mode get a subtle tint of the chosen primary
+    // color instead of a flat neutral, so the brand color is visible across
+    // the whole page, not just on buttons. Dark mode used to hardcode the
+    // exact same "#0F0F0F"/"#262626"/"#333333" for every style, so any two
+    // dark-mode styles (Premium, Luxury, Bold, Elegant, Tech) rendered an
+    // identical page background and only differed by a small accent color —
+    // easy to miss, especially between styles with muted/desaturated
+    // primaries like Premium's crimson and Luxury's gold.
+    const backgroundColor = darkMode ? mixWithWhite(ctx.primaryColor, 0.93, "black") : mixWithWhite(ctx.primaryColor, 0.94);
+    const mutedColor = darkMode ? mixWithWhite(ctx.primaryColor, 0.85, "black") : mixWithWhite(ctx.primaryColor, 0.88);
+    const borderColor = darkMode ? mixWithWhite(ctx.primaryColor, 0.72, "black") : mixWithWhite(ctx.primaryColor, 0.8);
 
     return {
       primaryColor: ctx.primaryColor,
@@ -2723,6 +4073,8 @@ class MockAIProvider extends AIProvider {
       letterSpacing: profile.letterSpacing,
       borderWidth: accentOverride?.borderWidth || profile.borderWidth,
       backgroundTreatment: accentOverride?.backgroundTreatment || profile.backgroundTreatment,
+      buttonFill: accentOverride?.buttonFill || "solid",
+      buttonShadow: accentOverride?.buttonShadow || "none",
     };
   }
 }

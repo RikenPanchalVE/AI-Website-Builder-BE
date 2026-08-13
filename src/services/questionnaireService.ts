@@ -35,7 +35,6 @@ export const saveQuestionnaire = async (
     businessName,
     industry: businessType,
     businessDescription: incoming.business?.description || incoming.businessDescription || "",
-    targetAudience: incoming.business?.targetAudience || incoming.targetAudience || "",
     location: incoming.business?.location || incoming.location || "",
     // Real contact details the client actually typed in — must flow through
     // to the generated Contact page/footer instead of being discarded.
@@ -44,6 +43,11 @@ export const saveQuestionnaire = async (
     address: incoming.business?.address || incoming.address || "",
     socialMedia,
     logo: incoming.branding?.logo || incoming.logo || null,
+    // The image the client uploaded for image-based hero styles (Full-Screen
+    // Statement, Image-Focused, etc.) — distinct from the generic per-project
+    // asset list, so it doesn't get silently swapped out by whatever image
+    // happens to be first in `assets` (e.g. a team photo).
+    heroImage: incoming.branding?.bannerImages?.[0] || incoming.heroImage || null,
     themeStyle: incoming.theme?.style || incoming.themeStyle || "",
     primaryColor: incoming.theme?.primaryColor || incoming.primaryColor || "",
     secondaryColor: incoming.theme?.secondaryColor || incoming.secondaryColor || "",
@@ -72,6 +76,17 @@ export const saveQuestionnaire = async (
     classSchedule: incoming.content?.classSchedule || [],
     courses: incoming.content?.courses || [],
     destinations: incoming.content?.destinations || [],
+    solutions: incoming.content?.solutions || [],
+    industries: incoming.content?.industries || [],
+    caseStudies: incoming.content?.caseStudies || [],
+    rooms: incoming.content?.rooms || [],
+    amenities: incoming.content?.amenities || [],
+    experiences: incoming.content?.experiences || [],
+    travelPackages: incoming.content?.travelPackages || [],
+    process: incoming.content?.process || [],
+    programs: incoming.content?.programs || [],
+    facilities: incoming.content?.facilities || [],
+    skills: incoming.content?.skills || [],
     // Component selections
     componentSelections: incoming.components || {},
   };
