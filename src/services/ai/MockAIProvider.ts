@@ -297,7 +297,10 @@ const DESIGN_STYLE_DEFAULTS: Record<string, Record<string, string>> = {
 // (Image-Focused) are actually built around a photo — Hero2/3/5 are
 // text-first and shouldn't be handed a background image even if one was
 // uploaded while a different hero style was selected.
-const IMAGE_HERO_COMPONENTS = new Set(["Hero1", "Hero4"]);
+// Hero2 (Split Editorial) has an image slot too — its right column falls
+// back to a decorative gradient with no image, same as Hero1/Hero4 — it was
+// just missing from this set, so an uploaded image was silently dropped.
+const IMAGE_HERO_COMPONENTS = new Set(["Hero1", "Hero2", "Hero4"]);
 
 const COMPONENT_MAP: Record<string, string> = {
   navbar1: "Navbar1", navbar2: "Navbar2", navbar3: "Navbar3",
@@ -623,7 +626,22 @@ function capitalize(s: string): string {
 // client). Any field left blank falls back to the mock industry content —
 // custom text always wins over the mock default when provided.
 export interface PageContentOverride {
-  hero?: { headline?: string; subheadline?: string; ctaText?: string };
+  hero?: {
+    headline?: string;
+    subheadline?: string;
+    ctaText?: string;
+    // Hero2 (Split Editorial)'s social-proof line, e.g. "Trusted by 1,000+".
+    socialProofText?: string;
+    socialProofSubtext?: string;
+    // Hero3 (Centered Statement)'s second button and 3-stat bar.
+    secondaryCtaText?: string;
+    stat1Value?: string;
+    stat1Label?: string;
+    stat2Value?: string;
+    stat2Label?: string;
+    stat3Value?: string;
+    stat3Label?: string;
+  };
   about_story?: { content?: string };
   cta?: { headline?: string; subheadline?: string; ctaText?: string };
 }
@@ -709,6 +727,7 @@ class MockAIProvider extends AIProvider {
     const componentSelections = answers.componentSelections || {};
     const socialMedia = answers.socialMedia || {};
     const themeMode = answers.themeMode || "auto";
+    const footerContent = answers.footerContent || {};
 
     // Real contact details typed in by the client. Only fall back to generic
     // placeholder text when the field was genuinely left blank, so the
@@ -716,6 +735,7 @@ class MockAIProvider extends AIProvider {
     const contactPhone = answers.phone || "+1 (555) 123-4567";
     const contactEmail = answers.email || "hello@example.com";
     const contactAddress = answers.address || answers.location || "123 Business St, Suite 100";
+    const contactContent = answers.contactContent || {};
 
     const userServices = answers.services || [];
     const userTestimonials = answers.testimonials || [];
@@ -724,6 +744,7 @@ class MockAIProvider extends AIProvider {
     const userGalleryImages = answers.galleryImages || [];
     const userTeam = answers.teamMembers || [];
     const userWhyChooseUs = answers.whyChooseUsReasons || [];
+    const userAboutValues = answers.aboutValues || [];
     const userPricingPlans = answers.pricingPlans || [];
     const userMenuItems = answers.menuItems || [];
     const userDailySpecials = answers.dailySpecials || [];
@@ -793,7 +814,7 @@ class MockAIProvider extends AIProvider {
               logoPath: logo, imagePaths, componentSelections, themeStyle,
               pageSections: pageSections["about"] || [],
               pageContent: pageContentMap["about"],
-              userTeam, userStats, userTimeline,
+              userTeam, userStats, userTimeline, userAboutValues,
             }),
           });
           break;
@@ -848,6 +869,7 @@ class MockAIProvider extends AIProvider {
             slug: "contact",
             title: "Contact",
             sections: this._buildContactSections({
+              contactContent, projectId,
               businessName, businessDescription, industry,
               componentSelections, themeStyle,
               contactPhone, contactEmail, contactAddress,
@@ -1020,7 +1042,7 @@ class MockAIProvider extends AIProvider {
             title: "Location",
             sections: this._buildLocationSections({
               businessName, industry, userBusinessHours, componentSelections, themeStyle,
-              contactPhone, contactEmail, contactAddress,
+              contactPhone, contactEmail, contactAddress, contactContent,
               pageSections: pageSections["location"] || [],
               pageContent: pageContentMap["location"],
             }),
@@ -1207,9 +1229,17 @@ class MockAIProvider extends AIProvider {
         component: footerComp,
         props: {
           brandName: businessName,
-          description: businessDescription || `${businessName} - Professional services`,
+          description: (footerContent.tagline || "").trim() || businessDescription || `${businessName} - Professional services`,
           links: chromeLinks,
           socialLinks: chromeSocialLinks,
+          copyrightText: (footerContent.copyrightText || "").trim() || undefined,
+          ctaHeading: (footerContent.ctaHeading || "").trim() || undefined,
+          ctaSubtext: (footerContent.ctaSubtext || "").trim() || undefined,
+          ctaButtonText: (footerContent.ctaButtonText || "").trim() || undefined,
+          // Was hardcoded to "#contact" inside Footer1 itself — a fragment
+          // with no matching element anywhere on the page, so the button
+          // didn't go anywhere when clicked.
+          ctaLink: resolveCtaLink((footerContent.ctaButtonText || "").trim() || "Start a Project", selectedPages),
         },
         order: p.sections.length,
       });
@@ -1233,7 +1263,7 @@ class MockAIProvider extends AIProvider {
       theme,
       navigation: { items: navItems },
       footer: {
-        copyright: `© ${new Date().getFullYear()} ${businessName}. All rights reserved.`,
+        copyright: (footerContent.copyrightText || "").trim() || `© ${new Date().getFullYear()} ${businessName}. All rights reserved.`,
         links: navItems.map((n: any) => ({ label: n.label, href: n.href })),
         socialMedia,
       },
@@ -1302,6 +1332,11 @@ class MockAIProvider extends AIProvider {
     const subheadline = override?.subheadline?.trim() || content.subheadline;
     const ctaText = override?.ctaText?.trim() || content.ctaText;
     const heroComp = resolveComponent(ctx.componentSelections, "hero", "Hero1", ctx.themeStyle);
+    const heroOverride = ctx.pageContent?.hero as Record<string, string> | undefined;
+    const stat = (n: number, fallback: { value: string; label: string }) => ({
+      value: heroOverride?.[`stat${n}Value`]?.trim() || fallback.value,
+      label: heroOverride?.[`stat${n}Label`]?.trim() || fallback.label,
+    });
 
     return {
       id: "hero",
@@ -1315,12 +1350,24 @@ class MockAIProvider extends AIProvider {
         // Hero1-5 all read `backgroundImage`, not `image` — this used to be
         // the wrong prop key entirely, so an uploaded hero image was silently
         // dropped and every image-based hero style just fell back to its
-        // default gradient. Only Hero1 (Full-Screen Statement) and Hero4
-        // (Image-Focused) are actually built around a photo — the other
-        // layouts are text-first, so don't hand them an image even if one
-        // was uploaded while a different hero style was selected.
+        // default gradient. Hero1 (Full-Screen Statement), Hero2 (Split
+        // Editorial), and Hero4 (Image-Focused) are actually built around a
+        // photo — the other layouts are text-first, so don't hand them an
+        // image even if one was uploaded while a different hero style was
+        // selected.
         backgroundImage: IMAGE_HERO_COMPONENTS.has(heroComp) ? ctx.heroImage || ctx.imagePaths[0] || null : null,
         logo: ctx.logoPath || null,
+        // Hero2's social-proof line and Hero3's second button/stats bar —
+        // harmless no-ops for every other hero, which just ignores whatever
+        // extra props it doesn't read.
+        socialProofText: heroOverride?.socialProofText?.trim() || undefined,
+        socialProofSubtext: heroOverride?.socialProofSubtext?.trim() || undefined,
+        secondaryCtaText: heroOverride?.secondaryCtaText?.trim() || undefined,
+        stats: [
+          stat(1, { value: "500+", label: "Projects" }),
+          stat(2, { value: "98%", label: "Satisfaction" }),
+          stat(3, { value: "24/7", label: "Support" }),
+        ],
       },
       order: 0,
     };
@@ -1647,6 +1694,7 @@ class MockAIProvider extends AIProvider {
     userTeam: Array<{ name: string; role: string; bio?: string; avatar?: string | null }>;
     userStats: Array<{ label: string; value: string }>;
     userTimeline: Array<{ year: string; title: string; description?: string }>;
+    userAboutValues: Array<{ title: string; description: string; icon?: string }>;
   }): Array<Record<string, unknown>> {
     const hero = heroCopy(ctx.pageContent, getAboutTitle(ctx.industry), `Learn more about ${ctx.businessName}`);
     const sections: Array<Record<string, unknown>> = [
@@ -1688,23 +1736,25 @@ class MockAIProvider extends AIProvider {
             order: order++,
           });
           break;
-        case "values":
+        case "values": {
+          const defaultValues = [
+            { title: "Excellence", description: "We strive for excellence in everything we do, setting high standards and exceeding expectations.", icon: "star" },
+            { title: "Integrity", description: "We conduct our business with honesty, transparency, and ethical practices.", icon: "shield" },
+            { title: "Innovation", description: "We embrace new ideas and continuously improve our approach to better serve our clients.", icon: "lightbulb" },
+            { title: "Customer Focus", description: "Our clients are at the heart of every decision we make.", icon: "heart" },
+          ];
           sections.push({
             id: "about_values",
             component: resolveComponent(ctx.componentSelections, "about_values", "AboutValues", ctx.themeStyle),
             props: {
               title: "Our Values",
               subtitle: "What drives us every day",
-              values: [
-                { title: "Excellence", description: "We strive for excellence in everything we do, setting high standards and exceeding expectations.", icon: "star" },
-                { title: "Integrity", description: "We conduct our business with honesty, transparency, and ethical practices.", icon: "shield" },
-                { title: "Innovation", description: "We embrace new ideas and continuously improve our approach to better serve our clients.", icon: "lightbulb" },
-                { title: "Customer Focus", description: "Our clients are at the heart of every decision we make.", icon: "heart" },
-              ],
+              values: ctx.userAboutValues.length > 0 ? ctx.userAboutValues : defaultValues,
             },
             order: order++,
           });
           break;
+        }
         case "team":
           sections.push({
             id: "team",
@@ -2031,6 +2081,8 @@ class MockAIProvider extends AIProvider {
     businessName: string; businessDescription: string; industry: string;
     componentSelections: Record<string, string>; themeStyle: string;
     contactPhone: string; contactEmail: string; contactAddress: string;
+    contactContent: { heading?: string; intro?: string; submitButtonText?: string; infoHeading?: string; infoSubtitle?: string };
+    projectId?: string;
     pageSections?: string[];
     userBusinessHours: Array<{ day: string; hours: string }>;
     pageContent?: PageContentOverride;
@@ -2067,11 +2119,14 @@ class MockAIProvider extends AIProvider {
             id: "contact_form",
             component: resolveComponent(ctx.componentSelections, "contact", "Contact1", ctx.themeStyle),
             props: {
-              title: "Send Us a Message",
+              title: ctx.contactContent.heading?.trim() || "Send Us a Message",
               subtitle: "We'll get back to you within 24 hours",
               phone: ctx.contactPhone,
               email: ctx.contactEmail,
               address: ctx.contactAddress,
+              intro: ctx.contactContent.intro?.trim() || undefined,
+              submitButtonText: ctx.contactContent.submitButtonText?.trim() || undefined,
+              projectId: ctx.projectId,
             },
             order: order++,
           });
@@ -2092,6 +2147,8 @@ class MockAIProvider extends AIProvider {
             id: "contact_info",
             component: resolveComponent(ctx.componentSelections, "contact_info", "ContactInfo", ctx.themeStyle),
             props: {
+              title: ctx.contactContent.infoHeading?.trim() || undefined,
+              subtitle: ctx.contactContent.infoSubtitle?.trim() || undefined,
               methods: [
                 { title: "Phone", value: ctx.contactPhone, description: "Call us directly" },
                 { title: "Email", value: ctx.contactEmail, description: "Send us a message" },
@@ -3167,6 +3224,7 @@ class MockAIProvider extends AIProvider {
     userBusinessHours: Array<{ day: string; hours: string }>;
     componentSelections: Record<string, string>; themeStyle: string;
     contactPhone: string; contactEmail: string; contactAddress: string;
+    contactContent: { heading?: string; intro?: string; submitButtonText?: string; infoHeading?: string; infoSubtitle?: string };
     pageSections?: string[];
     pageContent?: PageContentOverride;
   }): Array<Record<string, unknown>> {
@@ -3202,6 +3260,8 @@ class MockAIProvider extends AIProvider {
             id: "contact_info",
             component: resolveComponent(ctx.componentSelections, "contact_info", "ContactInfo", ctx.themeStyle),
             props: {
+              title: ctx.contactContent.infoHeading?.trim() || undefined,
+              subtitle: ctx.contactContent.infoSubtitle?.trim() || undefined,
               methods: [
                 { title: "Phone", value: ctx.contactPhone, description: "Call us directly" },
                 { title: "Email", value: ctx.contactEmail, description: "Send us a message" },

@@ -66,6 +66,7 @@ export const saveQuestionnaire = async (
     galleryImages: incoming.content?.gallery || [],
     teamMembers: incoming.content?.team || [],
     whyChooseUsReasons: incoming.content?.whyChooseUs || [],
+    aboutValues: incoming.content?.aboutValues || [],
     pricingPlans: incoming.content?.pricingPlans || [],
     menuItems: incoming.content?.menuItems || [],
     dailySpecials: incoming.content?.dailySpecials || [],
@@ -87,6 +88,11 @@ export const saveQuestionnaire = async (
     programs: incoming.content?.programs || [],
     facilities: incoming.content?.facilities || [],
     skills: incoming.content?.skills || [],
+    // Site-wide footer text overrides (tagline/copyright/CTA) — optional,
+    // MockAIProvider falls back to the auto-generated defaults for anything
+    // left blank.
+    footerContent: incoming.content?.footer || {},
+    contactContent: incoming.content?.contact || {},
     // Component selections
     componentSelections: incoming.components || {},
   };

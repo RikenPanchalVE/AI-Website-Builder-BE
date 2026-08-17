@@ -9,6 +9,8 @@ import assetRoutes from "./routes/assetRoutes";
 import websiteSpecRoutes from "./routes/websiteSpecRoutes";
 import revisionRoutes from "./routes/revisionRoutes";
 import billingRoutes from "./routes/billingRoutes";
+import contactSubmissionRoutes from "./routes/contactSubmissionRoutes";
+import contactRoutes from "./routes/contactRoutes";
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
@@ -31,6 +33,10 @@ app.use("/api/projects", assetRoutes);
 app.use("/api/projects", websiteSpecRoutes);
 app.use("/api/projects", revisionRoutes);
 app.use("/api/projects", billingRoutes);
+app.use("/api/projects", contactSubmissionRoutes);
+// Fixed path (not project-scoped) — same one a downloaded site's own
+// standalone server implements, see downloadService.ts.
+app.use("/api", contactRoutes);
 
 app.use(errorHandler);
 
