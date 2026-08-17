@@ -95,6 +95,7 @@ export const saveQuestionnaire = async (
     contactContent: incoming.content?.contact || {},
     // Component selections
     componentSelections: incoming.components || {},
+    sectionColors: incoming.sectionColors || {},
   };
 
   const existing = await questionnaireRepo.findByProject(projectId);

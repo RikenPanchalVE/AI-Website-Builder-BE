@@ -1247,6 +1247,7 @@ class MockAIProvider extends AIProvider {
 
     const theme = this._buildTheme({
       primaryColor, secondaryColor, fontStyle, themeStyle, themeMode, accentStyle, config,
+      sectionColors: answers.sectionColors || {},
     });
 
     const navItems = pages.map((p: any) => ({
@@ -4035,6 +4036,7 @@ class MockAIProvider extends AIProvider {
     primaryColor: string; secondaryColor: string;
     fontStyle: string; themeStyle: string; themeMode?: string; accentStyle?: string;
     config: BusinessTypeConfig;
+    sectionColors?: Record<string, any>;
   }): Record<string, any> {
     const styleKey = ctx.themeStyle.toLowerCase();
 
@@ -4135,6 +4137,11 @@ class MockAIProvider extends AIProvider {
       backgroundTreatment: accentOverride?.backgroundTreatment || profile.backgroundTreatment,
       buttonFill: accentOverride?.buttonFill || "solid",
       buttonShadow: accentOverride?.buttonShadow || "none",
+      // Per-section color overrides, keyed by component category — see
+      // client/src/renderer/WebsiteRenderer.tsx's buildSectionStyleOverride,
+      // which is what actually applies these (same renderer used for the
+      // live preview, the real generated site, and downloaded exports).
+      sectionColors: ctx.sectionColors || {},
     };
   }
 }
