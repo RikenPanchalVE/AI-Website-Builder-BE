@@ -23,8 +23,14 @@ const PORT = process.env.PORT || 5000;
 // cross-origin request here. Deployed with the frontend on a separate
 // domain, set CORS_ORIGIN to that domain (e.g. https://aiwebsitebuilder.com)
 // so the API only accepts requests from your real frontend instead of any
-// site on the internet.
-app.use(cors(process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN } : undefined));
+// site on the internet. Comma-separate multiple origins — e.g. the real
+// frontend domain plus http://localhost:5173, so you can point a local
+// `npm run dev` client at this live backend for testing without opening
+// CORS up to everyone.
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean)
+  : undefined;
+app.use(cors(corsOrigins ? { origin: corsOrigins } : undefined));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
