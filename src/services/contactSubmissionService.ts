@@ -17,7 +17,7 @@ export const submitContactForm = async (data: {
     throw new ApiError(400, "Name, email, and message are required");
   }
 
-  // Best-effort project link — a submission from the live in-questionnaire
+  // Best-effort project link - a submission from the live in-questionnaire
   // preview (no saved project context yet) or a stale/unknown id still gets
   // saved, just without a project reference, rather than being rejected.
   let projectObjectId;

@@ -6,7 +6,7 @@ export interface IEnquiry {
   email: string;
   phone?: string;
   businessName: string;
-  // Chosen in the questionnaire's Business step, not on the landing page —
+  // Chosen in the questionnaire's Business step, not on the landing page -
   // may be absent at project-creation time.
   businessType?: string;
 }
@@ -62,7 +62,7 @@ export type Feature =
   | "newsletter"
   | "gallery"
   | "testimonials";
-  // | "ecommerce"; // TODO: Uncomment when eCommerce is implemented
+// | "ecommerce"; // TODO: Uncomment when eCommerce is implemented
 
 export type ThemeStyle = "modern" | "corporate" | "minimal" | "luxury" | "creative";
 

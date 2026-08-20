@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import * as websiteSpecService from "../services/websiteSpecService";
-import * as revisionRepo from "../repositories/revisionRepository";
 import * as pricingRepo from "../repositories/pricingRepository";
 import * as paymentRepo from "../repositories/paymentRepository";
 import * as publishedSiteRepo from "../repositories/publishedSiteRepository";
@@ -63,37 +62,6 @@ export const approve = async (
       req.params.projectId as string
     );
     ApiResponse.success(res, spec);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getRevisions = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const revisions = await revisionRepo.findByProject(
-      req.params.projectId as string
-    );
-    ApiResponse.success(res, revisions);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const createRevision = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const revision = await revisionRepo.create(
-      req.params.projectId as string,
-      req.body.request
-    );
-    ApiResponse.success(res, revision, 201);
   } catch (err) {
     next(err);
   }

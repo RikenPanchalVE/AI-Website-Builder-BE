@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as contactSubmissionService from "../services/contactSubmissionService";
 
-// Mounted at the fixed, non-project-scoped POST /api/contact — the exact
+// Mounted at the fixed, non-project-scoped POST /api/contact - the exact
 // same path a downloaded/exported site's own standalone server implements
 // (see downloadService.ts), so Contact1/Contact2's form can always submit
 // to "/api/contact" regardless of whether it's rendering inside the

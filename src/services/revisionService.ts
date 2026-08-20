@@ -1,38 +1,28 @@
 import * as revisionRepo from "../repositories/revisionRepository";
-import * as websiteSpecRepo from "../repositories/websiteSpecRepository";
-import { IRevision } from "../models/Revision";
+import { IRevision, IRevisionChangeEntry } from "../models/Revision";
 import ApiError from "../utils/ApiError";
-import createAIProvider from "./ai";
+
+// The actual edit already happened by the time this runs - the client
+// calls saveQuestionnaire + generate (the same real pipeline that builds a
+// project the first time, which genuinely applies whatever changed) before
+// ever hitting this endpoint. There used to be a `processRevision` AI step
+// here that tried to interpret a free-text request and patch the spec
+// itself - it never did anything but glue a "Changes applied: <request
+// text>" placeholder section onto the homepage, since there was no real
+// parsing behind it. Revisions are now just a structured record of what a
+// real edit changed, not a second (fake) mechanism for applying one.
+function summarize(changes: IRevisionChangeEntry[]): string {
+  if (changes.length === 0) return "No changes";
+  const names = changes.slice(0, 3).map((c) => c.label);
+  const rest = changes.length - names.length;
+  return `${changes.length} change${changes.length === 1 ? "" : "s"}: ${names.join(", ")}${rest > 0 ? `, +${rest} more` : ""}`;
+}
 
 export const submitRevision = async (
   projectId: string,
-  request: string
+  changes: IRevisionChangeEntry[]
 ): Promise<IRevision> => {
-  const revision = await revisionRepo.create(projectId, request);
-  const latestSpec = await websiteSpecRepo.findLatest(projectId);
-
-  if (latestSpec) {
-    const ai = createAIProvider();
-    const updatedSpec = await ai.processRevision(
-      latestSpec.toObject() as Record<string, unknown>,
-      request
-    );
-
-    await websiteSpecRepo.create(
-      projectId,
-      {
-        name: updatedSpec.name as string | undefined,
-        description: updatedSpec.description as string | undefined,
-        pages: updatedSpec.pages as any,
-        theme: updatedSpec.theme as Record<string, any> | undefined,
-        navigation: updatedSpec.navigation as Record<string, any> | undefined,
-        footer: updatedSpec.footer as Record<string, any> | undefined,
-      },
-      latestSpec.version + 1
-    );
-  }
-
-  return revision;
+  return revisionRepo.create(projectId, summarize(changes), changes);
 };
 
 export const getRevisions = async (projectId: string): Promise<IRevision[]> => {

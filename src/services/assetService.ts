@@ -11,7 +11,7 @@ import fs from "fs";
 // same origin as this server (single-server deployment, or local dev via
 // Vite's proxy). Deployed with the frontend and API on separate domains,
 // an <img src="/uploads/..."> rendered on the frontend's own domain would
-// request that path from the FRONTEND's host, not this one, and 404 —
+// request that path from the FRONTEND's host, not this one, and 404 -
 // PUBLIC_SERVER_URL (set only in that split-domain setup) prefixes every
 // asset URL with this server's real public origin so it stays correct no
 // matter which domain the page rendering it is on.

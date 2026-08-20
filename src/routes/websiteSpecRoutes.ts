@@ -9,8 +9,12 @@ router.get("/:projectId/website-spec", websiteSpecController.getLatest);
 router.get("/:projectId/website-spec/:version", websiteSpecController.getVersion);
 router.post("/:projectId/approve", websiteSpecController.approve);
 
-router.get("/:projectId/revisions", websiteSpecController.getRevisions);
-router.post("/:projectId/revisions", websiteSpecController.createRevision);
+// GET/POST /:projectId/revisions live in revisionRoutes.ts (mounted after
+// this router at the same /api/projects prefix) - they used to be
+// duplicated here too, calling revisionRepo directly and shadowing
+// revisionRoutes' handlers entirely (Express matches whichever router was
+// registered first), so revisionController/revisionService's actual logic
+// was silently never reached.
 
 router.post("/:projectId/pricing/calculate", websiteSpecController.calculatePricing);
 

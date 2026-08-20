@@ -18,7 +18,7 @@ export const saveQuestionnaire = async (
   const businessType = incoming.business?.type || incoming.industry || project.enquiry.businessType || "";
   const businessName = incoming.business?.name || incoming.businessName || project.enquiry.businessName || "";
 
-  // business.socialLinks is an array of { platform, url } — flatten to a
+  // business.socialLinks is an array of { platform, url } - flatten to a
   // { platform: url } map, which is what MockAIProvider/components expect.
   const socialLinksArray: Array<{ platform?: string; url?: string }> =
     incoming.business?.socialLinks || incoming.socialLinks || [];
@@ -36,7 +36,7 @@ export const saveQuestionnaire = async (
     industry: businessType,
     businessDescription: incoming.business?.description || incoming.businessDescription || "",
     location: incoming.business?.location || incoming.location || "",
-    // Real contact details the client actually typed in — must flow through
+    // Real contact details the client actually typed in - must flow through
     // to the generated Contact page/footer instead of being discarded.
     phone: incoming.business?.phone || incoming.phone || project.enquiry.phone || "",
     email: incoming.business?.email || incoming.email || project.enquiry.email || "",
@@ -44,7 +44,7 @@ export const saveQuestionnaire = async (
     socialMedia,
     logo: incoming.branding?.logo || incoming.logo || null,
     // The image the client uploaded for image-based hero styles (Full-Screen
-    // Statement, Image-Focused, etc.) — distinct from the generic per-project
+    // Statement, Image-Focused, etc.) - distinct from the generic per-project
     // asset list, so it doesn't get silently swapped out by whatever image
     // happens to be first in `assets` (e.g. a team photo).
     heroImage: incoming.branding?.bannerImages?.[0] || incoming.heroImage || null,
@@ -88,7 +88,7 @@ export const saveQuestionnaire = async (
     programs: incoming.content?.programs || [],
     facilities: incoming.content?.facilities || [],
     skills: incoming.content?.skills || [],
-    // Site-wide footer text overrides (tagline/copyright/CTA) — optional,
+    // Site-wide footer text overrides (tagline/copyright/CTA) - optional,
     // MockAIProvider falls back to the auto-generated defaults for anything
     // left blank.
     footerContent: incoming.content?.footer || {},

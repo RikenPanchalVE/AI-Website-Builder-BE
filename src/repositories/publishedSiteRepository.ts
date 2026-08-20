@@ -88,7 +88,7 @@ const copyClientAssets = (buildDir: string): void => {
     if (fs.existsSync(favicon)) {
       fs.copyFileSync(favicon, path.join(buildDir, "favicon.svg"));
     }
-  } catch {}
+  } catch { }
 };
 
 const generateShellHtml = (
@@ -199,7 +199,7 @@ export const publish = async (projectId: string): Promise<IPublishedSite> => {
   // link (the admin dashboard) shares this server's origin. Deployed with
   // the frontend on a separate domain, PUBLIC_SERVER_URL (unset in that
   // single-server setup) prefixes it with this server's real public
-  // origin so the "view published site" link stays correct either way —
+  // origin so the "view published site" link stays correct either way -
   // same reasoning as assetService.ts's asset URLs.
   const PUBLIC_SERVER_URL = (process.env.PUBLIC_SERVER_URL || "").replace(/\/$/, "");
   const url = `${PUBLIC_SERVER_URL}/generated-sites/${projectId}`;

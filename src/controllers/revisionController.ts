@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as revisionService from "../services/revisionService";
+import { IRevisionChangeEntry } from "../models/Revision";
 import ApiResponse from "../utils/ApiResponse";
 
 export const submitRevision = async (
@@ -8,10 +9,10 @@ export const submitRevision = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { request } = req.body as { request: string };
+    const { changes } = req.body as { changes: IRevisionChangeEntry[] };
     const revision = await revisionService.submitRevision(
       req.params.projectId as string,
-      request
+      changes || []
     );
     ApiResponse.success(res, revision, 201);
   } catch (err) {

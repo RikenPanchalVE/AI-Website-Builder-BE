@@ -18,12 +18,12 @@ dotenv.config({ path: path.join(__dirname, "..", ".env") });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Wide open (reflects any origin) by default — harmless for local dev and
+// Wide open (reflects any origin) by default - harmless for local dev and
 // for a same-origin deployment, where the browser never even sends a
 // cross-origin request here. Deployed with the frontend on a separate
 // domain, set CORS_ORIGIN to that domain (e.g. https://aiwebsitebuilder.com)
 // so the API only accepts requests from your real frontend instead of any
-// site on the internet. Comma-separate multiple origins — e.g. the real
+// site on the internet. Comma-separate multiple origins - e.g. the real
 // frontend domain plus http://localhost:5173, so you can point a local
 // `npm run dev` client at this live backend for testing without opening
 // CORS up to everyone.
@@ -47,7 +47,7 @@ app.use("/api/projects", websiteSpecRoutes);
 app.use("/api/projects", revisionRoutes);
 app.use("/api/projects", billingRoutes);
 app.use("/api/projects", contactSubmissionRoutes);
-// Fixed path (not project-scoped) — same one a downloaded site's own
+// Fixed path (not project-scoped) - same one a downloaded site's own
 // standalone server implements, see downloadService.ts.
 app.use("/api", contactRoutes);
 
@@ -57,7 +57,7 @@ app.use("/api", contactRoutes);
 // frontend host to configure). Gated on NODE_ENV=production (not just
 // whether a dist/ happens to exist) so a stale local build never leaks
 // into `npm run dev`, where the client is served by its own Vite dev
-// server instead — see client/vite.config.ts's proxy. Registered after
+// server instead - see client/vite.config.ts's proxy. Registered after
 // every /api route above, so those always match first; this only catches
 // what's left.
 const clientDist = path.join(__dirname, "..", "..", "client", "dist");

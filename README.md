@@ -1,4 +1,4 @@
-# AI Website Builder — Server
+# AI Website Builder - Server
 
 Express + MongoDB backend.
 

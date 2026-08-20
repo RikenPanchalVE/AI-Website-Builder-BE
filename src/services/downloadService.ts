@@ -7,12 +7,12 @@ import ApiError from "../utils/ApiError";
 
 // Reaches the client's source tree from wherever this file ends up running
 // from (server/src/services in dev via tsx, server/dist/services once
-// built) — same "three levels up to the repo root" pattern already used by
+// built) - same "three levels up to the repo root" pattern already used by
 // publishedSiteRepository.ts for CLIENT_DIST.
 const CLIENT_SRC = path.join(__dirname, "..", "..", "..", "client", "src");
 
 // Same "wherever this file ends up running from" logic, but only two levels
-// up — server/src/services or server/dist/services are both two levels
+// up - server/src/services or server/dist/services are both two levels
 // below server/, where uploaded assets actually live on disk (see
 // index.ts's `express.static(path.join(__dirname, "..", "uploads"))`).
 const UPLOADS_ROOT = path.join(__dirname, "..", "..", "uploads");
@@ -28,17 +28,17 @@ interface ComponentSource {
   // (the app aliases both industries' "ServicePackages" export on import).
   exportName?: string;
   // Other component-library files this one imports internally (e.g. every
-  // Footer imports SocialIcon from Common/index.tsx) — these need to be
+  // Footer imports SocialIcon from Common/index.tsx) - these need to be
   // copied into the archive too, but aren't registry entries themselves, so
   // they don't get an import/registry line of their own. Forgetting to
   // declare one here is exactly how a download used to ship a Footer whose
-  // build failed on a missing "@/component-library/Common" module — the
+  // build failed on a missing "@/component-library/Common" module - the
   // site always has a footer, but Common/index.tsx was only ever pulled in
   // when the site happened to also use one of its *named* exports.
   extraFiles?: string[];
 }
 
-// Mirrors client/src/renderer/ComponentRegistry.ts exactly, just as data —
+// Mirrors client/src/renderer/ComponentRegistry.ts exactly, just as data -
 // lets the download build a trimmed registry containing only the
 // components this specific generated site actually uses, instead of
 // shipping every industry's entire component library.
@@ -174,13 +174,13 @@ function collectUsedComponents(pages: Array<{ sections?: Array<{ component?: str
 
 // Every uploaded logo/hero/gallery/portfolio/team image is referenced as a
 // root-relative "/uploads/<projectId>/<filename>" URL, served by *this*
-// server's own uploads folder — not by the standalone site the download
+// server's own uploads folder - not by the standalone site the download
 // produces. Left alone, every uploaded image would 404 once downloaded and
 // self-hosted. Walk the entire site data structure (any field, any nesting
-// depth — content items carry image URLs under all kinds of keys) rather
+// depth - content items carry image URLs under all kinds of keys) rather
 // than hardcoding a list of "the fields that might have images", and bundle
 // whatever's actually referenced as static files the client serves itself.
-// `seen` guards against circular references — the raw (pre-JSON) siteData
+// `seen` guards against circular references - the raw (pre-JSON) siteData
 // can still hold Mongoose document/subdocument internals with parent
 // back-references even after the top-level spec fields were destructured
 // out, and walking those with a plain Object.values recursion overflows
@@ -208,7 +208,7 @@ function buildComponentRegistrySource(usedComponents: string[]): string {
 
   for (const name of usedComponents.sort()) {
     const entry = COMPONENT_SOURCE_MAP[name];
-    if (!entry) continue; // unrecognized/legacy component name — skip rather than break the export
+    if (!entry) continue; // unrecognized/legacy component name - skip rather than break the export
 
     if (entry.kind === "default") {
       const importPath = `../component-library/${entry.file.replace(/\.tsx$/, "")}`;
@@ -300,7 +300,7 @@ function buildClientPackageJson(folderName: string): string {
 }
 
 function buildClientViteConfig(): string {
-  // The "@" alias is required — Footer1/2/3 import SocialIcon via
+  // The "@" alias is required - Footer1/2/3 import SocialIcon via
   // "@/component-library/Common", same as the main app.
   return `import path from "path";
 import { defineConfig } from "vite";
@@ -352,7 +352,7 @@ function buildClientTsconfig(): string {
 }
 
 function buildMainTsx(): string {
-  // Adapted verbatim from client/src/generated-site.tsx — the exact entry
+  // Adapted verbatim from client/src/generated-site.tsx - the exact entry
   // point already used to render a published site from an embedded
   // <script id="site-data"> blob, with pushState-based page navigation.
   return `import { useState, useEffect } from "react";
@@ -429,7 +429,7 @@ function buildServerPackageJson(folderName: string): string {
       main: "index.js",
       scripts: {
         start: "node index.js",
-        // Alias — this is a plain static file server, there's nothing to
+        // Alias - this is a plain static file server, there's nothing to
         // watch/rebuild, but "npm run dev" is what people reach for out of
         // habit (and what the main app's own server uses), so it should
         // work too instead of failing with "Missing script: dev".
@@ -455,7 +455,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const CLIENT_DIST = path.join(__dirname, "..", "client", "dist");
 
-// This site has no real database — submissions from the Contact page's
+// This site has no real database - submissions from the Contact page's
 // form are appended to a local JSON file instead. Open data/contact-
 // submissions.json to see them, or swap this route out for whatever
 // backend/CRM you actually want to wire up.
@@ -465,7 +465,7 @@ const SUBMISSIONS_FILE = path.join(DATA_DIR, "contact-submissions.json");
 app.use(express.json());
 
 // Same fixed path the main website builder's own server implements (see
-// server/src/routes/contactRoutes.ts there) — the Contact form component
+// server/src/routes/contactRoutes.ts there) - the Contact form component
 // is the exact same code in both places and always posts here.
 app.post("/api/contact", (req, res) => {
   const { name, email, subject, message } = req.body || {};
@@ -495,7 +495,7 @@ app.post("/api/contact", (req, res) => {
 
 app.use(express.static(CLIENT_DIST));
 
-// Every unmatched route falls back to index.html — the site does its own
+// Every unmatched route falls back to index.html - the site does its own
 // client-side page routing (see client/src/main.tsx).
 app.use((req, res) => {
   res.sendFile(path.join(CLIENT_DIST, "index.html"));
@@ -512,10 +512,10 @@ function buildGitignore(extra: string[]): string {
 }
 
 function buildReadme(businessName: string): string {
-  return `# ${businessName} — Website Source
+  return `# ${businessName} - Website Source
 
 This is the source code for your generated website. It only includes the
-pages and components your site actually uses — not the website builder
+pages and components your site actually uses - not the website builder
 itself.
 
 ## 1. Build the site
@@ -541,7 +541,7 @@ Then open http://localhost:3000 in your browser.
 ## Contact form submissions
 
 If your site has a Contact page, submissions are saved to
-\`server/data/contact-submissions.json\` — there's no database to set up.
+\`server/data/contact-submissions.json\` - there's no database to set up.
 Open that file any time to see the leads that have come in.
 
 ## Development
@@ -608,7 +608,7 @@ export const buildProjectArchive = async (
   });
 
   // Only the component-library files this site's sections actually
-  // reference get copied in — everything else (other industries' widgets,
+  // reference get copied in - everything else (other industries' widgets,
   // the questionnaire, the builder dashboard) is left out entirely.
   const includedFiles = new Set<string>();
   for (const name of usedComponents) {
@@ -626,7 +626,7 @@ export const buildProjectArchive = async (
 
   // Bundle only the uploaded images this site actually references (logo,
   // hero/banner images, gallery/portfolio/team photos, etc.) as static
-  // files under client/public/uploads/ — Vite's public dir is served
+  // files under client/public/uploads/ - Vite's public dir is served
   // (and, on build, copied) at the site root, so the "/uploads/..." URLs
   // already embedded in siteData keep working completely unchanged, with
   // no rewriting needed anywhere.
@@ -647,7 +647,7 @@ export const buildProjectArchive = async (
   archive.append(buildServerPackageJson(folderName), { name: `${folderName}/server/package.json` });
   archive.append(buildServerIndexJs(), { name: `${folderName}/server/index.js` });
   // data/ holds contact-form submissions (real customer names/emails/
-  // messages once this is deployed) — shouldn't end up committed to git.
+  // messages once this is deployed) - shouldn't end up committed to git.
   archive.append(buildGitignore(["data/"]), { name: `${folderName}/server/.gitignore` });
 
   archive.append(buildReadme(businessName), { name: `${folderName}/README.md` });
